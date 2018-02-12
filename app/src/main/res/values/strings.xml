@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MusicHistory</string>
+    <string name="txt_all_music">All Music</string>
+    <string name="txt_music_history">Music History</string>
 </resources>
