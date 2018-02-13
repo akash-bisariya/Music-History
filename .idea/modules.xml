@@ -3,10 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Music-History.iml" filepath="$PROJECT_DIR$/Music-History.iml" />
-      <module fileurl="file://$PROJECT_DIR$/MusicHistory.iml" filepath="$PROJECT_DIR$/MusicHistory.iml" />
       <module fileurl="file://F:\Android_Projects\Music-History\MusicHistory.iml" filepath="F:\Android_Projects\Music-History\MusicHistory.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://F:\Android_Projects\Music-History\app\app.iml" filepath="F:\Android_Projects\Music-History\app\app.iml" />
     </modules>
   </component>
 </project>

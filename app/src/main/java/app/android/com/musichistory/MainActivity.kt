@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import java.io.Serializable
 
 
 class MainActivity : AppCompatActivity() {
@@ -76,6 +77,6 @@ class MainActivity : AppCompatActivity() {
 
 }
 
-class SongHistory(songName:String,songArtist:String) {
+class SongHistory(songName:String,songArtist:String):Serializable {
 
 }

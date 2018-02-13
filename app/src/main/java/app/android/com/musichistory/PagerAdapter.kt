@@ -23,14 +23,14 @@ class PagerAdapter(val fm:FragmentManager,val songsList: ArrayList<SongHistory> 
     override fun getItem(position: Int): Fragment? {
         when(position)
         {
-//            0-> {
-//                val fragment = MusicHistoryFragment()
-//                val args = Bundle()
-//                args.putSerializable("SongsList", songsList)
-//                fragment.arguments = args
-//                return fragment
-//            }
-            0-> return MusicHistoryFragment()
+            0-> {
+                val fragment = MusicHistoryFragment()
+                val args = Bundle()
+                args.putSerializable("SongsList", songsList)
+                fragment.arguments = args
+                return fragment
+            }
+
         }
 
         return MusicHistoryFragment()
