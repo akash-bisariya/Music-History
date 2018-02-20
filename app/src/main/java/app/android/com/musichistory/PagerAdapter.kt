@@ -31,9 +31,25 @@ class PagerAdapter(val fm:FragmentManager,val songsList: ArrayList<SongHistory> 
                 return fragment
             }
 
+            1-> {
+                val fragment = MusicHistoryFragment()
+                val args = Bundle()
+                args.putSerializable("SongsList", songsList)
+                fragment.arguments = args
+                return fragment
+            }
+            else->
+            {
+                val fragment = MusicHistoryFragment()
+                val args = Bundle()
+                args.putSerializable("SongsList", songsList)
+                fragment.arguments = args
+                return fragment
+            }
+
         }
 
-        return MusicHistoryFragment()
+
 
 
     }

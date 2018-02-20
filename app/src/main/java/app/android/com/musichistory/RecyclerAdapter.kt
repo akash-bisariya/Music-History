@@ -5,15 +5,15 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import kotlinx.android.synthetic.main.row_music_history.view.*
 /**
  * Created by akash bisariya on 13-02-2018.
  */
 class RecyclerAdapter(val context:Context, val arrayList:ArrayList<SongHistory>): RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        var tv:android.widget.TextView = holder!!.view.findViewById(R.id.tv_song_name)
-        tv.text=arrayList.get(position).toString()
+        holder!!.tvSongName.text=arrayList.get(position).songName
+        holder.tvArtistName.text=arrayList.get(position).songArtist
     }
 
     override fun getItemCount(): Int {
@@ -27,7 +27,8 @@ class RecyclerAdapter(val context:Context, val arrayList:ArrayList<SongHistory>)
 
     class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView)
     {
-        var view:View = itemView!!
+        var tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
+        var tvArtistName = itemView!!.findViewById(R.id.tv_artist_name) as TextView
 
 
     }

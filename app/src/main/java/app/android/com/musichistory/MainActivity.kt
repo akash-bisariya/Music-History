@@ -77,6 +77,6 @@ class MainActivity : AppCompatActivity() {
 
 }
 
-class SongHistory(songName:String,songArtist:String):Serializable {
+class SongHistory(var songName:String,var songArtist:String):Serializable {
 
 }
