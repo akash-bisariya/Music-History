@@ -30,7 +30,8 @@ class MusicHistoryFragment: Fragment() {
         val view: View = LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
         val rv_music_history:RecyclerView=view.findViewById(R.id.rv_music_history)
         rv_music_history.layoutManager = LinearLayoutManager(activity)
-        val list:ArrayList<SongHistory> = arguments.getSerializable("SongsList") as ArrayList<SongHistory>
+        val list:ArrayList<SongHistory> = ArrayList()
+//                list= arguments.getSerializable("SongsList") as ArrayList<SongHistory>
 // arguments.getSerializable("SongsList")
 //        val rv_music_history:RecyclerView=view.findViewById(R.id.rv_music_history)
         rv_music_history.adapter=RecyclerAdapter(activity,list)

@@ -10,12 +10,13 @@ import android.provider.MediaStore
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.util.Log
-import android.widget.EditText
-import android.widget.TextView
+
+import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import java.io.File
 import java.io.Serializable
 
 
@@ -39,44 +40,55 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-//        for (i: Int in 1..100000)
-//        {
-//            Log.d("Tag","Coroutine outside launch method loop "+Thread.currentThread().name)
-//        }
-
-
-        Log.d("MusicHistory","Coroutine outside launch method "+Thread.currentThread().name)
 
     }
 
-    fun getSong(context: Context):List<SongHistory>
+    private fun getSong(context: Context)
     {
+
+        val realm:Realm = Realm.getDefaultInstance()
+
         val songList: ArrayList<SongHistory> = ArrayList()
+        realm.beginTransaction()
+        realm.deleteAll()
+        realm.commitTransaction()
         val uri: Uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val cursor:Cursor = context.contentResolver.query(uri,null,MediaStore.Audio.Media.IS_MUSIC+ " = 1",null,null)
+        realm.beginTransaction()
         if(cursor.count>0) {
             cursor.moveToFirst()
             do {
-                songList.add(SongHistory(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)), cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))))
+
+                realm.insert(SongHistory(
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)),
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)),
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA )),
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)),
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)),
+                        0))
+
             } while (cursor.moveToNext())
-
-
         }
+        realm.commitTransaction()
+
+
+
+
+
+
 
 
 
 
 
         launch(UI) {
-            viewPager!!.adapter = PagerAdapter(supportFragmentManager,songList)
+            viewPager!!.adapter = PagerAdapter(supportFragmentManager)
             tb_music.setupWithViewPager(vp_pager)
         }
-        return songList
     }
 
 
 }
 
-class SongHistory(var songName:String,var songArtist:String):Serializable {
 
-}

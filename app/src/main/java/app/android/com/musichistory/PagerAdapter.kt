@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentStatePagerAdapter
 /**
  * Created by akash bisariya on 18-01-2018.
  */
-class PagerAdapter(val fm:FragmentManager,val songsList: ArrayList<SongHistory> ) : FragmentStatePagerAdapter(fm) {
+class PagerAdapter(val fm:FragmentManager) : FragmentStatePagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence {
         var title:String=""
         when(position)
@@ -25,25 +25,25 @@ class PagerAdapter(val fm:FragmentManager,val songsList: ArrayList<SongHistory> 
         {
             0-> {
                 val fragment = MusicHistoryFragment()
-                val args = Bundle()
-                args.putSerializable("SongsList", songsList)
-                fragment.arguments = args
+//                val args = Bundle()
+//                args.putSerializable("SongsList", songsList)
+//                fragment.arguments = args
                 return fragment
             }
 
             1-> {
                 val fragment = MusicHistoryFragment()
-                val args = Bundle()
-                args.putSerializable("SongsList", songsList)
-                fragment.arguments = args
+//                val args = Bundle()
+//                args.putSerializable("SongsList", songsList)
+//                fragment.arguments = args
                 return fragment
             }
             else->
             {
                 val fragment = MusicHistoryFragment()
-                val args = Bundle()
-                args.putSerializable("SongsList", songsList)
-                fragment.arguments = args
+//                val args = Bundle()
+//                args.putSerializable("SongsList", songsList)
+//                fragment.arguments = args
                 return fragment
             }
 
