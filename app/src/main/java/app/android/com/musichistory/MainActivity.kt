@@ -31,11 +31,8 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        launch(UI){
-
+        launch {
             getSong(applicationContext)
-
-
             Log.d("MusicHistory","Coroutine under launch method "+Thread.currentThread().name)
         }
 
@@ -47,8 +44,6 @@ class MainActivity : AppCompatActivity() {
     {
 
         val realm:Realm = Realm.getDefaultInstance()
-
-        val songList: ArrayList<SongHistory> = ArrayList()
         realm.beginTransaction()
         realm.deleteAll()
         realm.commitTransaction()
@@ -64,23 +59,13 @@ class MainActivity : AppCompatActivity() {
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA )),
-                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)),
+                        "%.2f".format((((cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))).toFloat()/(1000*60)))),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)),
                         0))
 
             } while (cursor.moveToNext())
         }
         realm.commitTransaction()
-
-
-
-
-
-
-
-
-
-
 
         launch(UI) {
             viewPager!!.adapter = PagerAdapter(supportFragmentManager)
