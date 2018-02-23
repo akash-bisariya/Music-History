@@ -15,8 +15,9 @@ open class SongHistory(
         var songData:String,
         var songDuration:String,
         var lastPlayed:String,
+        var songImage:String,
         var playCount:Int
         ): Serializable, RealmObject()
 {
-    constructor() : this(songName="",songArtist = "",albumName = "",songData = "",songDuration = "",lastPlayed = "",playCount = 0)
+    constructor() : this(songName="",songArtist = "",albumName = "",songData = "",songDuration = "",lastPlayed = "",songImage = "",playCount = 0)
 }

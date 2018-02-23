@@ -17,17 +17,30 @@ import io.realm.RealmResults
  */
 
 class MusicHistoryFragment: Fragment() {
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val rvMusicHistory:RecyclerView= view!!.findViewById(R.id.rv_music_history)
+        val rvMusicHistory:RecyclerView= view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
         val list:RealmResults<SongHistory> = realm.where(SongHistory::class.java).findAll()
-        rvMusicHistory.adapter= MusicRecyclerAdapter(activity,list,true)
+        rvMusicHistory.adapter= MusicRecyclerAdapter(activity!!.applicationContext,list,true)
     }
 
-
-    override  fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
     }
+
+//    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+//        super.onViewCreated(view!!, savedInstanceState)
+//        val rvMusicHistory:RecyclerView= view!!.findViewById(R.id.rv_music_history)
+//        rvMusicHistory.layoutManager = LinearLayoutManager(activity)
+//        val realm: Realm = Realm.getDefaultInstance()
+//        val list:RealmResults<SongHistory> = realm.where(SongHistory::class.java).findAll()
+//        rvMusicHistory.adapter= MusicRecyclerAdapter(this!!.activity!!,list,true)
+//    }
+//
+//
+//    override  fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+//        return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
+//    }
 }

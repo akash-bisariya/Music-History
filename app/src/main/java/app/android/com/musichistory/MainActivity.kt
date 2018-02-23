@@ -1,6 +1,5 @@
 package app.android.com.musichistory
 
-import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
@@ -14,10 +13,8 @@ import android.util.Log
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
-import java.io.File
-import java.io.Serializable
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,38 +30,57 @@ class MainActivity : AppCompatActivity() {
 
         launch {
             getSong(applicationContext)
-            Log.d("MusicHistory","Coroutine under launch method "+Thread.currentThread().name)
+            Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
         }
+
+
 
 
 
     }
 
-    private fun getSong(context: Context)
-    {
+    private fun getSongImageIcon(albumId: String):String {
 
-        val realm:Realm = Realm.getDefaultInstance()
+        val uri: Uri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+        val cursor: Cursor = applicationContext.contentResolver.query(uri, null, MediaStore.Audio.Albums._ID + " = "+albumId, null, null)
+        cursor.moveToFirst()
+        if(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))!=null)
+        {
+            return cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))
+        }
+        else
+            return ""
+    }
+
+    private fun getSong(context: Context) {
+
+        val realm: Realm = Realm.getDefaultInstance()
         realm.beginTransaction()
         realm.deleteAll()
         realm.commitTransaction()
         val uri: Uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val cursor:Cursor = context.contentResolver.query(uri,null,MediaStore.Audio.Media.IS_MUSIC+ " = 1",null,null)
+        val cursor: Cursor = context.contentResolver.query(uri, null, MediaStore.Audio.Media.IS_MUSIC + " = 1", null, null)
         realm.beginTransaction()
-        if(cursor.count>0) {
+        if (cursor.count > 0) {
             cursor.moveToFirst()
             do {
+
+                val albumId=cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
+
+//                getSongImageIcon(albumId)
 
                 realm.insert(SongHistory(
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)),
-                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA )),
-                        "%.2f".format((((cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))).toFloat()/(1000*60)))),
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)),
+                        "%.2f".format((((cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))).toFloat() / (1000 * 60)))),
+                        getSongImageIcon(albumId),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)),
                         0))
-
             } while (cursor.moveToNext())
         }
+        cursor.close()
         realm.commitTransaction()
 
         launch(UI) {
@@ -72,8 +88,6 @@ class MainActivity : AppCompatActivity() {
             tb_music.setupWithViewPager(vp_pager)
         }
     }
-
-
 }
 
 

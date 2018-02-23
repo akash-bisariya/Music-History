@@ -5,7 +5,9 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import io.realm.RealmResults
 
 /**
@@ -17,6 +19,9 @@ class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<Son
         holder.tvArtistName.text = arrayList.get(position)!!.songArtist
         holder.tvSongDuration.text = arrayList.get(position)!!.songDuration
         holder.tvSongPlayCount.text = arrayList.get(position)!!.playCount.toString()
+//        Glide.with(context)
+//                .load(arrayList.get(position)!!.songImage)
+//                .into(holder.ivSongImage)
         if (isHistory)
             holder.tvSongPlayCount.visibility = View.VISIBLE
         else
@@ -37,6 +42,7 @@ class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<Son
         var tvArtistName = itemView!!.findViewById(R.id.tv_artist_name) as TextView
         var tvSongDuration = itemView!!.findViewById(R.id.tv_song_duration) as TextView
         var tvSongPlayCount = itemView!!.findViewById(R.id.tv_song_play_count) as TextView
+        var ivSongImage = itemView!!.findViewById(R.id.iv_song_image) as ImageView
 
     }
 }

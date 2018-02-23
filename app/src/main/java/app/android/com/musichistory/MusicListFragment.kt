@@ -17,18 +17,33 @@ import io.realm.RealmResults
  */
 
 class MusicListFragment : Fragment() {
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val rvMusicHistory:RecyclerView= view!!.findViewById(R.id.rv_music_history)
+        val rvMusicHistory:RecyclerView= view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
         val list:RealmResults<SongHistory> = realm.where(SongHistory::class.java).findAll()
-        rvMusicHistory.adapter= MusicRecyclerAdapter(activity,list,false)
+        rvMusicHistory.adapter= MusicRecyclerAdapter(activity!!.applicationContext,list,false)
     }
 
+//    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+//        if (view != null) {
+//            super.onViewCreated(view, savedInstanceState)
+//        }
+//        val rvMusicHistory:RecyclerView= view!!.findViewById(R.id.rv_music_history)
+//        rvMusicHistory.layoutManager = LinearLayoutManager(activity)
+//        val realm: Realm = Realm.getDefaultInstance()
+//        val list:RealmResults<SongHistory> = realm.where(SongHistory::class.java).findAll()
+//        rvMusicHistory.adapter= MusicRecyclerAdapter(this!!.activity!!,list,false)
+//    }
 
-    override  fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
-    }
+
+//    override  fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+//        return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
+//    }
 
 }
