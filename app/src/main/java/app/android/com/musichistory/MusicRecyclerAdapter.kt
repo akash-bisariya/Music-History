@@ -19,9 +19,17 @@ class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<Son
         holder.tvArtistName.text = arrayList.get(position)!!.songArtist
         holder.tvSongDuration.text = arrayList.get(position)!!.songDuration
         holder.tvSongPlayCount.text = arrayList.get(position)!!.playCount.toString()
-//        Glide.with(context)
-//                .load(arrayList.get(position)!!.songImage)
-//                .into(holder.ivSongImage)
+        if(arrayList.get(position)!!.songImage==""||arrayList.get(position)!!.songImage==null)
+        {
+            Glide.with(context)
+                    .load(R.drawable.music_icon)
+                    .into(holder.ivSongImage)
+        }
+        else {
+            Glide.with(context)
+                    .load(arrayList.get(position)!!.songImage)
+                    .into(holder.ivSongImage)
+        }
         if (isHistory)
             holder.tvSongPlayCount.visibility = View.VISIBLE
         else
