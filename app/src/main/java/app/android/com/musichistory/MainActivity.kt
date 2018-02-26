@@ -9,12 +9,12 @@ import android.provider.MediaStore
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
 import android.util.Log
+import android.view.View
 
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
-
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         viewPager = vp_pager
         tb_music.setupWithViewPager(vp_pager)
+        pb_music.visibility = View.VISIBLE
+        vp_pager.visibility = View.GONE
 
 
 
@@ -34,21 +36,16 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
-
-
     }
 
-    private fun getSongImageIcon(albumId: String):String {
+    private fun getSongImageIcon(albumId: String): String {
 
         val uri: Uri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
-        val cursor: Cursor = applicationContext.contentResolver.query(uri, null, MediaStore.Audio.Albums._ID + " = "+albumId, null, null)
+        val cursor: Cursor = applicationContext.contentResolver.query(uri, null, MediaStore.Audio.Albums._ID + " = " + albumId, null, null)
         cursor.moveToFirst()
-        if(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))!=null)
-        {
+        if (cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)) != null) {
             return cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))
-        }
-        else
+        } else
             return ""
     }
 
@@ -65,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             cursor.moveToFirst()
             do {
 
-                val albumId=cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
+                val albumId = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
 
 //                getSongImageIcon(albumId)
 
@@ -86,6 +83,8 @@ class MainActivity : AppCompatActivity() {
         launch(UI) {
             viewPager!!.adapter = PagerAdapter(supportFragmentManager)
             tb_music.setupWithViewPager(vp_pager)
+            pb_music.visibility = View.GONE
+            vp_pager.visibility = View.VISIBLE
         }
     }
 }

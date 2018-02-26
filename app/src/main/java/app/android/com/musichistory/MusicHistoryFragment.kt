@@ -29,18 +29,4 @@ class MusicHistoryFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
     }
-
-//    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view!!, savedInstanceState)
-//        val rvMusicHistory:RecyclerView= view!!.findViewById(R.id.rv_music_history)
-//        rvMusicHistory.layoutManager = LinearLayoutManager(activity)
-//        val realm: Realm = Realm.getDefaultInstance()
-//        val list:RealmResults<SongHistory> = realm.where(SongHistory::class.java).findAll()
-//        rvMusicHistory.adapter= MusicRecyclerAdapter(this!!.activity!!,list,true)
-//    }
-//
-//
-//    override  fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-//        return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history,null)
-//    }
 }

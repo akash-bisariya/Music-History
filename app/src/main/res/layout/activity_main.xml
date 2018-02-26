@@ -6,11 +6,21 @@
     android:layout_height="match_parent"
     tools:context="app.android.com.musichistory.MainActivity">
 
+    <ProgressBar
+        android:id="@+id/pb_music"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/vp_pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tb_music"
@@ -19,13 +29,11 @@
 
             <android.support.design.widget.TabItem
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-               />
+                android:layout_height="wrap_content" />
 
             <android.support.design.widget.TabItem
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                 />
+                android:layout_height="wrap_content" />
 
 
         </android.support.design.widget.TabLayout>
