@@ -16,14 +16,18 @@ import io.realm.RealmResults
  * Created by akash on 12/2/18.
  */
 
-class MusicHistoryFragment: Fragment() {
+class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
+    override fun onRecycleItemClick(view: View?, position: Int) {
+        val realm: Realm = Realm.getDefaultInstance()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val rvMusicHistory:RecyclerView= view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
         val list:RealmResults<SongHistory> = realm.where(SongHistory::class.java).findAll()
-        rvMusicHistory.adapter= MusicRecyclerAdapter(activity!!.applicationContext,list,true)
+        rvMusicHistory.adapter= MusicRecyclerAdapter(activity!!.applicationContext,list,true,this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

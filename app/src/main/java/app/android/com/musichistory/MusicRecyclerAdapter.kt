@@ -13,27 +13,15 @@ import io.realm.RealmResults
 /**
  * Created by akash bisariya on 13-02-2018.
  */
-class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<SongHistory>, val isHistory: Boolean) : RecyclerView.Adapter<MusicRecyclerAdapter.ViewHolder>() {
+class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<SongHistory>, val isHistory: Boolean,val onItemClick:IOnRecycleItemClick) : RecyclerView.Adapter<MusicRecyclerAdapter.ViewHolder>() {
+
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        holder!!.tvSongName.text = arrayList.get(position)!!.songName
-        holder.tvArtistName.text = arrayList.get(position)!!.songArtist
-        holder.tvSongDuration.text = arrayList.get(position)!!.songDuration
-        holder.tvSongPlayCount.text = arrayList.get(position)!!.playCount.toString()
-        if(arrayList.get(position)!!.songImage == "")
-        {
-            Glide.with(context)
-                    .load(R.drawable.music_icon)
-                    .into(holder.ivSongImage)
+
+
+        if (holder != null) {
+            holder.ViewHolderBind(isHistory,context,arrayList,onItemClick)
         }
-        else {
-            Glide.with(context)
-                    .load(arrayList.get(position)!!.songImage)
-                    .into(holder.ivSongImage)
-        }
-        if (isHistory)
-            holder.tvSongPlayCount.visibility = View.VISIBLE
-        else
-            holder.tvSongPlayCount.visibility = View.GONE
+
     }
 
     override fun getItemCount(): Int {
@@ -42,14 +30,48 @@ class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<Son
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
         val view: View = LayoutInflater.from(context).inflate(R.layout.row_music_history, parent, false)
-        return ViewHolder(view)
+        return ViewHolder(view,onItemClick)
     }
 
-    class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
-        var tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
-        var tvArtistName = itemView!!.findViewById(R.id.tv_artist_name) as TextView
-        var tvSongDuration = itemView!!.findViewById(R.id.tv_song_duration) as TextView
-        var tvSongPlayCount = itemView!!.findViewById(R.id.tv_song_play_count) as TextView
-        var ivSongImage = itemView!!.findViewById(R.id.iv_song_image) as ImageView
+    class ViewHolder(itemView: View?,var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView),View.OnClickListener{
+        override fun onClick(view: View?) {
+            onItemClick.onRecycleItemClick(view,adapterPosition)
+        }
+
+
+        fun ViewHolderBind(isHistory: Boolean,context: Context,arrayList: RealmResults<SongHistory>, listener: IOnRecycleItemClick): Unit{
+            onItemClick = listener
+            val tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
+            val tvArtistName = itemView.findViewById(R.id.tv_artist_name) as TextView
+            val tvSongDuration = itemView.findViewById(R.id.tv_song_duration) as TextView
+            val tvSongPlayCount = itemView.findViewById(R.id.tv_song_play_count) as TextView
+            val ivSongImage = itemView.findViewById(R.id.iv_song_image) as ImageView
+            tvSongName.text = arrayList.get(position)!!.songName
+            tvArtistName.text = arrayList.get(position)!!.songArtist
+            tvSongDuration.text = arrayList.get(position)!!.songDuration
+
+            tvSongPlayCount.text = context.resources.getQuantityString(R.plurals.numberOfTimeSongPlayed,arrayList.get(position)!!.playCount,arrayList.get(position)!!.playCount)
+            if(arrayList.get(position)!!.songImage == "")
+            {
+                Glide.with(context)
+                        .load(R.drawable.music_icon)
+                        .into(ivSongImage)
+            }
+            else {
+                Glide.with(context)
+                        .load(arrayList.get(position)!!.songImage)
+                        .into(ivSongImage)
+            }
+            if (isHistory)
+                tvSongPlayCount.visibility = View.VISIBLE
+            else
+                tvSongPlayCount.visibility = View.GONE
+            itemView.setOnClickListener(this)
+        }
+
+
+
+
+
     }
 }

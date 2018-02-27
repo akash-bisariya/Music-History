@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
 //                getSongImageIcon(albumId)
 
                 realm.insert(SongHistory(
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)),

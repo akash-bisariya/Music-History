@@ -16,7 +16,8 @@ class MyApplication: Application() {
         val configuration:RealmConfiguration=RealmConfiguration.Builder()
                 .name("songHistory.realm")
                 .schemaVersion(3)
-                .migration(RealmChangeMigration())
+//                .migration(RealmChangeMigration())
+                .deleteRealmIfMigrationNeeded()
                 .build()
 
         Realm.setDefaultConfiguration(configuration)

@@ -2,4 +2,9 @@
     <string name="app_name">MusicHistory</string>
     <string name="txt_all_music">All Music</string>
     <string name="txt_music_history">Music History</string>
+
+    <plurals name="numberOfTimeSongPlayed">
+            <item quantity="one">Played %d time</item>
+            <item quantity="other">Played %d times</item>
+    </plurals>
 </resources>
