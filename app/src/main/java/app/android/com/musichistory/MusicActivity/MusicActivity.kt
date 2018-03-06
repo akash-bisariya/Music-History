@@ -1,21 +1,12 @@
 package app.android.com.musichistory.MusicActivity
 
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import app.android.com.musichistory.R
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_music.*
-import kotlinx.android.synthetic.main.activity_music.*
-import android.graphics.BitmapFactory
-import android.support.v7.graphics.Palette
-import android.provider.MediaStore
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.media.MediaPlayer
-import android.net.Uri
 import android.view.View
 import android.widget.Toast
 
@@ -25,33 +16,48 @@ import android.widget.Toast
  * on 22/2/18.
  */
 class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaPlayer.OnErrorListener {
+    var mediaPlayerPause =false
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
         Toast.makeText(this,""+p1+" "+p2,Toast.LENGTH_SHORT).show()
         return true
     }
 
+
+
+
     private val mediaPlayer = MediaPlayer()
-    override fun onClick(p0: View?) {
-        if (p0 != null) {
-            when(p0.id) {
+    override fun onClick(view: View?) {
+        if (view != null) {
+            when(view.id) {
                 R.id.iv_play_pause->
                 {
                     if(!mediaPlayer.isPlaying) {
-                        mediaPlayer.setDataSource(intent.getStringExtra("songData"))
-                        mediaPlayer.prepareAsync()
-                        mediaPlayer.setOnErrorListener(this)
-                        mediaPlayer.setOnPreparedListener {
-                            if (!mediaPlayer.isPlaying) {
-                                mediaPlayer.start()
-                            } else
-                                mediaPlayer.reset()
+                        if(mediaPlayerPause)
+                        {
+                            mediaPlayer.start()
+
                         }
+                        else {
+                            mediaPlayer.setDataSource(intent.getStringExtra("songData"))
+                            mediaPlayer.prepareAsync()
+                            mediaPlayer.setOnErrorListener(this)
+                            mediaPlayer.setOnPreparedListener {
+                                it.start()
+                            }
+                        }
+                        iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                     }
                     else
                     {
-                        mediaPlayer.reset()
-                        mediaPlayer.setDataSource(intent.getStringExtra("songData"))
-                        mediaPlayer.prepare()
+                        mediaPlayer.pause()
+                        mediaPlayerPause=true
+                        iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
+
+
+
+//                        mediaPlayer.reset()
+//                        mediaPlayer.setDataSource(intent.getStringExtra("songData"))
+//                        mediaPlayer.prepare()
                     }
 
                 }
@@ -61,6 +67,9 @@ class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaP
                     mediaPlayer.reset()
                     mediaPlayer.release()
                 }
+
+
+
             }
 
 
@@ -102,6 +111,11 @@ class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaP
 
             iv_play_pause.setOnClickListener(this)
             iv_next.setOnClickListener(this)
+
+
+
+
+
 
 
 

@@ -20,6 +20,7 @@
         </activity>
         <!--<activity android:name=".MusicActivity.MusicActivity" />-->
         <activity android:name=".MusicActivity.MusicActivity" />
+        <service android:name=".MusicActivity.MusicService" />
     </application>
 
 </manifest>
