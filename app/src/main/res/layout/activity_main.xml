@@ -6,6 +6,22 @@
     android:layout_height="match_parent"
     tools:context="app.android.com.musichistory.MainActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#EF5350"
+        android:elevation="4dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+    </android.support.v7.widget.Toolbar>
+
     <ProgressBar
         android:id="@+id/pb_music"
         android:layout_width="wrap_content"
@@ -20,7 +36,8 @@
         android:id="@+id/vp_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone">
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tb_music"

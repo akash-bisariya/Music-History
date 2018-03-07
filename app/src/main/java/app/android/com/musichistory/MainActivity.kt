@@ -19,10 +19,10 @@ import kotlinx.coroutines.experimental.launch
 
 class MainActivity : AppCompatActivity() {
     var viewPager: ViewPager? = null
-    var tabLayout: TabLayout? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
         viewPager = vp_pager
         tb_music.setupWithViewPager(vp_pager)
         pb_music.visibility = View.VISIBLE

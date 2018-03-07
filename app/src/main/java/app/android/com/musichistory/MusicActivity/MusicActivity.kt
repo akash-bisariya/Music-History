@@ -9,35 +9,32 @@ import kotlinx.android.synthetic.main.activity_music.*
 import android.media.MediaPlayer
 import android.view.View
 import android.widget.Toast
+import com.bumptech.glide.request.RequestOptions.bitmapTransform
+import jp.wasabeef.glide.transformations.BlurTransformation
 
 
 /**
  * Created by akash
  * on 22/2/18.
  */
-class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaPlayer.OnErrorListener {
-    var mediaPlayerPause =false
+class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, MediaPlayer.OnErrorListener {
+    var mediaPlayerPause = false
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
-        Toast.makeText(this,""+p1+" "+p2,Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "" + p1 + " " + p2, Toast.LENGTH_SHORT).show()
         return true
     }
-
-
 
 
     private val mediaPlayer = MediaPlayer()
     override fun onClick(view: View?) {
         if (view != null) {
-            when(view.id) {
-                R.id.iv_play_pause->
-                {
-                    if(!mediaPlayer.isPlaying) {
-                        if(mediaPlayerPause)
-                        {
+            when (view.id) {
+                R.id.iv_play_pause -> {
+                    if (!mediaPlayer.isPlaying) {
+                        if (mediaPlayerPause) {
                             mediaPlayer.start()
 
-                        }
-                        else {
+                        } else {
                             mediaPlayer.setDataSource(intent.getStringExtra("songData"))
                             mediaPlayer.prepareAsync()
                             mediaPlayer.setOnErrorListener(this)
@@ -46,13 +43,10 @@ class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaP
                             }
                         }
                         iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
-                    }
-                    else
-                    {
+                    } else {
                         mediaPlayer.pause()
-                        mediaPlayerPause=true
+                        mediaPlayerPause = true
                         iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
-
 
 
 //                        mediaPlayer.reset()
@@ -62,12 +56,11 @@ class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaP
 
                 }
 
-                R.id.iv_next->
-                {
+                R.id.iv_next -> {
                     mediaPlayer.reset()
-                    mediaPlayer.release()
+                    mediaPlayerPause = false
+                    iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                 }
-
 
 
             }
@@ -95,9 +88,8 @@ class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaP
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
-
-        if(intent!=null)
-        {
+        setSupportActionBar(toolbar)
+        if (intent != null) {
             Glide.with(this)
                     .applyDefaultRequestOptions(RequestOptions()
                             .placeholder(R.drawable.music_icon)
@@ -105,18 +97,12 @@ class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaP
                     .load(intent.getStringExtra("songImage"))
                     .into(iv_song_image)
 
-            tv_song_artist.text=intent.getStringExtra("songArtist")
-            tv_song_duration.text=intent.getStringExtra("songduration")
-            tv_song_name.text=intent.getStringExtra("songName")
+            tv_song_artist.text = intent.getStringExtra("songArtist")
+            tv_song_duration.text = intent.getStringExtra("songduration")
+            tv_song_name.text = intent.getStringExtra("songName")
 
             iv_play_pause.setOnClickListener(this)
             iv_next.setOnClickListener(this)
-
-
-
-
-
-
 
 
 
@@ -136,8 +122,6 @@ class MusicActivity : AppCompatActivity(),MusicView, View.OnClickListener,MediaP
 //            })
 
         }
-
-
 
 
 //        /**

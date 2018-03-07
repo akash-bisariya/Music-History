@@ -9,7 +9,7 @@ import android.os.IBinder
  * on 5/3/18.
  */
 class MusicService : Service() {
-    override fun onBind(p0: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 }
