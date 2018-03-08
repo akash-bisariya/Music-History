@@ -13,25 +13,35 @@ import io.realm.RealmResults
 /**
  * Created by akash bisariya on 13-02-2018.
  */
-class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<SongHistory>, val isHistory: Boolean, val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<MusicRecyclerAdapter.ViewHolder>() {
-
-    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-
-
+class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmResults<SongHistory>, val isHistory: Boolean, val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<MusicRecyclerAdapter.ViewHolder>() {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (holder != null) {
             holder.ViewHolderBind(isHistory, context, arrayList, onItemClick)
         }
-
     }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view: View = LayoutInflater.from(context).inflate(R.layout.row_music_history, parent, false)
+        return ViewHolder(view, onItemClick)
+    }
+
+//    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
+//
+//
+//        if (holder != null) {
+//            holder.ViewHolderBind(isHistory, context, arrayList, onItemClick)
+//        }
+//
+//    }
 
     override fun getItemCount(): Int {
         return arrayList.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-        val view: View = LayoutInflater.from(context).inflate(R.layout.row_music_history, parent, false)
-        return ViewHolder(view, onItemClick)
-    }
+//    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
+//        val view: View = LayoutInflater.from(context).inflate(R.layout.row_music_history, parent, false)
+//        return ViewHolder(view, onItemClick)
+//    }
 
     class ViewHolder(itemView: View?, var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         override fun onClick(view: View?) {

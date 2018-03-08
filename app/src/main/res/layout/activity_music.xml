@@ -23,13 +23,14 @@
 
     <ImageView
         android:id="@+id/iv_song_image"
-        android:layout_width="@dimen/dimen_song_image_200dp"
-        android:layout_height="@dimen/dimen_song_image_200dp"
+        android:layout_width="@dimen/dimen_song_image_250dp"
+        android:layout_height="@dimen/dimen_song_image_250dp"
         android:layout_marginBottom="@dimen/dimen_10dp"
         android:layout_marginTop="@dimen/dimen_30dp"
         app:layout_constraintLeft_toRightOf="parent"
         app:layout_constraintRight_toLeftOf="parent"
         android:elevation="@dimen/dimen_10dp"
+        android:src="@drawable/x_ds_background"
         app:layout_constraintTop_toBottomOf="@id/toolbar"/>
 
     <TextView
@@ -57,8 +58,8 @@
 
     <ImageView
         android:id="@+id/iv_previous"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/dimen_play_pause_80dp"
+        android:layout_height="@dimen/dimen_play_pause_80dp"
         android:padding="@dimen/dimen_10dp"
         android:src="@drawable/ic_skip_previous_red_400_48dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -66,8 +67,8 @@
 
     <ImageView
         android:id="@+id/iv_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/dimen_play_pause_80dp"
+        android:layout_height="@dimen/dimen_play_pause_80dp"
         android:padding="@dimen/dimen_10dp"
         android:src="@drawable/ic_skip_next_red_400_48dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -75,7 +76,7 @@
 
     <ImageView
         android:id="@+id/iv_play_pause"
-        android:layout_width="80dp"
+        android:layout_width="@dimen/dimen_play_pause_80dp"
         android:layout_height="@dimen/dimen_play_pause_80dp"
         android:src="@drawable/ic_play_circle_filled_red_400_48dp"
         app:layout_constraintBottom_toBottomOf="parent"

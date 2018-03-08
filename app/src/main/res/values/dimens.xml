@@ -5,5 +5,5 @@
     <dimen name="txt_size_20sp">20sp</dimen>
     <dimen name="txt_size_15sp">15sp</dimen>
     <dimen name="dimen_play_pause_80dp">80dp</dimen>
-    <dimen name="dimen_song_image_200dp">200dp</dimen>
+    <dimen name="dimen_song_image_250dp">250dp</dimen>
 </resources>
