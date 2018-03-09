@@ -4,11 +4,12 @@
     android:id="@+id/music_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#EF5350"
+        android:background="@color/color_red"
         android:elevation="4dp">
 
         <TextView
@@ -20,6 +21,32 @@
             android:textStyle="bold" />
     </android.support.v7.widget.Toolbar>
 
+    <TextView
+        android:id="@+id/tv_song_play_count"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="@dimen/dimen_10dp"
+        android:background="@drawable/x_ds_background_circle"
+        android:singleLine="true"
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toRightOf="@id/iv_song_image"
+        app:layout_constraintTop_toTopOf="@id/iv_song_image" />
+
+    <TextView
+        android:id="@+id/tv_song_play_count_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dimen_10dp"
+        android:text="times"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="8sp"
+        app:layout_constraintLeft_toRightOf="@id/iv_song_image"
+        app:layout_constraintTop_toBottomOf="@id/tv_song_play_count" />
+
 
     <ImageView
         android:id="@+id/iv_song_image"
@@ -27,32 +54,31 @@
         android:layout_height="@dimen/dimen_song_image_250dp"
         android:layout_marginBottom="@dimen/dimen_10dp"
         android:layout_marginTop="@dimen/dimen_30dp"
-        app:layout_constraintLeft_toRightOf="parent"
-        app:layout_constraintRight_toLeftOf="parent"
         android:elevation="@dimen/dimen_10dp"
         android:src="@drawable/x_ds_background"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"/>
+        app:layout_constraintLeft_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <TextView
         android:id="@+id/tv_song_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLines="2"
         android:padding="@dimen/dimen_10dp"
         android:textAlignment="center"
+        android:textColor="@android:color/black"
         android:textSize="@dimen/txt_size_20sp"
         android:textStyle="bold"
-        android:maxLines="2"
-        android:textColor="@android:color/black"
         app:layout_constraintTop_toBottomOf="@id/iv_song_image" />
 
     <TextView
         android:id="@+id/tv_song_artist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/dimen_10dp"
+        android:maxLines="2"
         android:textAlignment="center"
         android:textColor="@android:color/black"
-        android:maxLines="2"
         android:textSize="@dimen/txt_size_15sp"
         app:layout_constraintTop_toBottomOf="@id/tv_song_name" />
 
@@ -73,6 +99,42 @@
         android:src="@drawable/ic_skip_next_red_400_48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_like"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dimen_10dp"
+        android:src="@drawable/ic_thumb_up_grey_400_36dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/iv_previous"
+        app:layout_constraintRight_toLeftOf="@id/iv_play_pause" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/iv_play_pause"
+        app:layout_constraintRight_toLeftOf="@id/iv_next">
+
+
+        <ImageView
+            android:id="@+id/iv_repeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dimen_10dp"
+            android:src="@drawable/ic_repeat_grey_400_36dp" />
+
+        <TextView
+            android:id="@+id/tv_repeat_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="@color/color_red"
+            android:textStyle="bold" />
+
+
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/iv_play_pause"

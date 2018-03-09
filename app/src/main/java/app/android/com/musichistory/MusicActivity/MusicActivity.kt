@@ -16,6 +16,10 @@ import android.media.MediaPlayer
 import android.support.v7.graphics.Palette
 import android.view.View
 import android.widget.Toast
+import app.android.com.musichistory.SongHistory
+import io.realm.Realm
+import io.realm.RealmResults
+
 
 /**
  * Created by akash
@@ -23,7 +27,48 @@ import android.widget.Toast
  */
 class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
     private var mediaPlayerPause = false
+    private var repeatCount: Int = -1
     private var audioManager: AudioManager? = null
+    lateinit var songData: RealmResults<SongHistory>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_music)
+        setSupportActionBar(toolbar)
+        songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
+
+        if (intent != null) {
+            Glide.with(this)
+                    .applyDefaultRequestOptions(RequestOptions()
+                            .placeholder(R.drawable.music_icon)
+                            .useAnimationPool(true))
+                    .load(songData[0]!!.songImage)
+                    .into(iv_song_image)
+
+            tv_song_artist.text = songData[0]!!.songArtist
+            tv_song_duration.text = songData[0]!!.songDuration
+            tv_song_name.text = songData[0]!!.songName
+            tv_song_play_count.text = songData[0]!!.playCount.toString()
+            iv_like.setOnClickListener(this)
+            iv_play_pause.setOnClickListener(this)
+            iv_next.setOnClickListener(this)
+            iv_repeat.setOnClickListener(this)
+
+            var bitmap: Bitmap? = null
+            val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
+            if (!(songData[0]!!.songImage).equals("")) {
+                bitmap = BitmapFactory.decodeFile(songData[0]!!.songImage, bmOptions)
+                bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
+                Palette.from(bitmap).generate(
+                        {
+                            music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
+                            toolbar.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
+                        })
+            }
+        }
+    }
+
+
     override fun onAudioFocusChange(result: Int) {
 
         when (result) {
@@ -42,7 +87,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
-                mediaPlayer.setDataSource(intent.getStringExtra("songData"))
+                mediaPlayer.setDataSource(songData[0]!!.songData)
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnErrorListener(this)
                 mediaPlayer.setOnPreparedListener {
@@ -59,7 +104,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
-        Toast.makeText(this, "" + p1 + " " + p2, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "$p1 $p2", Toast.LENGTH_SHORT).show()
         return true
     }
 
@@ -79,7 +124,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                             val result = audioManager!!.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
 
                             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                                mediaPlayer.setDataSource(intent.getStringExtra("songData"))
+                                mediaPlayer.setDataSource(songData[0]!!.songData)
                                 mediaPlayer.prepareAsync()
                                 mediaPlayer.setOnErrorListener(this)
                                 mediaPlayer.setOnPreparedListener {
@@ -94,6 +139,26 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                         iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                     }
                 }
+
+                R.id.iv_like -> {
+                    iv_like.setImageResource(R.drawable.ic_thumb_up_red_400_36dp)
+                }
+                R.id.iv_repeat -> {
+                    if (repeatCount == -1) {
+                        iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
+                        tv_repeat_count.text = ""
+                        repeatCount++
+                    } else {
+                        repeatCount++
+                        tv_repeat_count.text = (repeatCount).toString()
+                        if (repeatCount > 3) {
+                            repeatCount = -1
+                            tv_repeat_count.text = ""
+                            iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
+                        }
+                    }
+                }
+
                 R.id.iv_next -> {
                     val result = audioManager!!.abandonAudioFocus(this)
                     if (result == AudioManager.AUDIOFOCUS_LOSS) {
@@ -122,38 +187,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_music)
-        setSupportActionBar(toolbar)
-        if (intent != null) {
-            Glide.with(this)
-                    .applyDefaultRequestOptions(RequestOptions()
-                            .placeholder(R.drawable.music_icon)
-                            .useAnimationPool(true))
-                    .load(intent.getStringExtra("songImage"))
-                    .into(iv_song_image)
-
-            tv_song_artist.text = intent.getStringExtra("songArtist")
-            tv_song_duration.text = intent.getStringExtra("songduration")
-            tv_song_name.text = intent.getStringExtra("songName")
-
-            iv_play_pause.setOnClickListener(this)
-            iv_next.setOnClickListener(this)
-
-            var bitmap: Bitmap? = null
-            val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
-            if (intent.getStringExtra("songImage") != null && (!(intent.getStringExtra("songImage")).equals(""))) {
-                bitmap = BitmapFactory.decodeFile(intent.getStringExtra("songImage"), bmOptions)
-                bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
-                Palette.from(bitmap).generate(
-                        {
-                            music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
-                            toolbar.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
-                        })
-            }
-        }
-    }
 
     private fun getGradientDrawable(topColor: Int, centerColor: Int, bottomColor: Int): GradientDrawable {
         val gradientDrawable = GradientDrawable()

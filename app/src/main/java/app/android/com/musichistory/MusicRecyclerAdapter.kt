@@ -15,9 +15,7 @@ import io.realm.RealmResults
  */
 class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmResults<SongHistory>, val isHistory: Boolean, val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<MusicRecyclerAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (holder != null) {
-            holder.ViewHolderBind(isHistory, context, arrayList, onItemClick)
-        }
+        holder.viewHolderBind(isHistory, context, arrayList, onItemClick)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -25,31 +23,16 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
         return ViewHolder(view, onItemClick)
     }
 
-//    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-//
-//
-//        if (holder != null) {
-//            holder.ViewHolderBind(isHistory, context, arrayList, onItemClick)
-//        }
-//
-//    }
-
     override fun getItemCount(): Int {
         return arrayList.size
     }
-
-//    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-//        val view: View = LayoutInflater.from(context).inflate(R.layout.row_music_history, parent, false)
-//        return ViewHolder(view, onItemClick)
-//    }
 
     class ViewHolder(itemView: View?, var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         override fun onClick(view: View?) {
             onItemClick.onRecycleItemClick(view, adapterPosition)
         }
 
-
-        fun ViewHolderBind(isHistory: Boolean, context: Context, arrayList: RealmResults<SongHistory>, listener: IOnRecycleItemClick): Unit {
+        fun viewHolderBind(isHistory: Boolean, context: Context, arrayList: RealmResults<SongHistory>, listener: IOnRecycleItemClick): Unit {
             onItemClick = listener
             val tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
             val tvArtistName = itemView.findViewById(R.id.tv_artist_name) as TextView
@@ -76,7 +59,5 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
                 tvSongPlayCount.visibility = View.GONE
             itemView.setOnClickListener(this)
         }
-
-
     }
 }
