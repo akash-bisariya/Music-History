@@ -16,8 +16,6 @@ import io.realm.RealmResults
 class MusicRecyclerAdapter(val context: Context, val arrayList: RealmResults<SongHistory>, val isHistory: Boolean,val onItemClick:IOnRecycleItemClick) : RecyclerView.Adapter<MusicRecyclerAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-
-
         if (holder != null) {
             holder.ViewHolderBind(isHistory,context,arrayList,onItemClick)
         }
