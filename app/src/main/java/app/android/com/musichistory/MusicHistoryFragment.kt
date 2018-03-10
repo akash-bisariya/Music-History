@@ -1,6 +1,7 @@
 package app.android.com.musichistory
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -8,6 +9,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.Realm
 import io.realm.RealmResults
 
@@ -17,8 +19,12 @@ import io.realm.RealmResults
  */
 
 class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
+    private lateinit var list:RealmResults<SongHistory>
     override fun onRecycleItemClick(view: View?, position: Int) {
-        val realm: Realm = Realm.getDefaultInstance()
+        Realm.getDefaultInstance().executeTransaction({list[position]!!.playCount++  })
+        val intent = Intent(activity, MusicActivity::class.java)
+        intent.putExtra("songId", list[position]!!.songId)
+        startActivity(intent)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -26,7 +32,7 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
         val rvMusicHistory:RecyclerView= view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
-        val list:RealmResults<SongHistory> = realm.where(SongHistory::class.java).findAll()
+        list = realm.where(SongHistory::class.java).findAll()
         rvMusicHistory.adapter= MusicRecyclerAdapter(activity!!.applicationContext,list,true,this)
     }
 
