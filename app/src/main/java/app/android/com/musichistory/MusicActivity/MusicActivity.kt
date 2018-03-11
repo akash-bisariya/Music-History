@@ -16,6 +16,7 @@ import android.media.MediaPlayer
 import android.support.v7.graphics.Palette
 import android.view.View
 import android.widget.Toast
+import app.android.com.musichistory.MusicPlayer
 import app.android.com.musichistory.SongHistory
 import io.realm.Realm
 import io.realm.RealmResults
@@ -35,6 +36,9 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         setSupportActionBar(toolbar)
+
+
+
         songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
 
         if (intent != null) {
@@ -74,29 +78,29 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         when (result) {
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT -> {
                 if (mediaPlayerPause)
-                    mediaPlayer.start()
+                    musicPlayer.start()
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                if (mediaPlayer.isPlaying) {
-                    mediaPlayer.pause()
+                if (musicPlayer.isPlaying) {
+                    musicPlayer.pause()
                 }
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
-                mediaPlayer.reset()
+                musicPlayer.reset()
                 mediaPlayerPause = false
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
-                mediaPlayer.setDataSource(songData[0]!!.songData)
-                mediaPlayer.prepareAsync()
-                mediaPlayer.setOnErrorListener(this)
-                mediaPlayer.setOnPreparedListener {
+                musicPlayer.setDataSource(songData[0]!!.songData)
+                musicPlayer.prepareAsync()
+                musicPlayer.setOnErrorListener(this)
+                musicPlayer.setOnPreparedListener {
                     it.start()
                     iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                 }
             }
             else -> {
-                mediaPlayer.reset()
+                musicPlayer.reset()
                 mediaPlayerPause = false
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
             }
@@ -109,32 +113,34 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     }
 
 
-    private val mediaPlayer = MediaPlayer()
+    //    private val mediaPlayer = MediaPlayer()
+    private val musicPlayer: MusicPlayer = MusicPlayer
+
     override fun onClick(view: View?) {
         if (view != null) {
             when (view.id) {
                 R.id.iv_play_pause -> {
-                    if (!mediaPlayer.isPlaying) {
+                     if (!musicPlayer.isPlaying) {
                         if (mediaPlayerPause) {
-                            mediaPlayer.start()
+                            musicPlayer.start()
                             iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                         } else {
-
                             audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
                             val result = audioManager!!.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
 
                             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                                mediaPlayer.setDataSource(songData[0]!!.songData)
-                                mediaPlayer.prepareAsync()
-                                mediaPlayer.setOnErrorListener(this)
-                                mediaPlayer.setOnPreparedListener {
+                                musicPlayer.setDataSource(songData[0]!!.songData)
+                                val s= songData[0]!!.songData
+                                musicPlayer.prepareAsync()
+                                musicPlayer.setOnErrorListener(this)
+                                musicPlayer.setOnPreparedListener {
                                     it.start()
                                     iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                                 }
                             }
                         }
                     } else {
-                        mediaPlayer.pause()
+                        musicPlayer.pause()
                         mediaPlayerPause = true
                         iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                     }
@@ -161,11 +167,11 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
                 R.id.iv_next -> {
                     val result = audioManager!!.abandonAudioFocus(this)
-                    if (result == AudioManager.AUDIOFOCUS_LOSS) {
-                        mediaPlayer.reset()
+//                    if (result == AudioManager.AUDIOFOCUS_LOSS) {
+                        musicPlayer.reset()
                         mediaPlayerPause = false
                         iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
-                    }
+//                    }
                 }
             }
         }

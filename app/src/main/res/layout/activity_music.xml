@@ -16,6 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
+            android:textColor="@android:color/white"
             android:textAlignment="center"
             android:textSize="25sp"
             android:textStyle="bold" />
@@ -150,6 +151,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_10dp"
+        android:thumbTint="@color/color_red"
+        android:progressTint="@color/color_red"
+        android:backgroundTint="@color/color_red"
         app:layout_constraintBottom_toTopOf="@id/iv_play_pause"
         app:layout_constraintRight_toLeftOf="@id/tv_song_duration" />
 

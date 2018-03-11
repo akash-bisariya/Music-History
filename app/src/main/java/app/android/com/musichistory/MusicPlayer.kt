@@ -2,6 +2,8 @@ package app.android.com.musichistory
 
 import android.media.MediaPlayer
 
+
+
 /**
  * Created by akash
  * on 5/3/18.
@@ -11,8 +13,7 @@ object MusicPlayer : MediaPlayer(),MediaPlayer.OnErrorListener,MediaPlayer.OnCom
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    //    private lateinit var mediaPlayer:MediaPlayer
-    object MusicPlayer
+//    private var mediaPlayer:MediaPlayer?=null
     override fun onError(mediaPlayer: MediaPlayer?, p1: Int, p2: Int): Boolean {
         if (mediaPlayer != null) {
             mediaPlayer.reset()
@@ -21,9 +22,9 @@ object MusicPlayer : MediaPlayer(),MediaPlayer.OnErrorListener,MediaPlayer.OnCom
         return true
     }
 
-//    fun getMediaPlayer(): MediaPlayer {
-//        if (mediaPlayer==null)
-//        return MediaPlayer()
+//    fun getMediaPlayer():MediaPlayer {
+//        if (mediaPlayer == null)
+//            mediaPlayer = MediaPlayer();
+//        return mediaPlayer as MediaPlayer
 //    }
-
 }

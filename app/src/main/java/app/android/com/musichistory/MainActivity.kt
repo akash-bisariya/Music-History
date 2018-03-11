@@ -50,9 +50,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getSong(context: Context) {
-
         val realm: Realm = Realm.getDefaultInstance()
-        if(realm.where(SongHistory::class.java).findAll().count()<0) {
+        if(realm.where(SongHistory::class.java).findAll().count()<=0) {
             realm.beginTransaction()
             realm.deleteAll()
             realm.commitTransaction()
