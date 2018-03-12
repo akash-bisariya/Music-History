@@ -1,12 +1,14 @@
 package app.android.com.musichistory
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.support.design.widget.TabLayout
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.View
@@ -16,6 +18,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 
+const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity() {
     var viewPager: ViewPager? = null
@@ -28,30 +31,37 @@ class MainActivity : AppCompatActivity() {
         pb_music.visibility = View.VISIBLE
         vp_pager.visibility = View.GONE
 
-
-
-        launch {
-            getSong(applicationContext)
-            Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_PERMISSION_STORAGE)
+        } else {
+            launch {
+                getSong(applicationContext)
+                Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
+            }
         }
 
 
     }
 
     private fun getSongImageIcon(albumId: String): String {
-
         val uri: Uri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
         val cursor: Cursor = applicationContext.contentResolver.query(uri, null, MediaStore.Audio.Albums._ID + " = " + albumId, null, null)
         cursor.moveToFirst()
         if (cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)) != null) {
-            return cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))
-        } else
-            return ""
+            val albumArt = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART))
+            cursor.close()
+            return albumArt
+        } else {
+            val albumArt = ""
+            cursor.close()
+            return albumArt
+        }
+
     }
 
     private fun getSong(context: Context) {
         val realm: Realm = Realm.getDefaultInstance()
-        if(realm.where(SongHistory::class.java).findAll().count()<=0) {
+        if (realm.where(SongHistory::class.java).findAll().count() <= 0) {
             realm.beginTransaction()
             realm.deleteAll()
             realm.commitTransaction()
@@ -82,6 +92,18 @@ class MainActivity : AppCompatActivity() {
             tb_music.setupWithViewPager(vp_pager)
             pb_music.visibility = View.GONE
             vp_pager.visibility = View.VISIBLE
+        }
+    }
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode == REQUEST_PERMISSION_STORAGE) {
+            grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
+                launch {
+                    getSong(applicationContext)
+                    Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
+                }
+            }
         }
     }
 }

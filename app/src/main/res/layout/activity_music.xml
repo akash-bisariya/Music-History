@@ -16,8 +16,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
-            android:textColor="@android:color/white"
             android:textAlignment="center"
+            android:textColor="@android:color/white"
             android:textSize="25sp"
             android:textStyle="bold" />
     </android.support.v7.widget.Toolbar>
@@ -42,9 +42,9 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/dimen_10dp"
         android:text="times"
-        android:textStyle="bold"
         android:textColor="@android:color/black"
         android:textSize="8sp"
+        android:textStyle="bold"
         app:layout_constraintLeft_toRightOf="@id/iv_song_image"
         app:layout_constraintTop_toBottomOf="@id/tv_song_play_count" />
 
@@ -150,10 +150,10 @@
         android:id="@+id/seek_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/dimen_10dp"
-        android:thumbTint="@color/color_red"
-        android:progressTint="@color/color_red"
         android:backgroundTint="@color/color_red"
+        android:padding="@dimen/dimen_10dp"
+        android:progressTint="@color/color_red"
+        android:thumbTint="@color/color_red"
         app:layout_constraintBottom_toTopOf="@id/iv_play_pause"
         app:layout_constraintRight_toLeftOf="@id/tv_song_duration" />
 
