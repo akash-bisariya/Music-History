@@ -1,60 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="app.android.com.musichistory.MainActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#EF5350"
-        android:elevation="4dp">
+        android:layout_height="wrap_content">
 
-        <TextView
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textAlignment="center"
-            android:textSize="25sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
-    </android.support.v7.widget.Toolbar>
+            android:layout_height="256dp"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:titleEnabled="false">
 
-    <ProgressBar
-        android:id="@+id/pb_music"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="parent"
-        app:layout_constraintRight_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/iv_home_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/screen_home"
+                android:fitsSystemWindows="true"
+                android:scaleType="centerCrop"
+                app:layout_collapseMode="parallax" />
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.3"
+                android:background="@android:color/black"
+                android:fitsSystemWindows="true" />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_gravity="top"
+                android:layout_marginBottom="48dp"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="@string/app_name"
+                app:titleTextColor="@android:color/white">
+
+            </android.support.v7.widget.Toolbar>
+
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tb_music"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                app:tabTextColor="@color/tab_normal_color"
+                app:tabIndicatorColor="@android:color/white"
+                app:tabTextAppearance="@style/Tab_Text_Selected"
+                app:tabSelectedTextColor="@android:color/white">
+
+            </android.support.design.widget.TabLayout>
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/vp_pager"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
-
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tb_music"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.design.widget.TabItem
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <android.support.design.widget.TabItem
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-        </android.support.design.widget.TabLayout>
     </android.support.v4.view.ViewPager>
-</android.support.constraint.ConstraintLayout>
+
+
+    <ProgressBar
+        android:id="@+id/pb_music"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+</android.support.design.widget.CoordinatorLayout>

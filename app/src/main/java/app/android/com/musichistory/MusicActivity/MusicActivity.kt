@@ -83,10 +83,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         return true
     }
 
-
-    //    private val mediaPlayer = MediaPlayer()
-
-
     override fun onClick(view: View?) {
         if (view != null) {
             when (view.id) {

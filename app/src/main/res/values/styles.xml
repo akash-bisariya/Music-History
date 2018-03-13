@@ -13,4 +13,7 @@
         <item name="android:windowFullscreen">true</item>
 
     </style>
+    <style name="Tab_Text_Selected">
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>
