@@ -25,7 +25,7 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
             android:screenOrientation="portrait"/>
 
-        <service android:name=".MusicActivity.MusicService" />
+        <service android:name=".MusicService" />
     </application>
 
 </manifest>

@@ -146,24 +146,34 @@
         app:layout_constraintLeft_toRightOf="@id/iv_previous"
         app:layout_constraintRight_toLeftOf="@id/iv_next" />
 
+    <TextView
+        android:id="@+id/tv_song_current_position"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:padding="@dimen/dimen_10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/iv_play_pause" />
+
     <android.support.v7.widget.AppCompatSeekBar
         android:id="@+id/seek_bar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/color_red"
         android:padding="@dimen/dimen_10dp"
         android:progressTint="@color/color_red"
         android:thumbTint="@color/color_red"
         app:layout_constraintBottom_toTopOf="@id/iv_play_pause"
+        app:layout_constraintLeft_toRightOf="@id/tv_song_current_position"
         app:layout_constraintRight_toLeftOf="@id/tv_song_duration" />
 
     <TextView
         android:id="@+id/tv_song_duration"
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:text="sdfsdfsdfsdf"
-        app:layout_constraintLeft_toRightOf="@id/seek_bar"
-        app:layout_constraintStart_toEndOf="@id/seek_bar"
-        app:layout_constraintTop_toBottomOf="@id/tv_song_name" />
+        android:maxLines="1"
+        android:padding="@dimen/dimen_10dp"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/iv_play_pause" />
 
 </android.support.constraint.ConstraintLayout>

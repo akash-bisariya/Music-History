@@ -1,8 +1,6 @@
-package app.android.com.musichistory.MusicActivity
+package app.android.com.musichistory
 
-import android.app.Service
 import android.content.Intent
-import android.media.session.MediaController
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
