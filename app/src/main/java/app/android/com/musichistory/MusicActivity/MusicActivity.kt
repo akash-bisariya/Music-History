@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_music.*
 import android.media.MediaPlayer
+import android.media.browse.MediaBrowser
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v7.graphics.Palette
 import android.view.View
