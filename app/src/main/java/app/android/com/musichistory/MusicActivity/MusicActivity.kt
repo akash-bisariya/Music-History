@@ -1,5 +1,6 @@
 package app.android.com.musichistory.MusicActivity
 
+import android.content.ComponentName
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,24 +9,24 @@ import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import app.android.com.musichistory.R
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_music.*
 import android.media.MediaPlayer
+import android.media.browse.MediaBrowser
 import android.os.Handler
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v7.graphics.Palette
 import android.view.View
 import android.widget.Toast
-import app.android.com.musichistory.MusicPlayer
-import app.android.com.musichistory.SongHistory
 import io.realm.Realm
 import io.realm.RealmResults
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.widget.SeekBar
-import app.android.com.musichistory.IMusicPlayerPlayback
+import app.android.com.musichistory.*
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import java.util.*
@@ -35,7 +36,8 @@ import java.util.*
  * Created by akash
  * on 22/2/18.
  */
-class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, IMusicPlayerPlayback {
+class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, IMusicPlayerPlayback
+{
     override fun onPauseMusicPlayer(position: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -50,7 +52,8 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
     override fun onProgress(position: Int) {
         runOnUiThread({
-            tv_song_current_position.text = "%.2f".format((musicPlayer.currentPosition).toFloat() / (1000 * 60))
+//            tv_song_current_position.text = "%.2f".format((musicPlayer.currentPosition).toFloat() / (1000 * 60))
+            tv_song_current_position.text =(musicPlayer.currentPosition/1000).toString()
         })
 
     }
@@ -70,6 +73,60 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     private lateinit var songData: RealmResults<SongHistory>
     private val musicPlayer: MusicPlayer = MusicPlayer
     private val mTimer: Timer = Timer("SeekBarListener")
+    private var mMediaBrowserCompat:MediaBrowserCompat?= null
+
+
+    val mMediaControllerCompatCallback:MediaControllerCompat.Callback = object :MediaControllerCompat.Callback()
+    {
+        override fun onCaptioningEnabledChanged(enabled: Boolean) {
+            super.onCaptioningEnabledChanged(enabled)
+        }
+
+        override fun onRepeatModeChanged(repeatMode: Int) {
+            super.onRepeatModeChanged(repeatMode)
+        }
+
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+            super.onPlaybackStateChanged(state)
+            when(state?.state)
+            {
+                PlaybackStateCompat.STATE_PLAYING->
+                {
+
+                }
+            }
+
+        }
+
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            super.onMetadataChanged(metadata)
+        }
+    }
+
+    private val mMediaBrowserCompatConnectionCallback:MediaBrowserCompat.ConnectionCallback=object :MediaBrowserCompat.ConnectionCallback()
+    {
+        override fun onConnected() {
+            super.onConnected()
+            val mMediaControllerCompat = MediaControllerCompat(applicationContext,mMediaBrowserCompat!!.sessionToken)
+            mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+//            mediaController=mMediaControllerCompat
+            MediaControllerCompat.setMediaController(this@MusicActivity,mMediaControllerCompat)
+
+//            mediaController.getTransportControls().playFromMediaId(String.valueOf(R.raw.warner_tautz_off_broadway), null);
+            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"),null)
+
+
+        }
+
+        override fun onConnectionSuspended() {
+            super.onConnectionSuspended()
+        }
+
+        override fun onConnectionFailed() {
+            super.onConnectionFailed()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,7 +165,15 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                     })
         }
 
+        mMediaBrowserCompat= MediaBrowserCompat(this, ComponentName(this,MusicService::class.java),mMediaBrowserCompatConnectionCallback,null)
+        mMediaBrowserCompat!!.connect()
+
+
+
+
     }
+
+
 
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
@@ -191,6 +256,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         mTimer.cancel()
         mTimer.purge()
     }
+
+
+
+
 
     override fun playSong() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -293,6 +362,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 musicPlayer.reset()
                 mediaPlayerPause = false
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
+
             }
         }
     }
