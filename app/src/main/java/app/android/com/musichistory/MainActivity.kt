@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)),
-                            "%.2f".format((((cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))).toFloat() / (1000 * 60)))),
+                            cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)),
                             getSongImageIcon(albumId),
                             0))

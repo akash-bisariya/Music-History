@@ -41,7 +41,7 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
             val ivSongImage = itemView.findViewById(R.id.iv_song_image) as ImageView
             tvSongName.text = arrayList.get(adapterPosition)!!.songName
             tvArtistName.text = arrayList.get(adapterPosition)!!.songArtist
-            tvSongDuration.text = arrayList.get(adapterPosition)!!.songDuration
+            tvSongDuration.text =  "%.2f".format((((arrayList.get(adapterPosition)!!.songDuration))).toFloat() / (1000 * 60))
 
             tvSongPlayCount.text = context.resources.getQuantityString(R.plurals.numberOfTimeSongPlayed, arrayList.get(adapterPosition)!!.playCount, arrayList.get(adapterPosition)!!.playCount)
             if (arrayList[adapterPosition]!!.songImage == "") {
