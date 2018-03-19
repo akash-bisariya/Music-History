@@ -141,7 +141,7 @@
         android:id="@+id/iv_play_pause"
         android:layout_width="@dimen/dimen_play_pause_80dp"
         android:layout_height="@dimen/dimen_play_pause_80dp"
-        android:src="@drawable/ic_play_circle_filled_red_400_48dp"
+        android:src="@drawable/ic_pause_circle_filled_red_400_48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/iv_previous"
         app:layout_constraintRight_toLeftOf="@id/iv_next" />
@@ -159,8 +159,8 @@
         android:id="@+id/seek_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/color_red"
         android:padding="@dimen/dimen_10dp"
+        android:backgroundTint="@color/color_red"
         android:progressTint="@color/color_red"
         android:thumbTint="@color/color_red"
         app:layout_constraintBottom_toTopOf="@id/iv_play_pause"

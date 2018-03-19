@@ -2,6 +2,7 @@ package app.android.com.musichistory.MusicActivity
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -110,8 +111,11 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
 
 //            mediaController.getTransportControls().playFromMediaId(String.valueOf(R.raw.warner_tautz_off_broadway), null);
-            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"), null)
+//            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"), null)
 
+            val intent1 = Intent(this@MusicActivity,MusicService::class.java)
+            intent1.putExtra("songId",intent.getStringExtra("songId"))
+            startService(intent)
 
         }
 

@@ -12,4 +12,5 @@ interface IMusicPlayerPlayback {
     fun onStopMusicPlayer()
 
     fun onStartMusicPlayer()
+
 }
