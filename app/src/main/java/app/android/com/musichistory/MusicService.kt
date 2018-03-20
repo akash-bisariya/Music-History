@@ -230,7 +230,7 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
                 mMusicPlayer.reset()
                 mediaPlayerPause = false
 //                iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
-
+mysic
             }
         }
     }
