@@ -24,6 +24,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Bitmap
 
 
+
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity() {
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
                 collapsing_toolbar.setContentScrimColor(vibrantColor)
                 collapsing_toolbar.setStatusBarScrimColor(vibrantDarkColor)
             }
+
 
         } catch (e:Exception) {
             collapsing_toolbar.setContentScrimColor(
