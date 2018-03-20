@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                 collapsing_toolbar.setStatusBarScrimColor(vibrantDarkColor)
             }
 
-        } catch (e: Exception) {
+        } catch (e:Exception) {
             collapsing_toolbar.setContentScrimColor(
                     ContextCompat.getColor(this, R.color.color_red)
             )

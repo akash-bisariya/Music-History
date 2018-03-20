@@ -40,33 +40,6 @@ import java.util.*
  * on 22/2/18.
  */
 class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, IMusicPlayerPlayback {
-    override fun onPauseMusicPlayer(position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onStopMusicPlayer() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onStartMusicPlayer() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onProgress(position: Int) {
-        runOnUiThread({
-            //            tv_song_current_position.text = "%.2f".format((musicPlayer.currentPosition).toFloat() / (1000 * 60))
-            tv_song_current_position.text = (musicPlayer.currentPosition / 1000).toString()
-        })
-
-    }
-
-    override fun onCompletion(p0: MediaPlayer?) {
-        musicPlayer.stop()
-        musicPlayer.reset()
-        mTimer.cancel()
-        mTimer.purge()
-        seek_bar.progress = 0
-    }
 
     private var mediaPlayerPause = false
     private var audioFocusCanDuck = false
@@ -76,7 +49,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     private val musicPlayer: MusicPlayer = MusicPlayer
     private val mTimer: Timer = Timer("SeekBarListener")
     private var mMediaBrowserCompat: MediaBrowserCompat? = null
-
+    private var playbackStateCompat:PlaybackStateCompat?=null
 
     val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
         override fun onCaptioningEnabledChanged(enabled: Boolean) {
@@ -89,12 +62,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
-            when (state?.state) {
-                PlaybackStateCompat.STATE_PLAYING -> {
-
-                }
-            }
-
+            playbackStateCompat = state
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
@@ -115,7 +83,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
             val intent1 = Intent(this@MusicActivity,MusicService::class.java)
             intent1.putExtra("songId",intent.getStringExtra("songId"))
-            startService(intent)
+            startService(intent1)
 
         }
 
@@ -310,6 +278,35 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 else -> palette.darkMutedSwatch!!.rgb
             }
         else Color.BLUE
+    }
+
+
+    override fun onCompletion(p0: MediaPlayer?) {
+        musicPlayer.stop()
+        musicPlayer.reset()
+        mTimer.cancel()
+        mTimer.purge()
+        seek_bar.progress = 0
+    }
+
+    override fun onPauseMusicPlayer(position: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onStopMusicPlayer() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onStartMusicPlayer() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onProgress(position: Int) {
+        runOnUiThread({
+            //            tv_song_current_position.text = "%.2f".format((musicPlayer.currentPosition).toFloat() / (1000 * 60))
+            tv_song_current_position.text = (musicPlayer.currentPosition / 1000).toString()
+        })
+
     }
 
 
