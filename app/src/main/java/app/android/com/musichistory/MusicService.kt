@@ -12,12 +12,14 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.session.PlaybackState
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -30,17 +32,17 @@ import kotlinx.android.synthetic.main.activity_music.*
  * Created by akash
  * on 5/3/18.
  */
-class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListener,MediaPlayer.OnErrorListener,AudioManager.OnAudioFocusChangeListener {
+class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
     private val MY_MEDIA_ROOT_ID = "media_root_id"
     private val MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id"
-    private val MUSIC_HISTORY_NOTIFICATION_ID=10001
+    private val MUSIC_HISTORY_NOTIFICATION_ID = 10001
     private var mMediaSession: MediaSessionCompat? = null
     private var mStateBuilder: PlaybackStateCompat.Builder? = null
     private val mMusicPlayer: MusicPlayer = MusicPlayer
-    private  var mNotificationManager: NotificationManager? = null
+    private var mNotificationManager: NotificationManager? = null
     private var audioManager: AudioManager? = null
     lateinit var mNotification: Notification
-    private var pendingIntent:PendingIntent?=null
+    private var pendingIntent: PendingIntent? = null
     private var mediaPlayerPause = false
     private var audioFocusCanDuck = false
     private lateinit var songData: RealmResults<SongHistory>
@@ -67,8 +69,6 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
         sessionToken = mMediaSession!!.sessionToken
 
 
-
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -87,10 +87,12 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
             mMusicPlayer.setOnPreparedListener {
                 it.start()
                 mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING,0,1.0f)
+                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+//                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING,mMusicPlayer.currentPosition.toLong(),1.0f)
             }
         }
         return Service.START_STICKY
-
 
 
     }
@@ -113,7 +115,9 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
             mMusicPlayer.setOnErrorListener(this@MusicService)
             mMusicPlayer.setOnPreparedListener {
                 it.start()
-                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID,mNotification)
+                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING,0,0.0f)
+                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
 //                iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
 //                seek_bar.progress = 0
 //                seek_bar.max = songData[0]!!.songDuration.toInt()
@@ -129,13 +133,12 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
 
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
+            Log.d("MusicHistory onSeekTo:", ""+pos)
         }
 
         override fun onPrepare() {
             super.onPrepare()
         }
-
-
 
 
         override fun onPlay() {
@@ -170,19 +173,13 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
 
     override fun onDestroy() {
         super.onDestroy()
-        mMediaSession?.release()
-        mMusicPlayer.stop()
-        mMusicPlayer.release()
-        mNotificationManager?.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
+        stopMusicPlayer()
     }
 
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
-        mMediaSession?.release()
-        mMusicPlayer.stop()
-        mMusicPlayer.release()
+        stopMusicPlayer()
         stopSelf()
     }
 
@@ -210,7 +207,6 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
             AudioManager.AUDIOFOCUS_LOSS -> {
                 mMusicPlayer.reset()
                 mediaPlayerPause = false
-//                iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS")
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
@@ -220,7 +216,6 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
                     mMusicPlayer.setOnErrorListener(this)
                     mMusicPlayer.setOnPreparedListener {
                         it.start()
-//                        iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                     }
                 }
                 audioFocusCanDuck = false
@@ -229,8 +224,6 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
             else -> {
                 mMusicPlayer.reset()
                 mediaPlayerPause = false
-//                iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
-
             }
         }
     }
@@ -241,14 +234,13 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        stopMusicPlayer()
+        return false
     }
 
 
-
     //Creating mediaStyle notifications
-    private fun buildNotification()
-    {
+    private fun buildNotification() {
         val bmOptions = BitmapFactory.Options()
         val bitmap = BitmapFactory.decodeFile(songData[0]?.songImage, bmOptions)
         mNotification = NotificationCompat.Builder(this@MusicService)
@@ -259,7 +251,7 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
                 .setLargeIcon(bitmap)
                 .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(sessionToken)
-                        .setShowActionsInCompactView(0,1,2))
+                        .setShowActionsInCompactView(0, 1, 2))
                 .setContentText(songData[0]?.songArtist)
                 .setContentInfo(songData[0]?.songName)
                 .addAction(R.drawable.ic_skip_previous_red_400_48dp, "previous", playbackAction(3))
@@ -273,22 +265,22 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
         when (actionNumber) {
             0 -> {
                 // Play
-                playbackAction.setAction("ACTION_PLAY")
+                playbackAction.action = "ACTION_PLAY"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             1 -> {
                 // Pause
-                playbackAction.setAction("ACTION_PAUSE")
+                playbackAction.action = "ACTION_PAUSE"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             2 -> {
                 // Next track
-                playbackAction.setAction("ACTION_NEXT")
+                playbackAction.action = "ACTION_NEXT"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             3 -> {
                 // Previous track
-                playbackAction.setAction("ACTION_PREVIOUS")
+                playbackAction.action = "ACTION_PREVIOUS"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             else -> {
@@ -296,5 +288,18 @@ class MusicService : MediaBrowserServiceCompat(),MediaPlayer.OnCompletionListene
         }
         return null
     }
+
+
+    /**
+     * Stop and release media player and session
+     */
+    private fun stopMusicPlayer() {
+        mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
+        mMusicPlayer.stop()
+        mMusicPlayer.reset()
+        mMediaSession?.release()
+        audioManager?.abandonAudioFocus(this)
+    }
+
 
 }
