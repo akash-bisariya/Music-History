@@ -6,7 +6,10 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -76,26 +79,14 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-//            updateMediaDescription(metadata.getDescription())
-            updateDuration(metadata)
         }
     }
-
-        private fun updateDuration(metadata: MediaMetadataCompat?) {
-            if (metadata == null) {
-                return
-            }
-            Log.d("MusicHistory", "updateDuration called ")
-            val duration = metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION).toInt()
-            seek_bar.setMax(duration)
-            tv_song_duration.text = DateUtils.formatElapsedTime((duration / 1000).toLong())
-        }
 
 
 
     private fun scheduleSeekbarUpdate() {
         stopSeekbarUpdate()
-        if (!mExecutorService.isShutdown()) {
+        if (!mExecutorService.isShutdown) {
             mScheduleFuture = mExecutorService.scheduleAtFixedRate(
                     Runnable {
                         mHandler.post(mUpdateProgressTask)
@@ -118,7 +109,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
             currentPosition += (timeDelta.toInt() * playbackStateCompat!!.playbackSpeed).toLong()
         }
         seek_bar.progress = currentPosition.toInt()
-//        tv_song_current_position.text = (currentPosition.toInt()/1000).toString()
     }
 
 
@@ -131,15 +121,18 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     }
 
     private fun updateUIState(state: PlaybackStateCompat?) {
-        when(state!!.state)
-        {
-            STATE_PLAYING->
-            {
+        tv_song_duration.text = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(musicPlayer.duration.toLong()) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(musicPlayer.duration.toLong()) % TimeUnit.MINUTES.toSeconds(1))
+        when (state!!.state) {
+            STATE_PLAYING -> {
                 iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                 scheduleSeekbarUpdate()
             }
-            STATE_PAUSED->
+            STATE_PAUSED -> {
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
+                stopSeekbarUpdate()
+            }
         }
 
     }
@@ -190,15 +183,14 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 .into(iv_song_image)
 
         tv_song_artist.text = songData[0]!!.songArtist
-        tv_song_duration.text = "%.2f".format((((songData[0]!!.songDuration))).toFloat() / (1000 * 60))
-        tv_song_current_position.text = "0.00"
+        tv_song_current_position.text = "00.00"
         tv_song_name.text = songData[0]!!.songName
         tv_song_play_count.text = songData[0]!!.playCount.toString()
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
         iv_next.setOnClickListener(this)
         iv_repeat.setOnClickListener(this)
-
+        seek_bar.max = songData[0]!!.songDuration.toInt()
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 tv_song_current_position.text = DateUtils.formatElapsedTime((progress / 1000).toLong())
@@ -213,6 +205,8 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 scheduleSeekbarUpdate()
             }
         })
+
+
         var bitmap: Bitmap?
         val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
         if (!(songData[0]!!.songImage).equals("")) {
@@ -229,6 +223,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         mMediaBrowserCompat!!.connect()
 
 
+
     }
 
 
@@ -242,37 +237,12 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         if (view != null) {
             when (view.id) {
                 R.id.iv_play_pause -> {
-                    if (!musicPlayer.isPlaying) {
-                        if (mediaPlayerPause) {
-                            musicPlayer.start()
-                            iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
-
-                        } else {
-                            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                            val result = audioManager!!.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-                            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                                musicPlayer.setDataSource(songData[0]!!.songData)
-                                musicPlayer.prepareAsync()
-                                musicPlayer.setOnErrorListener(this)
-                                musicPlayer.setOnPreparedListener {
-                                    it.start()
-                                    iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
-                                    seek_bar.progress = 0
-                                    seek_bar.max = songData[0]!!.songDuration.toInt()
-//                                    mTimer.scheduleAtFixedRate(object : TimerTask() {
-//                                        override fun run() {
-//                                            seek_bar.progress = musicPlayer.currentPosition
-//                                            onProgress(musicPlayer.currentPosition)
-//                                            Log.e("onProgress", "Prog   ress" + musicPlayer.currentPosition)
-//                                        }
-//                                    }, 1000, 1000)
-                                }
-                            }
-                        }
+                    if (musicPlayer.isPlaying) {
+                        MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.pause()
+                        stopSeekbarUpdate()
                     } else {
-                        musicPlayer.pause()
-                        mediaPlayerPause = true
-                        iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
+                        MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.play()
+                        scheduleSeekbarUpdate()
                     }
                 }
 

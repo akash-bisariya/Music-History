@@ -5,6 +5,7 @@ package app.android.com.musichistory
  * on 14/3/18.
  */
 interface IMusicPlayerPlayback {
+
     fun onProgress(position:Int)
 
     fun onPauseMusicPlayer(position: Int)

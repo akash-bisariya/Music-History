@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioManager
+import android.media.MediaMetadata
 import android.media.MediaPlayer
 import android.media.session.PlaybackState
 import android.os.Bundle
@@ -61,9 +62,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS)
         mMediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
         mStateBuilder = PlaybackStateCompat.Builder()
-                .setActions(
-                        PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE)
-
+                .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE)
         mMediaSession!!.setPlaybackState(mStateBuilder!!.build())
         mMediaSession!!.setCallback(MediaCallbacks())
         sessionToken = mMediaSession!!.sessionToken
@@ -73,23 +72,26 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
-        mMusicPlayer.stop()
-        mMusicPlayer.reset()
-        buildNotification()
-        mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val result = audioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mMusicPlayer.setDataSource(songData[0]!!.songData)
-            mMusicPlayer.prepareAsync()
-            mMusicPlayer.setOnErrorListener(this@MusicService)
-            mMusicPlayer.setOnPreparedListener {
-                it.start()
-                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
-                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING,0,1.0f)
-                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-//                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING,mMusicPlayer.currentPosition.toLong(),1.0f)
+        if(!mMusicPlayer.isPlaying) {
+
+            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
+            mMusicPlayer.stop()
+            mMusicPlayer.reset()
+            buildNotification()
+            mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
+            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val result = audioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                mMusicPlayer.setDataSource(songData[0]!!.songData)
+                mMusicPlayer.prepareAsync()
+                mMusicPlayer.setOnErrorListener(this@MusicService)
+                mMusicPlayer.setOnPreparedListener {
+                    it.start()
+                    mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+
+                }
             }
         }
         return Service.START_STICKY
@@ -116,34 +118,20 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             mMusicPlayer.setOnPreparedListener {
                 it.start()
                 mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
-                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING,0,0.0f)
+                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 0.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-//                iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
-//                seek_bar.progress = 0
-//                seek_bar.max = songData[0]!!.songDuration.toInt()
-//                mTimer.scheduleAtFixedRate(object : TimerTask() {
-//                    override fun run() {
-//                        seek_bar.progress = mMusicPlayer.currentPosition
-//                        onProgress(mMusicPlayer.currentPosition)
-//                        Log.e("onProgress","Progress"+mMusicPlayer.currentPosition)
-//                    }
-//                }, 1000, 1000)
             }
         }
 
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
-            Log.d("MusicHistory onSeekTo:", ""+pos)
+            Log.d("MusicHistory onSeekTo:", "" + pos)
         }
 
         override fun onPrepare() {
             super.onPrepare()
         }
 
-
-        override fun onPlay() {
-            super.onPlay()
-        }
 
         override fun onStop() {
             super.onStop()
@@ -165,8 +153,14 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             super.onSkipToNext()
         }
 
+        override fun onPlay() {
+            super.onPlay()
+            playMediaPlayer()
+        }
+
         override fun onPause() {
             super.onPause()
+            pauseMediaplayer()
         }
     }
 
@@ -174,6 +168,21 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     override fun onDestroy() {
         super.onDestroy()
         stopMusicPlayer()
+    }
+
+    fun playMediaPlayer() {
+        val result = audioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
+            mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+            mMusicPlayer.start()
+        }
+    }
+
+    private fun pauseMediaplayer() {
+        mMusicPlayer.pause()
+        mStateBuilder?.setState(PlaybackStateCompat.STATE_PAUSED, mMusicPlayer.currentPosition.toLong(), 1.0f)
+        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
     }
 
 
@@ -189,12 +198,12 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         when (result) {
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT -> {
                 if (mediaPlayerPause)
-                    mMusicPlayer.start()
+                    playMediaPlayer()
                 Log.d("AudioFocus", "AUDIOFOCUS_GAIN_TRANSIENT")
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 if (mMusicPlayer.isPlaying) {
-                    mMusicPlayer.pause()
+                    pauseMediaplayer()
                     mediaPlayerPause = true
                 }
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS_TRANSIENT")
@@ -205,8 +214,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK")
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
-                mMusicPlayer.reset()
-                mediaPlayerPause = false
+                pauseMediaplayer()
+                mediaPlayerPause = true
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS")
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
@@ -222,15 +231,14 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 Log.d("AudioFocus", "AUDIOFOCUS_GAIN")
             }
             else -> {
-                mMusicPlayer.reset()
+                stopMusicPlayer()
                 mediaPlayerPause = false
             }
         }
     }
 
     override fun onCompletion(p0: MediaPlayer?) {
-        mMusicPlayer.stop()
-        mMusicPlayer.reset()
+        stopMusicPlayer()
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
@@ -265,28 +273,28 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         when (actionNumber) {
             0 -> {
                 // Play
-                playbackAction.action = "ACTION_PLAY"
+                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             1 -> {
                 // Pause
-                playbackAction.action = "ACTION_PAUSE"
+                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             2 -> {
                 // Next track
-                playbackAction.action = "ACTION_NEXT"
+                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             3 -> {
                 // Previous track
-                playbackAction.action = "ACTION_PREVIOUS"
+                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             else -> {
+                return null
             }
         }
-        return null
     }
 
 
