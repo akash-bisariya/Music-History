@@ -23,10 +23,10 @@
         android:paddingLeft="@dimen/dimen_10dp"
         android:paddingRight="@dimen/dimen_10dp"
         android:lines="1"
+        android:textColor="@color/darker_gray"
         android:ellipsize="end"
         android:paddingTop="@dimen/dimen_10dp"
         app:layout_constraintLeft_toRightOf="@id/iv_song_image"
-        android:text="Song name"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/tv_song_duration"
         />
@@ -37,7 +37,7 @@
         android:paddingTop="@dimen/dimen_10dp"
         android:paddingLeft="@dimen/dimen_10dp"
         android:paddingRight="@dimen/dimen_10dp"
-        android:text="Song duration"
+        android:textColor="@color/lighter_gray"
         app:layout_constraintEnd_toEndOf="parent"
         android:id="@+id/tv_song_duration"/>
 
@@ -49,7 +49,7 @@
         android:paddingBottom="@dimen/dimen_10dp"
         android:paddingLeft="@dimen/dimen_10dp"
         android:paddingRight="@dimen/dimen_10dp"
-        android:text="Artist name"
+        android:textColor="@color/lighter_gray"
         android:lines="1"
         android:ellipsize="end"
         app:layout_constraintLeft_toRightOf="@id/iv_song_image"

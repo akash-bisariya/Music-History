@@ -46,6 +46,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private var pendingIntent: PendingIntent? = null
     private var mediaPlayerPause = false
     private var audioFocusCanDuck = false
+    private var mRepeatCount=-1;
     private lateinit var songData: RealmResults<SongHistory>
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
     }
@@ -72,8 +73,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        if(!mMusicPlayer.isPlaying) {
-
+        if(!(mMusicPlayer.isPlaying && intent!!.getBooleanExtra("fromFloatingButton",false))) {
             songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
             mMusicPlayer.stop()
             mMusicPlayer.reset()
@@ -130,6 +130,16 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         override fun onPrepare() {
             super.onPrepare()
+        }
+
+
+        override fun onCustomAction(action: String?, extras: Bundle?) {
+            super.onCustomAction(action, extras)
+            if(extras!=null && action.equals("Music_History_Repeat_Count"))
+            {
+                mRepeatCount = extras.getInt("",-1)
+
+            }
         }
 
 
@@ -239,6 +249,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onCompletion(p0: MediaPlayer?) {
         stopMusicPlayer()
+        mStateBuilder?.setState(PlaybackStateCompat.STATE_NONE, mMusicPlayer.currentPosition.toLong(), 1.0f)
+        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {

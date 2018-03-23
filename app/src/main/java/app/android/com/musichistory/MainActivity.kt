@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity(),IOnRecycleItemClick,View.OnClickListene
             {
                 val intent = Intent(this, MusicActivity::class.java)
                 intent.putExtra("songId", songId)
+                intent.putExtra("fromFloatingButton",true)
                 startActivity(intent)
             }
         }

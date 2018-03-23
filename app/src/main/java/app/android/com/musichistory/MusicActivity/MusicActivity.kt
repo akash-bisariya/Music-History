@@ -31,8 +31,7 @@ import android.widget.Toast
 import io.realm.Realm
 import io.realm.RealmResults
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED
-import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
+import android.support.v4.media.session.PlaybackStateCompat.*
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
@@ -57,10 +56,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     private var audioManager: AudioManager? = null
     private lateinit var songData: RealmResults<SongHistory>
     private val musicPlayer: MusicPlayer = MusicPlayer
-    private val mTimer: Timer = Timer("SeekBarListener")
     private var mMediaBrowserCompat: MediaBrowserCompat? = null
     private var playbackStateCompat: PlaybackStateCompat? = null
     private val mHandler = Handler()
+    var mMediaControllerCompat:MediaControllerCompat?=null
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
     val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
         override fun onCaptioningEnabledChanged(enabled: Boolean) {
@@ -133,6 +132,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                 stopSeekbarUpdate()
             }
+            STATE_NONE->
+            {
+                onCompletion(musicPlayer)
+            }
         }
 
     }
@@ -140,20 +143,21 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     private val mMediaBrowserCompatConnectionCallback: MediaBrowserCompat.ConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             super.onConnected()
-            val mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
+            mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
-            mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+            mMediaControllerCompat!!.registerCallback(mMediaControllerCompatCallback)
 //            mediaController=mMediaControllerCompat
 
             mMediaControllerCompatCallback.onMetadataChanged(
-                    mMediaControllerCompat.metadata);
+                    mMediaControllerCompat!!.metadata);
             mMediaControllerCompatCallback
-                    .onPlaybackStateChanged(mMediaControllerCompat.playbackState);
+                    .onPlaybackStateChanged(mMediaControllerCompat!!.playbackState);
 //            mediaController.getTransportControls().playFromMediaId(String.valueOf(R.raw.warner_tautz_off_broadway), null);
 //            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"), null)
 
             val intent1 = Intent(this@MusicActivity, MusicService::class.java)
             intent1.putExtra("songId", intent.getStringExtra("songId"))
+            intent1.putExtra("fromFloatingButton",intent.getBooleanExtra("fromFloatingButton",false))
             startService(intent1)
 
         }
@@ -172,7 +176,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         setSupportActionBar(toolbar)
-
         songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
 
         Glide.with(this)
@@ -263,6 +266,11 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                             iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
                         }
                     }
+
+
+                    var bundle = Bundle()
+                    bundle.putInt("Music_History_Repeat_Count",repeatCount)
+                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder("","",1).build(),bundle)
                 }
 
                 R.id.iv_next -> {
@@ -279,8 +287,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
     override fun onDestroy() {
         super.onDestroy()
-        mTimer.cancel()
-        mTimer.purge()
     }
 
 
@@ -345,9 +351,9 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     override fun onCompletion(p0: MediaPlayer?) {
         musicPlayer.stop()
         musicPlayer.reset()
-        mTimer.cancel()
-        mTimer.purge()
         seek_bar.progress = 0
+        stopSeekbarUpdate()
+        iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
     }
 
     override fun onPauseMusicPlayer(position: Int) {
