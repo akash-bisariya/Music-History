@@ -73,6 +73,12 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+        when(intent!!.action)
+        {
+
+        }
+
+
         songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
         mMusicPlayer.stop()
         mMusicPlayer.reset()
