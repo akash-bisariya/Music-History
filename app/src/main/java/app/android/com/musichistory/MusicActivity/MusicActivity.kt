@@ -132,7 +132,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                 stopSeekbarUpdate()
             }
-            STATE_NONE->
+            STATE_STOPPED->
             {
                 onCompletion(musicPlayer)
             }

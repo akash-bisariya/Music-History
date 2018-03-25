@@ -114,6 +114,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             mMusicPlayer.setDataSource(songData[0]!!.songData)
             mMusicPlayer.prepareAsync()
             mMusicPlayer.setOnErrorListener(this@MusicService)
+            mMusicPlayer.setOnCompletionListener(this@MusicService)
             mMusicPlayer.setOnPreparedListener {
                 it.start()
                 mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
@@ -248,7 +249,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onCompletion(p0: MediaPlayer?) {
         stopMusicPlayer()
-        mStateBuilder?.setState(PlaybackStateCompat.STATE_NONE, mMusicPlayer.currentPosition.toLong(), 1.0f)
+        mStateBuilder?.setState(PlaybackStateCompat.STATE_STOPPED, mMusicPlayer.currentPosition.toLong(), 1.0f)
         mMediaSession?.setPlaybackState(mStateBuilder!!.build())
     }
 

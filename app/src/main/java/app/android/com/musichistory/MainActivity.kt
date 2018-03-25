@@ -29,15 +29,15 @@ import io.realm.RealmResults
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
-class MainActivity : AppCompatActivity(),IOnRecycleItemClick,View.OnClickListener {
-    private var songId:String?=null
+class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener {
+    private var songId: String? = null
 
 
     override fun onRecycleItemClick(view: View?, position: Int) {
-        songId=position.toString()
-        fab_music_playing.visibility=View.VISIBLE
-        var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", ""+position).findAll()
-        customView(fab_music_playing,0,R.color.black,songData[0]!!.songImage)
+        songId = position.toString()
+        fab_music_playing.visibility = View.VISIBLE
+        var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
+        customView(fab_music_playing, 0, R.color.black, songData[0]!!.songImage)
     }
 
     var viewPager: ViewPager? = null
@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity(),IOnRecycleItemClick,View.OnClickListene
             }
 
 
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             collapsing_toolbar.setContentScrimColor(
                     ContextCompat.getColor(this, R.color.color_red)
             )
@@ -96,36 +96,32 @@ class MainActivity : AppCompatActivity(),IOnRecycleItemClick,View.OnClickListene
         val color = -0xbdbdbe
         val paint = Paint()
         val rect = Rect(0, 0, bitmap.width, bitmap.height)
-
-        paint.setAntiAlias(true)
-
+        paint.isAntiAlias = true
         canvas.drawARGB(0, 0, 0, 0)
         paint.color = color
+        paint.alpha = 180
         // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-        canvas.drawCircle(bitmap.width / 2.toFloat(), bitmap.height /2f,
+        canvas.drawCircle(bitmap.width / 2.toFloat(), bitmap.height / 2f,
                 bitmap.width / 2.toFloat(), paint)
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
         canvas.drawBitmap(bitmap, rect, rect, paint)
-
         //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
         //return _bmp;
         return output
     }
 
 
-
     override fun onClick(view: View?) {
-        when(view?.id)
-        {
-            R.id.fab_music_playing->
-            {
+        when (view?.id) {
+            R.id.fab_music_playing -> {
                 val intent = Intent(this, MusicActivity::class.java)
                 intent.putExtra("songId", songId)
-                intent.putExtra("fromFloatingButton",true)
+                intent.putExtra("fromFloatingButton", true)
                 startActivity(intent)
             }
         }
     }
+
     private fun getSongImageIcon(albumId: String): String {
         val uri: Uri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
         val cursor: Cursor = applicationContext.contentResolver.query(uri, null, MediaStore.Audio.Albums._ID + " = " + albumId, null, null)
@@ -143,15 +139,20 @@ class MainActivity : AppCompatActivity(),IOnRecycleItemClick,View.OnClickListene
     }
 
 
+    private fun customView(v: View, backgroundColor: Int, borderColor: Int, imagePath: String) {
+//        val shape = GradientDrawable()
+//        shape.shape = GradientDrawable.OVAL
+//        shape.setColor(backgroundColor)
+////        shape.setStroke(3, borderColor)
+        var drawable: Drawable? = null
+        if (!imagePath.equals("")) {
+            drawable = BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath)))
+        } else {
+            drawable = BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeResource(resources,R.drawable.music_icon)))
+        }
 
-    private fun customView(v: View, backgroundColor: Int, borderColor: Int,imagePath:String) {
-        val shape = GradientDrawable()
-        shape.shape = GradientDrawable.OVAL
-        shape.setColor(backgroundColor)
-        shape.setStroke(5, borderColor)
-        val drawable= BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath)))
-        val layerDrawable= LayerDrawable(arrayOf(drawable,shape))
-        v.background = layerDrawable
+//        val layerDrawable= LayerDrawable(arrayOf(drawable,shape))
+        v.background = drawable
     }
 
     private fun getSong(context: Context) {

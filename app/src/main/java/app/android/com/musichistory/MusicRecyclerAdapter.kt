@@ -9,6 +9,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import io.realm.RealmResults
+import kotlinx.android.synthetic.main.activity_music.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by akash bisariya on 13-02-2018.
@@ -41,8 +43,10 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
             val ivSongImage = itemView.findViewById(R.id.iv_song_image) as ImageView
             tvSongName.text = arrayList.get(adapterPosition)!!.songName
             tvArtistName.text = arrayList.get(adapterPosition)!!.songArtist
-            tvSongDuration.text = "%.2f".format((((arrayList.get(adapterPosition)!!.songDuration))).toFloat() / (1000 * 60))
-
+//            tvSongDuration.text = "%.2f".format((((arrayList[adapterPosition]!!.songDuration))).toFloat() / (1000 * 60))
+            tvSongDuration.text = String.format("%02d:%02d",
+                    TimeUnit.MILLISECONDS.toMinutes((((arrayList[adapterPosition]!!.songDuration))).toLong()) % TimeUnit.HOURS.toMinutes(1),
+                    TimeUnit.MILLISECONDS.toSeconds((((arrayList[adapterPosition]!!.songDuration))).toLong()) % TimeUnit.MINUTES.toSeconds(1))
             tvSongPlayCount.text = context.resources.getQuantityString(R.plurals.numberOfTimeSongPlayed, arrayList.get(adapterPosition)!!.playCount, arrayList.get(adapterPosition)!!.playCount)
             if (arrayList[adapterPosition]!!.songImage == "") {
                 Glide.with(context)
