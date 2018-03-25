@@ -22,9 +22,12 @@ import io.realm.RealmResults
 class MusicListFragment : Fragment() ,IOnRecycleItemClick {
     lateinit var list:RealmResults<SongHistory>
     override fun onRecycleItemClick(view: View?, position: Int) {
-        val intent = Intent(activity,MusicActivity::class.java)
+        Realm.getDefaultInstance().executeTransaction({list[position]!!.playCount++  })
+        (activity as MainActivity).onRecycleItemClick(null,list[position]!!.songId.toInt())
+        val intent = Intent(activity, MusicActivity::class.java)
         intent.putExtra("songId", list[position]!!.songId)
         startActivity(intent)
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

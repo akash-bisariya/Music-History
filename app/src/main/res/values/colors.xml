@@ -5,4 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <color name="color_red">#ED3C3E</color>
     <color name="tab_normal_color">#f5df97</color>
+    <color name="black">#151414</color>
+    <color name="lighter_gray">#ddd</color>
+    <color name="darker_gray">#aaa</color>
 </resources>

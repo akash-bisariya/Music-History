@@ -6,7 +6,10 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -28,8 +31,7 @@ import android.widget.Toast
 import io.realm.Realm
 import io.realm.RealmResults
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED
-import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
+import android.support.v4.media.session.PlaybackStateCompat.*
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
@@ -54,10 +56,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     private var audioManager: AudioManager? = null
     private lateinit var songData: RealmResults<SongHistory>
     private val musicPlayer: MusicPlayer = MusicPlayer
-    private val mTimer: Timer = Timer("SeekBarListener")
     private var mMediaBrowserCompat: MediaBrowserCompat? = null
     private var playbackStateCompat: PlaybackStateCompat? = null
     private val mHandler = Handler()
+    var mMediaControllerCompat:MediaControllerCompat?=null
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
     val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
         override fun onCaptioningEnabledChanged(enabled: Boolean) {
@@ -76,26 +78,14 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-//            updateMediaDescription(metadata.getDescription())
-            updateDuration(metadata)
         }
     }
-
-        private fun updateDuration(metadata: MediaMetadataCompat?) {
-            if (metadata == null) {
-                return
-            }
-            Log.d("MusicHistory", "updateDuration called ")
-            val duration = metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION).toInt()
-            seek_bar.setMax(duration)
-            tv_song_duration.text = DateUtils.formatElapsedTime((duration / 1000).toLong())
-        }
 
 
 
     private fun scheduleSeekbarUpdate() {
         stopSeekbarUpdate()
-        if (!mExecutorService.isShutdown()) {
+        if (!mExecutorService.isShutdown) {
             mScheduleFuture = mExecutorService.scheduleAtFixedRate(
                     Runnable {
                         mHandler.post(mUpdateProgressTask)
@@ -118,7 +108,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
             currentPosition += (timeDelta.toInt() * playbackStateCompat!!.playbackSpeed).toLong()
         }
         seek_bar.progress = currentPosition.toInt()
-//        tv_song_current_position.text = (currentPosition.toInt()/1000).toString()
     }
 
 
@@ -131,15 +120,22 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     }
 
     private fun updateUIState(state: PlaybackStateCompat?) {
-        when(state!!.state)
-        {
-            STATE_PLAYING->
-            {
+        tv_song_duration.text = String.format("%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes(musicPlayer.duration.toLong()) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(musicPlayer.duration.toLong()) % TimeUnit.MINUTES.toSeconds(1))
+        when (state!!.state) {
+            STATE_PLAYING -> {
                 iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                 scheduleSeekbarUpdate()
             }
-            STATE_PAUSED->
+            STATE_PAUSED -> {
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
+                stopSeekbarUpdate()
+            }
+            STATE_NONE->
+            {
+                onCompletion(musicPlayer)
+            }
         }
 
     }
@@ -147,20 +143,21 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     private val mMediaBrowserCompatConnectionCallback: MediaBrowserCompat.ConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             super.onConnected()
-            val mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
+            mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
-            mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+            mMediaControllerCompat!!.registerCallback(mMediaControllerCompatCallback)
 //            mediaController=mMediaControllerCompat
 
             mMediaControllerCompatCallback.onMetadataChanged(
-                    mMediaControllerCompat.metadata);
+                    mMediaControllerCompat!!.metadata);
             mMediaControllerCompatCallback
-                    .onPlaybackStateChanged(mMediaControllerCompat.playbackState);
+                    .onPlaybackStateChanged(mMediaControllerCompat!!.playbackState);
 //            mediaController.getTransportControls().playFromMediaId(String.valueOf(R.raw.warner_tautz_off_broadway), null);
 //            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"), null)
 
             val intent1 = Intent(this@MusicActivity, MusicService::class.java)
             intent1.putExtra("songId", intent.getStringExtra("songId"))
+            intent1.putExtra("fromFloatingButton",intent.getBooleanExtra("fromFloatingButton",false))
             startService(intent1)
 
         }
@@ -179,7 +176,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         setSupportActionBar(toolbar)
-
         songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
 
         Glide.with(this)
@@ -190,15 +186,14 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 .into(iv_song_image)
 
         tv_song_artist.text = songData[0]!!.songArtist
-        tv_song_duration.text = "%.2f".format((((songData[0]!!.songDuration))).toFloat() / (1000 * 60))
-        tv_song_current_position.text = "0.00"
+        tv_song_current_position.text = "00.00"
         tv_song_name.text = songData[0]!!.songName
         tv_song_play_count.text = songData[0]!!.playCount.toString()
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
         iv_next.setOnClickListener(this)
         iv_repeat.setOnClickListener(this)
-
+        seek_bar.max = songData[0]!!.songDuration.toInt()
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 tv_song_current_position.text = DateUtils.formatElapsedTime((progress / 1000).toLong())
@@ -213,6 +208,8 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 scheduleSeekbarUpdate()
             }
         })
+
+
         var bitmap: Bitmap?
         val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
         if (!(songData[0]!!.songImage).equals("")) {
@@ -229,6 +226,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         mMediaBrowserCompat!!.connect()
 
 
+
     }
 
 
@@ -242,37 +240,12 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         if (view != null) {
             when (view.id) {
                 R.id.iv_play_pause -> {
-                    if (!musicPlayer.isPlaying) {
-                        if (mediaPlayerPause) {
-                            musicPlayer.start()
-                            iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
-
-                        } else {
-                            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                            val result = audioManager!!.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-                            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                                musicPlayer.setDataSource(songData[0]!!.songData)
-                                musicPlayer.prepareAsync()
-                                musicPlayer.setOnErrorListener(this)
-                                musicPlayer.setOnPreparedListener {
-                                    it.start()
-                                    iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
-                                    seek_bar.progress = 0
-                                    seek_bar.max = songData[0]!!.songDuration.toInt()
-//                                    mTimer.scheduleAtFixedRate(object : TimerTask() {
-//                                        override fun run() {
-//                                            seek_bar.progress = musicPlayer.currentPosition
-//                                            onProgress(musicPlayer.currentPosition)
-//                                            Log.e("onProgress", "Prog   ress" + musicPlayer.currentPosition)
-//                                        }
-//                                    }, 1000, 1000)
-                                }
-                            }
-                        }
+                    if (musicPlayer.isPlaying) {
+                        MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.pause()
+                        stopSeekbarUpdate()
                     } else {
-                        musicPlayer.pause()
-                        mediaPlayerPause = true
-                        iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
+                        MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.play()
+                        scheduleSeekbarUpdate()
                     }
                 }
 
@@ -293,6 +266,11 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                             iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
                         }
                     }
+
+
+                    var bundle = Bundle()
+                    bundle.putInt("Music_History_Repeat_Count",repeatCount)
+                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder("","",1).build(),bundle)
                 }
 
                 R.id.iv_next -> {
@@ -309,8 +287,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
 
     override fun onDestroy() {
         super.onDestroy()
-        mTimer.cancel()
-        mTimer.purge()
     }
 
 
@@ -375,9 +351,9 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     override fun onCompletion(p0: MediaPlayer?) {
         musicPlayer.stop()
         musicPlayer.reset()
-        mTimer.cancel()
-        mTimer.purge()
         seek_bar.progress = 0
+        stopSeekbarUpdate()
+        iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
     }
 
     override fun onPauseMusicPlayer(position: Int) {

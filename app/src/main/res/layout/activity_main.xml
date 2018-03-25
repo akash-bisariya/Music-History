@@ -84,4 +84,16 @@
         android:layout_gravity="center_vertical|center_horizontal"/>
 
 
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:padding="@dimen/dimen_10dp"
+        android:layout_margin="@dimen/dimen_20dp"
+        android:id="@+id/fab_music_playing"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:src="@drawable/ic_play_arrow_white_48dp"
+        android:layout_gravity="end|bottom" />
+
+
 </android.support.design.widget.CoordinatorLayout>
