@@ -144,6 +144,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     }
 
     private val mMediaBrowserCompatConnectionCallback: MediaBrowserCompat.ConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
+
         override fun onConnected() {
             super.onConnected()
             mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
@@ -173,10 +174,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
     fun startServiceToPlay()
     {
-        val intent = Intent(this@MusicActivity, MusicService::class.java)
-        intent.putExtra("songId", intent.getStringExtra("songId"))
-        intent.putExtra("fromFloatingButton",intent.getBooleanExtra("fromFloatingButton",false))
-        startService(intent)
+        val intent1 = Intent(this@MusicActivity, MusicService::class.java)
+        intent1.putExtra("songId", intent.getStringExtra("songId"))
+        intent1.putExtra("fromFloatingButton",intent.getBooleanExtra("fromFloatingButton",false))
+        startService(intent1)
     }
 
 
@@ -194,7 +195,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                 .into(iv_song_image)
 
         tv_song_artist.text = songData[0]!!.songArtist
-        tv_song_current_position.text = "00.00"
+        tv_song_current_position.text = getString(R.string.txt_initial_position_media_player)
         tv_song_name.text = songData[0]!!.songName
         tv_song_play_count.text = songData[0]!!.playCount.toString()
         iv_like.setOnClickListener(this)

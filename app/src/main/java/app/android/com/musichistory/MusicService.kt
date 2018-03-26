@@ -39,7 +39,11 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private var pendingIntent: PendingIntent? = null
     private var mediaPlayerPause = false
     private var audioFocusCanDuck = false
-    private var mRepeatCount=-1;
+    private var mRepeatCount=-1
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY ="MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
     private lateinit var songData: RealmResults<SongHistory>
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
     }
@@ -65,25 +69,50 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if(!(mMusicPlayer.isPlaying && intent!!.getBooleanExtra("fromFloatingButton",false))) {
-            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
-            mMusicPlayer.stop()
-            mMusicPlayer.reset()
-            buildNotification()
-            mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
-            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val result = audioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                mMusicPlayer.setDataSource(songData[0]!!.songData)
-                mMusicPlayer.prepareAsync()
-                mMusicPlayer.setOnCompletionListener(this@MusicService)
-                mMusicPlayer.setOnErrorListener(this@MusicService)
-                mMusicPlayer.setOnPreparedListener {
-                    it.start()
-                    mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
-                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
-                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+        if (intent != null) {
+            if(intent.getStringExtra("songId")!=null) {
+                if (!(mMusicPlayer.isPlaying && intent!!.getBooleanExtra("fromFloatingButton", false))) {
+                    songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
+                    mMusicPlayer.stop()
+                    mMusicPlayer.reset()
+                    buildNotification()
+                    mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
+                    audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                    val result = audioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+                    if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                        mMusicPlayer.setDataSource(songData[0]!!.songData)
+                        mMusicPlayer.prepareAsync()
+                        mMusicPlayer.setOnCompletionListener(this@MusicService)
+                        mMusicPlayer.setOnErrorListener(this@MusicService)
+                        mMusicPlayer.setOnPreparedListener {
+                            it.start()
+                            mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+                            mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+                            mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+                        }
+                    }
+                }
+            }
+            else
+            {
+                when(intent.action)
+                {
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY->
+                    {
 
+                    }
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS->
+                    {
+
+                    }
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT->
+                    {
+
+                    }
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE->
+                    {
+
+                    }
                 }
             }
         }
@@ -277,22 +306,22 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         when (actionNumber) {
             0 -> {
                 // Play
-                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
+                playbackAction.action = MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             1 -> {
                 // Pause
-                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
+                playbackAction.action =MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             2 -> {
                 // Next track
-                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
+                playbackAction.action = MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             3 -> {
                 // Previous track
-                playbackAction.action = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
+                playbackAction.action = MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS
                 return PendingIntent.getService(this@MusicService, actionNumber, playbackAction, 0)
             }
             else -> {
