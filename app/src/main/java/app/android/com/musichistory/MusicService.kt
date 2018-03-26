@@ -1,32 +1,25 @@
 package app.android.com.musichistory
 
 
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioManager
-import android.media.MediaMetadata
 import android.media.MediaPlayer
-import android.media.session.PlaybackState
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import io.realm.Realm
 import io.realm.RealmResults
-import kotlinx.android.synthetic.main.activity_music.*
 
 
 /**
@@ -83,6 +76,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 mMusicPlayer.setDataSource(songData[0]!!.songData)
                 mMusicPlayer.prepareAsync()
+                mMusicPlayer.setOnCompletionListener(this@MusicService)
                 mMusicPlayer.setOnErrorListener(this@MusicService)
                 mMusicPlayer.setOnPreparedListener {
                     it.start()
@@ -113,8 +107,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
             mMusicPlayer.setDataSource(songData[0]!!.songData)
             mMusicPlayer.prepareAsync()
-            mMusicPlayer.setOnErrorListener(this@MusicService)
-            mMusicPlayer.setOnCompletionListener(this@MusicService)
             mMusicPlayer.setOnPreparedListener {
                 it.start()
                 mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
@@ -170,7 +162,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         override fun onPause() {
             super.onPause()
-            pauseMediaplayer()
+            pauseMediaPlayer()
         }
     }
 
@@ -189,7 +181,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         }
     }
 
-    private fun pauseMediaplayer() {
+    private fun pauseMediaPlayer() {
         mMusicPlayer.pause()
         mStateBuilder?.setState(PlaybackStateCompat.STATE_PAUSED, mMusicPlayer.currentPosition.toLong(), 1.0f)
         mMediaSession?.setPlaybackState(mStateBuilder!!.build())
@@ -213,7 +205,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 if (mMusicPlayer.isPlaying) {
-                    pauseMediaplayer()
+                    pauseMediaPlayer()
                     mediaPlayerPause = true
                 }
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS_TRANSIENT")
@@ -224,7 +216,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK")
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
-                pauseMediaplayer()
+                pauseMediaPlayer()
                 mediaPlayerPause = true
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS")
             }

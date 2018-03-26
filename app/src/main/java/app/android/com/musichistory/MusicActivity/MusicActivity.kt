@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit
  * Created by akash
  * on 22/2/18.
  */
-class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnCompletionListener, IMusicPlayerPlayback {
+class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, AudioManager.OnAudioFocusChangeListener, IMusicPlayerPlayback {
     private var mScheduleFuture: ScheduledFuture<*>? = null
     private var mediaPlayerPause = false
     private var audioFocusCanDuck = false
@@ -120,11 +120,12 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     }
 
     private fun updateUIState(state: PlaybackStateCompat?) {
-        tv_song_duration.text = String.format("%02d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes(musicPlayer.duration.toLong()) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(musicPlayer.duration.toLong()) % TimeUnit.MINUTES.toSeconds(1))
+
         when (state!!.state) {
             STATE_PLAYING -> {
+                tv_song_duration.text = String.format("%02d:%02d",
+                        TimeUnit.MILLISECONDS.toMinutes(musicPlayer.duration.toLong()) % TimeUnit.HOURS.toMinutes(1),
+                        TimeUnit.MILLISECONDS.toSeconds(musicPlayer.duration.toLong()) % TimeUnit.MINUTES.toSeconds(1))
                 iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                 scheduleSeekbarUpdate()
             }
@@ -134,7 +135,9 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
             }
             STATE_STOPPED->
             {
-                onCompletion(musicPlayer)
+                seek_bar.progress = 0
+                stopSeekbarUpdate()
+                iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
             }
         }
 
@@ -146,7 +149,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
             mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
             mMediaControllerCompat!!.registerCallback(mMediaControllerCompatCallback)
-//            mediaController=mMediaControllerCompat
 
             mMediaControllerCompatCallback.onMetadataChanged(
                     mMediaControllerCompat!!.metadata);
@@ -154,11 +156,8 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                     .onPlaybackStateChanged(mMediaControllerCompat!!.playbackState);
 //            mediaController.getTransportControls().playFromMediaId(String.valueOf(R.raw.warner_tautz_off_broadway), null);
 //            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"), null)
+            startServiceToPlay()
 
-            val intent1 = Intent(this@MusicActivity, MusicService::class.java)
-            intent1.putExtra("songId", intent.getStringExtra("songId"))
-            intent1.putExtra("fromFloatingButton",intent.getBooleanExtra("fromFloatingButton",false))
-            startService(intent1)
 
         }
 
@@ -169,6 +168,15 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
         override fun onConnectionFailed() {
             super.onConnectionFailed()
         }
+    }
+
+
+    fun startServiceToPlay()
+    {
+        val intent = Intent(this@MusicActivity, MusicService::class.java)
+        intent.putExtra("songId", intent.getStringExtra("songId"))
+        intent.putExtra("fromFloatingButton",intent.getBooleanExtra("fromFloatingButton",false))
+        startService(intent)
     }
 
 
@@ -230,12 +238,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     }
 
 
-    override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
-        Log.d("MediaPlayerError", "$p1+$p2")
-        p0!!.reset()
-        return true
-    }
-
     override fun onClick(view: View?) {
         if (view != null) {
             when (view.id) {
@@ -244,8 +246,15 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                         MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.pause()
                         stopSeekbarUpdate()
                     } else {
-                        MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.play()
-                        scheduleSeekbarUpdate()
+                        if(MediaControllerCompat.getMediaController(this@MusicActivity).playbackState.state== STATE_STOPPED)
+                        {
+                            startServiceToPlay()
+                            scheduleSeekbarUpdate()
+                        }
+                        else {
+                            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.play()
+                            scheduleSeekbarUpdate()
+                        }
                     }
                 }
 
@@ -348,14 +357,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
     }
 
 
-    override fun onCompletion(p0: MediaPlayer?) {
-        musicPlayer.stop()
-        musicPlayer.reset()
-        seek_bar.progress = 0
-        stopSeekbarUpdate()
-        iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
-    }
-
     override fun onPauseMusicPlayer(position: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -407,7 +408,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Medi
                 if (!audioFocusCanDuck) {
                     musicPlayer.setDataSource(songData[0]!!.songData)
                     musicPlayer.prepareAsync()
-                    musicPlayer.setOnErrorListener(this)
+//                    musicPlayer.setOnErrorListener(this)
                     musicPlayer.setOnPreparedListener {
                         it.start()
                         iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
