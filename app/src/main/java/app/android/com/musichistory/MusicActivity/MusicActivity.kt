@@ -1,5 +1,8 @@
 package app.android.com.musichistory.MusicActivity
 
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -22,6 +25,7 @@ import android.media.browse.MediaBrowser
 
 import android.os.Handler
 import android.os.SystemClock
+import android.support.v4.app.NotificationCompat
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -59,8 +63,17 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     private var mMediaBrowserCompat: MediaBrowserCompat? = null
     private var playbackStateCompat: PlaybackStateCompat? = null
     private val mHandler = Handler()
-    var mMediaControllerCompat:MediaControllerCompat?=null
+    lateinit var mNotification: Notification
+    var mMediaControllerCompat: MediaControllerCompat? = null
+    private var mNotificationManager: NotificationManager? = null
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
+    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY = "MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
+
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
+
+    private val MUSIC_HISTORY_NOTIFICATION_ID = 1001
     val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
         override fun onCaptioningEnabledChanged(enabled: Boolean) {
             super.onCaptioningEnabledChanged(enabled)
@@ -74,6 +87,12 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
             super.onPlaybackStateChanged(state)
             playbackStateCompat = state
             updateUIState(state)
+            if (state!!.state == PlaybackStateCompat.STATE_STOPPED || state.state == PlaybackStateCompat.STATE_NONE) {
+                mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
+            } else {
+                buildNotification()
+                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+            }
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
@@ -81,6 +100,45 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         }
     }
 
+
+    //Creating mediaStyle notifications
+    private fun buildNotification() {
+        val bmOptions = BitmapFactory.Options()
+        val bitmap = BitmapFactory.decodeFile(songData[0]?.songImage, bmOptions)
+        val builder = NotificationCompat.Builder(this)
+                .setContentTitle(songData[0]?.songName)
+                .setAutoCancel(false)
+                .setOngoing(playbackStateCompat!!.state == PlaybackStateCompat.STATE_PLAYING)
+                .setSmallIcon(R.drawable.music_icon)
+                .setLargeIcon(bitmap)
+                .setColor(resources.getColor(R.color.color_red))
+//                .setCustomBigContentView(RemoteViews(applicationContext.packageName,R.layout.remote_view_notification))
+//                .setCustomContentView(RemoteViews(applicationContext.packageName,R.layout.remote_view_notification))
+                .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
+                        .setMediaSession(mMediaBrowserCompat!!.sessionToken)
+                        .setShowCancelButton(true)
+                        .setShowActionsInCompactView(1))
+                .setContentText(songData[0]?.songArtist)
+                .setContentInfo(songData[0]?.songName)
+
+
+        var label: String? = null
+        var icon: Int? = null
+        var intent: PendingIntent? = null
+        if (playbackStateCompat!!.state == PlaybackStateCompat.STATE_PLAYING) {
+            label = "pause"
+            icon = R.drawable.ic_pause_circle_filled_red_400_48dp
+            intent = playbackAction(0)
+        } else {
+            label = "play"
+            icon = R.drawable.ic_play_circle_filled_red_400_48dp
+            intent = playbackAction(3)
+        }
+        builder.addAction(R.drawable.ic_skip_previous_red_400_48dp, "previous", playbackAction(1))
+        mNotification = builder.addAction(NotificationCompat.Action(icon, label, intent))
+                .addAction(R.drawable.ic_skip_next_red_400_48dp, "next", playbackAction(2))
+                .build()
+    }
 
 
     private fun scheduleSeekbarUpdate() {
@@ -133,11 +191,11 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                 stopSeekbarUpdate()
             }
-            STATE_STOPPED->
-            {
+            STATE_STOPPED -> {
                 seek_bar.progress = 0
                 stopSeekbarUpdate()
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
+
             }
         }
 
@@ -159,7 +217,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 //            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"), null)
             startServiceToPlay()
 
-
         }
 
         override fun onConnectionSuspended() {
@@ -172,12 +229,41 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     }
 
 
-    fun startServiceToPlay()
-    {
+    fun startServiceToPlay() {
         val intent1 = Intent(this@MusicActivity, MusicService::class.java)
         intent1.putExtra("songId", intent.getStringExtra("songId"))
-        intent1.putExtra("fromFloatingButton",intent.getBooleanExtra("fromFloatingButton",false))
+        intent1.putExtra("fromFloatingButton", intent.getBooleanExtra("fromFloatingButton", false))
         startService(intent1)
+    }
+
+
+    private fun playbackAction(actionNumber: Int): PendingIntent? {
+        val playbackAction = Intent(this, MusicService::class.java)
+        when (actionNumber) {
+            3 -> {
+                // Play
+                playbackAction.action = MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY
+                return PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_CANCEL_CURRENT)
+            }
+            0 -> {
+                // Pause
+                playbackAction.action = MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE
+                return PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_CANCEL_CURRENT)
+            }
+            2 -> {
+                // Next track
+                playbackAction.action = MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT
+                return PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_CANCEL_CURRENT)
+            }
+            1 -> {
+                // Previous track
+                playbackAction.action = MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS
+                return PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_CANCEL_CURRENT)
+            }
+            else -> {
+                return null
+            }
+        }
     }
 
 
@@ -186,7 +272,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         setContentView(R.layout.activity_music)
         setSupportActionBar(toolbar)
         songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
-
+        mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
         Glide.with(this)
                 .applyDefaultRequestOptions(RequestOptions()
                         .placeholder(R.drawable.music_icon)
@@ -235,7 +321,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         mMediaBrowserCompat!!.connect()
 
 
-
     }
 
 
@@ -247,12 +332,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                         MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.pause()
                         stopSeekbarUpdate()
                     } else {
-                        if(MediaControllerCompat.getMediaController(this@MusicActivity).playbackState.state== STATE_STOPPED)
-                        {
+                        if (MediaControllerCompat.getMediaController(this@MusicActivity).playbackState.state == STATE_STOPPED) {
                             startServiceToPlay()
                             scheduleSeekbarUpdate()
-                        }
-                        else {
+                        } else {
                             MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.play()
                             scheduleSeekbarUpdate()
                         }
@@ -279,8 +362,8 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
 
                     var bundle = Bundle()
-                    bundle.putInt("Music_History_Repeat_Count",repeatCount)
-                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder("","",1).build(),bundle)
+                    bundle.putInt("Music_History_Repeat_Count", repeatCount)
+                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder("", "", 1).build(), bundle)
                 }
 
                 R.id.iv_next -> {
