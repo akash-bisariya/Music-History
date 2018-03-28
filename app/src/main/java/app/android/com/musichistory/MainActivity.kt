@@ -1,16 +1,15 @@
 package app.android.com.musichistory
 
-import android.R.color.white
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.database.Cursor
 import android.graphics.*
 import android.graphics.drawable.*
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -30,17 +29,16 @@ import io.realm.RealmResults
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener {
-    private var songId: String? = null
-
+    private var mSongId: String? = null
+    private var viewPager: ViewPager? = null
 
     override fun onRecycleItemClick(view: View?, position: Int) {
-        songId = position.toString()
+        mSongId = position.toString()
         fab_music_playing.visibility = View.VISIBLE
         var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
-        customView(fab_music_playing, 0, R.color.black, songData[0]!!.songImage)
+        customView(fab_music_playing,  songData[0]!!.songImage)
     }
 
-    var viewPager: ViewPager? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -115,14 +113,21 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         when (view?.id) {
             R.id.fab_music_playing -> {
                 val intent = Intent(this, MusicActivity::class.java)
-                intent.putExtra("songId", songId)
+                intent.putExtra("songId", mSongId)
                 intent.putExtra("fromFloatingButton", true)
                 startActivity(intent)
             }
         }
     }
 
+
+
+    /**
+     * getting album art from cursor
+     */
     private fun getSongImageIcon(albumId: String): String {
+        //Todo Use MediaMetaData Receiver to fetch album art using embedded image
+
         val uri: Uri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
         val cursor: Cursor = applicationContext.contentResolver.query(uri, null, MediaStore.Audio.Albums._ID + " = " + albumId, null, null)
         cursor.moveToFirst()
@@ -139,7 +144,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     }
 
 
-    private fun customView(v: View, backgroundColor: Int, borderColor: Int, imagePath: String) {
+    private fun customView(v: View, imagePath: String) {
 //        val shape = GradientDrawable()
 //        shape.shape = GradientDrawable.OVAL
 //        shape.setColor(backgroundColor)
@@ -191,6 +196,44 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         }
     }
 
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState!!.putString("songId",mSongId)
+        super.onSaveInstanceState(outState)
+    }
+
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            mSongId = savedInstanceState.getString("songId")
+        }
+        super.onRestoreInstanceState(savedInstanceState)
+    }
+
+
+    override fun onPause() {
+        Log.d("MusicHistory_onBack","onBack called")
+        val savedInstanceState= Bundle()
+        savedInstanceState!!.putString("songId",mSongId)
+        onSaveInstanceState(savedInstanceState)
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(mSongId!=null) {
+            val m = MusicPlayer
+            fab_music_playing.visibility = View.VISIBLE
+            var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + mSongId).findAll()
+            customView(fab_music_playing, songData[0]!!.songImage)
+            fab_music_playing.visibility = if (m.isPlaying) View.VISIBLE else View.GONE
+        }
+
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode == REQUEST_PERMISSION_STORAGE) {

@@ -40,9 +40,6 @@ import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
 import app.android.com.musichistory.*
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -70,6 +67,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY = "MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
+    private val MUSIC_HISTORY_ACTION_REPEAT_ALL = "MUSIC_HISTORY_ACTION_REPEAT_ALL"
 
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
 
@@ -101,10 +99,18 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     }
 
 
-    //Creating mediaStyle notifications
+    /**
+     *   Created mediaStyle notifications
+     */
+
     private fun buildNotification() {
+        val bitmap: Bitmap
         val bmOptions = BitmapFactory.Options()
-        val bitmap = BitmapFactory.decodeFile(songData[0]?.songImage, bmOptions)
+        if (!songData[0]?.songImage.equals("")) {
+            bitmap = BitmapFactory.decodeFile(songData[0]?.songImage, bmOptions)
+        } else {
+            bitmap = BitmapFactory.decodeResource(resources, R.drawable.music_icon)
+        }
         val builder = NotificationCompat.Builder(this)
                 .setContentTitle(songData[0]?.songName)
                 .setAutoCancel(false)
@@ -112,8 +118,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                 .setSmallIcon(R.drawable.music_icon)
                 .setLargeIcon(bitmap)
                 .setColor(resources.getColor(R.color.color_red))
-//                .setCustomBigContentView(RemoteViews(applicationContext.packageName,R.layout.remote_view_notification))
-//                .setCustomContentView(RemoteViews(applicationContext.packageName,R.layout.remote_view_notification))
                 .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mMediaBrowserCompat!!.sessionToken)
                         .setShowCancelButton(true)
@@ -363,7 +367,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
                     var bundle = Bundle()
                     bundle.putInt("Music_History_Repeat_Count", repeatCount)
-                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder("", "", 1).build(), bundle)
+                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder(MUSIC_HISTORY_ACTION_REPEAT_ALL, "REPEAT_SONG", 1).build(), bundle)
                 }
 
                 R.id.iv_next -> {

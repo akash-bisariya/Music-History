@@ -9,4 +9,5 @@
     <dimen name="dimen_5dp">5dp</dimen>
     <dimen name="dimen_20dp">20dp</dimen>
     <dimen name="s_floating_button">100dp</dimen>
+    <dimen name="s_album_art">60dp</dimen>
 </resources>

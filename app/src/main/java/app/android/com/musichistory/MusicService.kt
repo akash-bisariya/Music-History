@@ -5,11 +5,14 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.media.MediaMetadata
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -38,6 +41,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY = "MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
+    private val MUSIC_HISTORY_ACTION_REPEAT_ALL = "MUSIC_HISTORY_ACTION_REPEAT_ALL"
+    val metaDataReceiver = MediaMetadataRetriever()
     private lateinit var songData: RealmResults<SongHistory>
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
     }
@@ -77,6 +82,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                     val result = mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
                     if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                         mMusicPlayer.setDataSource(songData[0]!!.songData)
+
+                        metaDataReceiver.setDataSource(songData[0]!!.songData)
                         mMusicPlayer.prepareAsync()
                         mMusicPlayer.setOnCompletionListener(this@MusicService)
                         mMusicPlayer.setOnErrorListener(this@MusicService)
@@ -84,8 +91,16 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                             it.start()
                             mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
                             mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-//                            buildNotification()
-//                            mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+                            mMediaSession!!.isActive=true
+
+
+
+                            val metadata:MediaMetadataCompat = MediaMetadataCompat.Builder()
+                                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,mSongId)
+                                    .build()
+
+                            mMediaSession!!.setMetadata(metadata)
+
                         }
                     }
                 }
@@ -148,8 +163,19 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         override fun onCustomAction(action: String?, extras: Bundle?) {
             super.onCustomAction(action, extras)
-            if (extras != null && action.equals("Music_History_Repeat_Count")) {
-                mRepeatCount = extras.getInt("", -1)
+            if (extras != null && action.equals(MUSIC_HISTORY_ACTION_REPEAT_ALL)) {
+                mRepeatCount = extras.getInt("Music_History_Repeat_Count", -1)
+                when(mRepeatCount)
+                {
+                    0->
+                    {
+                        mMusicPlayer.isLooping=true
+                    }
+                    -1->
+                    {
+                        mMusicPlayer.isLooping=false
+                    }
+                }
             }
         }
 

@@ -4,75 +4,73 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/dimen_10dp"
     android:paddingLeft="@dimen/dimen_10dp"
     android:paddingRight="@dimen/dimen_10dp"
+    android:paddingTop="@dimen/dimen_10dp"
     tools:context="app.android.com.musichistory.MainActivity">
 
 
     <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
         android:id="@+id/iv_song_image"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:layout_width="@dimen/s_album_art"
+        android:layout_height="@dimen/s_album_art"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_song_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
         android:paddingLeft="@dimen/dimen_10dp"
         android:paddingRight="@dimen/dimen_10dp"
-        android:lines="1"
-        android:textColor="@color/darker_gray"
-        android:ellipsize="end"
         android:paddingTop="@dimen/dimen_10dp"
-        app:layout_constraintLeft_toRightOf="@id/iv_song_image"
+        android:textColor="@color/darker_gray"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/tv_song_duration"
-        />
+        app:layout_constraintLeft_toRightOf="@id/iv_song_image" />
 
     <TextView
+        android:id="@+id/tv_song_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/dimen_10dp"
         android:paddingLeft="@dimen/dimen_10dp"
         android:paddingRight="@dimen/dimen_10dp"
+        android:paddingTop="@dimen/dimen_10dp"
         android:textColor="@color/lighter_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:id="@+id/tv_song_duration"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
     <TextView
         android:id="@+id/tv_artist_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
         android:paddingBottom="@dimen/dimen_10dp"
         android:paddingLeft="@dimen/dimen_10dp"
         android:paddingRight="@dimen/dimen_10dp"
         android:textColor="@color/lighter_gray"
-        android:lines="1"
-        android:ellipsize="end"
-        app:layout_constraintLeft_toRightOf="@id/iv_song_image"
         app:layout_constraintEnd_toStartOf="@id/tv_song_duration"
+        app:layout_constraintLeft_toRightOf="@id/iv_song_image"
         app:layout_constraintTop_toBottomOf="@id/tv_song_name" />
 
     <TextView
+        android:id="@+id/tv_song_play_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/dimen_10dp"
         android:paddingLeft="@dimen/dimen_10dp"
-        android:textStyle="bold"
         android:paddingRight="@dimen/dimen_10dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_artist_name"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        android:id="@+id/tv_song_play_count"/>
+        app:layout_constraintTop_toBottomOf="@id/tv_artist_name" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_song_play_count"
         android:background="@android:color/darker_gray"
-        />
+        app:layout_constraintTop_toBottomOf="@id/tv_song_play_count" />
 
 </android.support.constraint.ConstraintLayout>
