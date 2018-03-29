@@ -41,7 +41,7 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
         list = realm.where(SongHistory::class.java).findAllSorted("playCount",Sort.DESCENDING)
-        rvMusicHistory.adapter= MusicRecyclerAdapter(activity!!.applicationContext,list,true,this)
+        rvMusicHistory.adapter= MusicHistoryRecyclerAdapter(activity!!.applicationContext,list,true,this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
