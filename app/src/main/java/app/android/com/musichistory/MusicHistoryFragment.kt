@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.Realm
 import io.realm.RealmResults
+import io.realm.Sort
 
 
 /**
@@ -39,7 +40,7 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
         val rvMusicHistory:RecyclerView= view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
-        list = realm.where(SongHistory::class.java).findAll()
+        list = realm.where(SongHistory::class.java).findAllSorted("playCount",Sort.DESCENDING)
         rvMusicHistory.adapter= MusicRecyclerAdapter(activity!!.applicationContext,list,true,this)
     }
 
