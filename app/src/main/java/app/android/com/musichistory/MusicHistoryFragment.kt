@@ -22,6 +22,12 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
     private lateinit var list:RealmResults<SongHistory>
     override fun onRecycleItemClick(view: View?, position: Int) {
         Realm.getDefaultInstance().executeTransaction({list[position]!!.playCount++  })
+        Realm.getDefaultInstance().executeTransactionAsync({
+            val result =it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying",true).findAll()
+            for (music in result) {
+                music.isCurrentlyPlaying=false
+            }
+        })
         (activity as MainActivity).onRecycleItemClick(null,list[position]!!.songId.toInt())
         val intent = Intent(activity, MusicActivity::class.java)
         intent.putExtra("songId", list[position]!!.songId)

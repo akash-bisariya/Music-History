@@ -36,7 +36,14 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         mSongId = position.toString()
         fab_music_playing.visibility = View.VISIBLE
         var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
-        customView(fab_music_playing,  songData[0]!!.songImage)
+
+        Realm.getDefaultInstance().executeTransaction({
+            songData[0]!!.isCurrentlyPlaying = true
+            it.copyToRealmOrUpdate(songData[0])
+        })
+        customView(fab_music_playing, songData[0]!!.songImage)
+
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,11 +88,12 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
             }
         }
-
-
     }
 
 
+    /**
+     * Created round bitmap image for floating view
+     */
     private fun getCroppedBitmap(bitmap: Bitmap): Bitmap {
         val output = Bitmap.createBitmap(bitmap.width,
                 bitmap.height, Bitmap.Config.ARGB_8888)
@@ -121,7 +129,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     }
 
 
-
     /**
      * getting album art from cursor
      */
@@ -143,20 +150,17 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
     }
 
+    /**
+     * Generated Floating View for the playing song
+     */
 
     private fun customView(v: View, imagePath: String) {
-//        val shape = GradientDrawable()
-//        shape.shape = GradientDrawable.OVAL
-//        shape.setColor(backgroundColor)
-////        shape.setStroke(3, borderColor)
-        var drawable: Drawable? = null
-        if (!imagePath.equals("")) {
-            drawable = BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath)))
-        } else {
-            drawable = BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeResource(resources,R.drawable.music_icon)))
-        }
 
-//        val layerDrawable= LayerDrawable(arrayOf(drawable,shape))
+        var drawable: Drawable? = if (!imagePath.equals("")) {
+            BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath)))
+        } else {
+            BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeResource(resources, R.drawable.music_icon)))
+        }
         v.background = drawable
     }
 
@@ -182,7 +186,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)),
                             getSongImageIcon(albumId),
-                            0))
+                            0, false))
                 } while (cursor.moveToNext())
             }
             cursor.close()
@@ -197,42 +201,17 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     }
 
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        outState!!.putString("songId",mSongId)
-        super.onSaveInstanceState(outState)
-    }
-
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) {
-            mSongId = savedInstanceState.getString("songId")
-        }
-        super.onRestoreInstanceState(savedInstanceState)
-    }
-
-
-    override fun onPause() {
-        Log.d("MusicHistory_onBack","onBack called")
-        val savedInstanceState= Bundle()
-        savedInstanceState!!.putString("songId",mSongId)
-        onSaveInstanceState(savedInstanceState)
-        super.onPause()
-    }
 
     override fun onResume() {
         super.onResume()
-        if(mSongId!=null) {
-            val m = MusicPlayer
-            fab_music_playing.visibility = View.VISIBLE
-            var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + mSongId).findAll()
+        var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+        if (songData.size > 0) {
             customView(fab_music_playing, songData[0]!!.songImage)
-            fab_music_playing.visibility = if (m.isPlaying) View.VISIBLE else View.GONE
+            fab_music_playing.visibility = View.VISIBLE
+        } else {
+            fab_music_playing.visibility = View.GONE
         }
 
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

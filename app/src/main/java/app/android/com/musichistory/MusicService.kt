@@ -16,6 +16,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.widget.Toast
 import io.realm.Realm
 import io.realm.RealmResults
 
@@ -93,8 +94,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                             mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                             mMediaSession!!.isActive=true
 
-
-
                             val metadata:MediaMetadataCompat = MediaMetadataCompat.Builder()
                                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,mSongId)
                                     .build()
@@ -170,10 +169,12 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                     0->
                     {
                         mMusicPlayer.isLooping=true
+                        Toast.makeText(applicationContext,"Song will be repeated",Toast.LENGTH_SHORT).show()
                     }
                     -1->
                     {
                         mMusicPlayer.isLooping=false
+                        Toast.makeText(applicationContext,"Song will not be repeated",Toast.LENGTH_SHORT).show()
                     }
                 }
             }
