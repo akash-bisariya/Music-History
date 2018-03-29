@@ -235,7 +235,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
     fun startServiceToPlay() {
         val intent1 = Intent(this@MusicActivity, MusicService::class.java)
-        intent1.putExtra("songId", intent.getStringExtra("songId"))
+        intent1.putExtra("songId", songData[0]!!.songId)
         intent1.putExtra("fromFloatingButton", intent.getBooleanExtra("fromFloatingButton", false))
         startService(intent1)
     }
@@ -275,7 +275,12 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         setSupportActionBar(toolbar)
-        songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
+        if(intent.getStringExtra("songId")==null||intent.getStringExtra("songId")=="")
+        songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+        else
+        {
+            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
+        }
         mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
         Glide.with(this)
                 .applyDefaultRequestOptions(RequestOptions()

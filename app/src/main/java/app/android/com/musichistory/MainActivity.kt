@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         when (view?.id) {
             R.id.fab_music_playing -> {
                 val intent = Intent(this, MusicActivity::class.java)
-                intent.putExtra("songId", mSongId)
+//                intent.putExtra("songId", mSongId)
                 intent.putExtra("fromFloatingButton", true)
                 startActivity(intent)
             }
