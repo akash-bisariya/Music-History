@@ -389,6 +389,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
     override fun onDestroy() {
         super.onDestroy()
+        if (mMediaBrowserCompat!!.isConnected) mMediaBrowserCompat?.disconnect()
     }
 
 

@@ -22,6 +22,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.CharacterStyle
+import android.text.style.RelativeSizeSpan
+import android.text.style.StrikethroughSpan
+import android.text.style.StyleSpan
 import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.RealmResults
 
@@ -55,6 +61,14 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         pb_music.visibility = View.VISIBLE
         vp_pager.visibility = View.GONE
         fab_music_playing.setOnClickListener(this)
+
+        val spannableString = SpannableString(getString(R.string.app_name))
+        spannableString.setSpan(RelativeSizeSpan(1.5f),5,6,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(StyleSpan(Typeface.ITALIC),5,6,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        toolbar.title = spannableString
+
+
+
 
 
 

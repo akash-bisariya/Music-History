@@ -13,6 +13,7 @@ import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.Realm
 import io.realm.RealmResults
 import io.realm.Sort
+import kotlinx.android.synthetic.main.fragment_music_history.*
 
 
 /**
@@ -29,6 +30,8 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
                 music.isCurrentlyPlaying=false
             }
         })
+
+
         (activity as MainActivity).onRecycleItemClick(null,list[position]!!.songId.toInt())
         val intent = Intent(activity, MusicActivity::class.java)
         intent.putExtra("songId", list[position]!!.songId)
@@ -37,10 +40,10 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val rvMusicHistory:RecyclerView= view.findViewById(R.id.rv_music_history)
+        val rvMusicHistory:RecyclerView = view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
-        list = realm.where(SongHistory::class.java).findAllSorted("playCount",Sort.DESCENDING)
+        list = realm.where(SongHistory::class.java).findAll().sort("playCount",Sort.DESCENDING)
         rvMusicHistory.adapter= MusicHistoryRecyclerAdapter(activity!!.applicationContext,list,true,this)
     }
 
