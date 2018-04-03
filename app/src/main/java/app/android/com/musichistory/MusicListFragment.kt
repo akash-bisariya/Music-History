@@ -35,7 +35,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick {
 
         (activity as MainActivity).onRecycleItemClick(null, list[position]!!.songId.toInt())
         val intent = Intent(activity, MusicActivity::class.java)
-        intent.putExtra("songId", list[position]!!.songId)
+        intent.putExtra(PREFERENCE_KEY_SONG_ID, list[position]!!.songId)
         startActivity(intent)
 
     }
@@ -49,7 +49,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick {
         val rvMusicHistory: RecyclerView = view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
-        list = realm.where(SongHistory::class.java).findAllSorted("songName", Sort.ASCENDING)
+        list = realm.where(SongHistory::class.java).findAllSorted(PREFERENCE_KEY_SONG_NAME, Sort.ASCENDING)
         rvMusicHistory.adapter = MusicRecyclerAdapter(activity!!.applicationContext, list, false, this)
     }
 }
