@@ -34,7 +34,7 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
 
         (activity as MainActivity).onRecycleItemClick(null,list[position]!!.songId.toInt())
         val intent = Intent(activity, MusicActivity::class.java)
-        intent.putExtra("songId", list[position]!!.songId)
+        intent.putExtra(PREFERENCE_KEY_SONG_ID, list[position]!!.songId)
         startActivity(intent)
     }
 

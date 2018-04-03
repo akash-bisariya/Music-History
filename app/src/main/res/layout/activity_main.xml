@@ -43,9 +43,7 @@
                 android:layout_gravity="top"
                 android:layout_marginBottom="48dp"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:title="@string/app_name"
-                app:titleTextColor="@android:color/white">
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
             </android.support.v7.widget.Toolbar>
 
@@ -55,10 +53,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                app:tabTextAppearance="@style/MineCustomTabText"
-                app:tabTextColor="@color/tab_normal_color"
                 app:tabIndicatorColor="@android:color/white"
-                app:tabSelectedTextColor="@android:color/white">
+                app:tabSelectedTextColor="@android:color/white"
+                app:tabTextAppearance="@style/MineCustomTabText"
+                app:tabTextColor="@color/tab_normal_color">
 
             </android.support.design.widget.TabLayout>
 
@@ -81,20 +79,20 @@
         android:id="@+id/pb_music"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_gravity="center_vertical|center_horizontal"/>
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:visibility="gone" />
 
 
     <ImageView
+        android:id="@+id/fab_music_playing"
         android:layout_width="@dimen/s_floating_button"
         android:layout_height="@dimen/s_floating_button"
-        android:padding="@dimen/dimen_10dp"
+        android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/dimen_20dp"
-        android:id="@+id/fab_music_playing"
-        android:scaleType="centerCrop"
-        android:visibility="gone"
         android:elevation="20dp"
+        android:padding="@dimen/dimen_10dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/ic_pause_black_18dp"
-        android:layout_gravity="end|bottom" />
+        android:visibility="gone" />
 
 </android.support.design.widget.CoordinatorLayout>

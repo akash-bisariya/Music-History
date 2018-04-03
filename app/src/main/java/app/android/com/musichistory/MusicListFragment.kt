@@ -49,7 +49,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick {
         val rvMusicHistory: RecyclerView = view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
-        list = realm.where(SongHistory::class.java).findAllSorted(PREFERENCE_KEY_SONG_NAME, Sort.ASCENDING)
+        list = realm.where(SongHistory::class.java).findAll().sort(PREFERENCE_KEY_SONG_NAME, Sort.ASCENDING)
         rvMusicHistory.adapter = MusicRecyclerAdapter(activity!!.applicationContext, list, false, this)
     }
 }

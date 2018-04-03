@@ -29,6 +29,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private val MY_MEDIA_ROOT_ID = "media_root_id"
     private val MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id"
 
+
     private var mMediaSession: MediaSessionCompat? = null
     private var mStateBuilder: PlaybackStateCompat.Builder? = null
     private var mPlaybackStateCompat:PlaybackStateCompat?=null

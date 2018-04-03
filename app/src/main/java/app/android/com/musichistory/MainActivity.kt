@@ -9,7 +9,6 @@ import android.graphics.drawable.*
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -24,9 +23,7 @@ import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.style.CharacterStyle
 import android.text.style.RelativeSizeSpan
-import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.RealmResults
@@ -55,17 +52,16 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val view  = layoutInflater.inflate(R.layout.music_history_title_layout,null)
+        toolbar.addView(view)
         setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
         viewPager = vp_pager
         tb_music.setupWithViewPager(vp_pager)
         pb_music.visibility = View.VISIBLE
         vp_pager.visibility = View.GONE
         fab_music_playing.setOnClickListener(this)
 
-        val spannableString = SpannableString(getString(R.string.app_name))
-        spannableString.setSpan(RelativeSizeSpan(1.5f),5,6,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannableString.setSpan(StyleSpan(Typeface.ITALIC),5,6,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        toolbar.title = spannableString
 
 
 
