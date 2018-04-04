@@ -10,4 +10,5 @@
     <dimen name="dimen_20dp">20dp</dimen>
     <dimen name="s_floating_button">100dp</dimen>
     <dimen name="s_album_art">60dp</dimen>
+    <dimen name="dimen_play_count">20dp</dimen>
 </resources>

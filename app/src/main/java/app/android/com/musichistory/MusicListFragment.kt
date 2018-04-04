@@ -23,6 +23,10 @@ import io.realm.Sort
 class MusicListFragment : Fragment(), IOnRecycleItemClick {
     lateinit var list: RealmResults<SongHistory>
     override fun onRecycleItemClick(view: View?, position: Int) {
+
+        (activity as MainActivity).onRecycleItemClick(null, list[position]!!.songId.toInt())
+        val intent = Intent(activity, MusicActivity::class.java)
+        intent.putExtra(PREFERENCE_KEY_SONG_ID, list[position]!!.songId)
         Realm.getDefaultInstance().executeTransaction({
             list[position]!!.playCount++
         })
@@ -33,9 +37,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick {
             }
         })
 
-        (activity as MainActivity).onRecycleItemClick(null, list[position]!!.songId.toInt())
-        val intent = Intent(activity, MusicActivity::class.java)
-        intent.putExtra(PREFERENCE_KEY_SONG_ID, list[position]!!.songId)
+
         startActivity(intent)
 
     }

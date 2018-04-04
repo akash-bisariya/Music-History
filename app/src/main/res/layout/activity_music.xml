@@ -24,8 +24,8 @@
 
     <TextView
         android:id="@+id/tv_song_play_count"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/dimen_play_count"
+        android:layout_height="@dimen/dimen_play_count"
         android:layout_margin="@dimen/dimen_10dp"
         android:background="@drawable/x_ds_background_circle"
         android:singleLine="true"

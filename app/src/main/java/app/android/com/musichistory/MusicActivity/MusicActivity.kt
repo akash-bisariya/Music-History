@@ -1,5 +1,6 @@
 package app.android.com.musichistory.MusicActivity
 
+import android.app.Activity
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -63,15 +64,11 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     lateinit var mNotification: Notification
     var mMediaControllerCompat: MediaControllerCompat? = null
     private var mNotificationManager: NotificationManager? = null
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY = "MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
-    private val MUSIC_HISTORY_ACTION_REPEAT_ALL = "MUSIC_HISTORY_ACTION_REPEAT_ALL"
+
 
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
-
     private val MUSIC_HISTORY_NOTIFICATION_ID = 1001
+
     val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
         override fun onCaptioningEnabledChanged(enabled: Boolean) {
             super.onCaptioningEnabledChanged(enabled)
@@ -93,9 +90,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
             }
         }
 
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-            super.onMetadataChanged(metadata)
-        }
     }
 
 
@@ -233,11 +227,15 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     }
 
 
+    /**
+     * started service to play music
+     */
     fun startServiceToPlay() {
         val intent1 = Intent(this@MusicActivity, MusicService::class.java)
         intent1.putExtra("songId", songData[0]!!.songId)
         intent1.putExtra("fromFloatingButton", intent.getBooleanExtra("fromFloatingButton", false))
         startService(intent1)
+        setResult(Activity.RESULT_OK)
     }
 
 
