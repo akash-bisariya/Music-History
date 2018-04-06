@@ -30,12 +30,12 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick {
         Realm.getDefaultInstance().executeTransaction({
             list[position]!!.playCount++
         })
-        Realm.getDefaultInstance().executeTransactionAsync({
-            val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
-            for (music in result) {
-                music.isCurrentlyPlaying = false
-            }
-        })
+//        Realm.getDefaultInstance().executeTransactionAsync({
+//            val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+//            for (music in result) {
+//                music.isCurrentlyPlaying = false
+//            }
+//        })
 
 
         startActivity(intent)

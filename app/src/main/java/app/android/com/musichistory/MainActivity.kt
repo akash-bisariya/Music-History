@@ -39,11 +39,17 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         mSongId = position.toString()
         fab_music_playing.visibility = View.VISIBLE
         var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
-
         Realm.getDefaultInstance().executeTransaction({
+            val result =it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying",true).findAll()
+            for (music in result) {
+                music.isCurrentlyPlaying=false
+            }
             songData[0]!!.isCurrentlyPlaying = true
             it.copyToRealmOrUpdate(songData[0])
         })
+//        Realm.getDefaultInstance().executeTransaction({
+//
+//        })
         customView(fab_music_playing, songData[0]!!.songImage)
 
 

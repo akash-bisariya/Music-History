@@ -76,7 +76,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         if (intent != null) {
             if (intent.getStringExtra("songId") != null ) {
                 if (!(mMusicPlayer.isPlaying && intent!!.getBooleanExtra("fromFloatingButton", false))) {
-                    mSongId= intent!!.getStringExtra("songId")
+                    mSongId= intent.getStringExtra("songId")
                     songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
                     mMusicPlayer.stop()
                     mMusicPlayer.reset()
@@ -84,7 +84,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                     val result = mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
                     if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                         mMusicPlayer.setDataSource(songData[0]!!.songData)
-
                         metaDataReceiver.setDataSource(songData[0]!!.songData)
                         mMusicPlayer.prepareAsync()
                         mMusicPlayer.setOnCompletionListener(this@MusicService)

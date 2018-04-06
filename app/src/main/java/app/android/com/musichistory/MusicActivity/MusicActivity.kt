@@ -100,6 +100,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     private fun buildNotification() {
         val bitmap: Bitmap
         val bmOptions = BitmapFactory.Options()
+//        Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPla")
         if (!songData[0]?.songImage.equals("")) {
             bitmap = BitmapFactory.decodeFile(songData[0]?.songImage, bmOptions)
         } else {
