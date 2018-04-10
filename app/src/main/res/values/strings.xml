@@ -5,7 +5,13 @@
     <string name="txt_initial_position_media_player">00.00</string>
 
     <plurals name="numberOfTimeSongPlayed">
-            <item quantity="one">Played %d time</item>
-            <item quantity="other">Played %d times</item>
+        <item quantity="one">Played %d time</item>
+        <item quantity="other">Played %d times</item>
     </plurals>
+    <string name="title_activity_main2">Main2Activity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 </resources>
