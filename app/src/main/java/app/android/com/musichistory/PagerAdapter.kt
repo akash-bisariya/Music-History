@@ -7,16 +7,14 @@ import android.support.v4.app.FragmentStatePagerAdapter
 /**
  * Created by akash bisariya on 18-01-2018.
  */
-class PagerAdapter(private val fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+class PagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     override fun getItem(position: Int): Fragment = when (position) {
         0 -> MusicListFragment()
         1 -> MusicHistoryFragment()
         else -> MusicListFragment()
     }
 
-    override fun getCount(): Int {
-        return 2
-    }
+    override fun getCount()=2
 
     override fun getPageTitle(position: Int) = when (position) {
         0 -> "All Music"

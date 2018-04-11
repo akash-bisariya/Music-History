@@ -15,17 +15,14 @@ open class SongHistory(
         @Required
         @PrimaryKey
         @Index
-        var songId:String,
-        var songName:String,
-        var songArtist:String,
-        var albumName:String,
-        var songData:String,
-        var songDuration:String,
-        var lastPlayed:String,
-        var songImage:String,
-        var playCount:Int,
-        var isCurrentlyPlaying:Boolean
+        var songId:String="",
+        var songName:String="",
+        var songArtist:String="",
+        var albumName:String="",
+        var songData:String="",
+        var songDuration:String="",
+        var lastPlayed:String="",
+        var songImage:String="",
+        var playCount:Int=0,
+        var isCurrentlyPlaying:Boolean=false
         ): Serializable, RealmObject()
-{
-    constructor() : this(songId="",songName="",songArtist = "",albumName = "",songData = "",songDuration = "",lastPlayed = "",songImage = "",playCount = 0,isCurrentlyPlaying = false)
-}
