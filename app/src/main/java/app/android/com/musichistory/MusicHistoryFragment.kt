@@ -9,10 +9,8 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.*
-import kotlinx.android.synthetic.main.fragment_music_history.*
 
 
 /**
@@ -25,7 +23,7 @@ class MusicHistoryFragment: Fragment() ,IOnRecycleItemClick{
     override fun onRecycleItemClick(view: View?, position: Int) {
 
         val intent = Intent(activity, MusicActivity::class.java)
-        intent.putExtra(PREFERENCE_KEY_SONG_ID, list[position]!!.songId)
+        intent.putExtra(REALM_FIELD_SONG_ID, list[position]!!.songId)
         (activity as MainActivity).onRecycleItemClick(null,list[position]!!.songId.toInt())
         Realm.getDefaultInstance().executeTransaction({
             list[position]!!.playCount++

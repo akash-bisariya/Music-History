@@ -32,13 +32,13 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     private var mMediaSession: MediaSessionCompat? = null
     private var mStateBuilder: PlaybackStateCompat.Builder? = null
-    private var mPlaybackStateCompat:PlaybackStateCompat?=null
+    private var mPlaybackStateCompat: PlaybackStateCompat? = null
     private val mMusicPlayer: MusicPlayer = MusicPlayer
     private var mAudioManager: AudioManager? = null
     private var mMediaPlayerPause = false
     private var mAudioFocusCanDuck = false
     private var mRepeatCount = -1
-    private var mSongId:String?=null
+    private var mSongId: String? = null
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
@@ -62,7 +62,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
         mStateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE)
-        mPlaybackStateCompat=mStateBuilder!!.build()
+        mPlaybackStateCompat = mStateBuilder!!.build()
         mMediaSession!!.setPlaybackState(mPlaybackStateCompat)
         mMediaSession!!.setCallback(MediaCallbacks())
         sessionToken = mMediaSession!!.sessionToken
@@ -74,9 +74,9 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         if (intent != null) {
-            if (intent.getStringExtra("songId") != null ) {
+            if (intent.getStringExtra("songId") != null) {
                 if (!(mMusicPlayer.isPlaying && intent!!.getBooleanExtra("fromFloatingButton", false))) {
-                    mSongId= intent.getStringExtra("songId")
+                    mSongId = intent.getStringExtra("songId")
                     songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
                     mMusicPlayer.stop()
                     mMusicPlayer.reset()
@@ -92,10 +92,10 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                             it.start()
                             mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
                             mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-                            mMediaSession!!.isActive=true
+                            mMediaSession!!.isActive = true
 
-                            val metadata:MediaMetadataCompat = MediaMetadataCompat.Builder()
-                                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID,mSongId)
+                            val metadata: MediaMetadataCompat = MediaMetadataCompat.Builder()
+                                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId)
                                     .build()
 
                             mMediaSession!!.setMetadata(metadata)
@@ -150,6 +150,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             }
         }
 
+
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             Log.d("MusicHistory onSeekTo:", "" + pos)
@@ -164,17 +165,14 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             super.onCustomAction(action, extras)
             if (extras != null && action.equals(MUSIC_HISTORY_ACTION_REPEAT_ALL)) {
                 mRepeatCount = extras.getInt("Music_History_Repeat_Count", -1)
-                when(mRepeatCount)
-                {
-                    0->
-                    {
-                        mMusicPlayer.isLooping=true
-                        Toast.makeText(applicationContext,"Song will be repeated",Toast.LENGTH_SHORT).show()
+                when (mRepeatCount) {
+                    0 -> {
+//                        mMusicPlayer.isLooping=true
+                        Toast.makeText(applicationContext, "Song will be repeated", Toast.LENGTH_SHORT).show()
                     }
-                    -1->
-                    {
-                        mMusicPlayer.isLooping=false
-                        Toast.makeText(applicationContext,"Song will not be repeated",Toast.LENGTH_SHORT).show()
+                    -1 -> {
+                        mMusicPlayer.isLooping = false
+                        Toast.makeText(applicationContext, "Song will not be repeated", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -221,13 +219,11 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     fun playMediaPlayer() {
         val result = mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            if(mPlaybackStateCompat!!.state!=PlaybackStateCompat.STATE_STOPPED) {
+            if (mPlaybackStateCompat!!.state != PlaybackStateCompat.STATE_STOPPED) {
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                 mMusicPlayer.start()
-            }
-            else
-            {
+            } else {
 //                val intent1 = Intent(this, MusicService::class.java)
 //                intent1.putExtra("songId", intent.getStringExtra("songId"))
 //                intent1.putExtra("fromFloatingButton", intent.getBooleanExtra("fromFloatingButton", false))
@@ -295,17 +291,32 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     }
 
     override fun onCompletion(p0: MediaPlayer?) {
-        stopMusicPlayer()
+        mRepeatCount = getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT,-1)
+        when (mRepeatCount) {
+            0,1,2,3 -> {
+                p0!!.start()
+                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
+                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+                if(mRepeatCount==1)
+                {
+                    getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE).edit().putInt(PREFERENCE_KEY_REPEAT_COUNT,-1).apply()
+
+                }
+                else if(mRepeatCount==2)
+                    getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE).edit().putInt(PREFERENCE_KEY_REPEAT_COUNT,1).apply()
+                else if(mRepeatCount==3)
+                    getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE).edit().putInt(PREFERENCE_KEY_REPEAT_COUNT,2).apply()
+            }
+            -1 -> stopMusicPlayer()
+
+
+        }
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
         stopMusicPlayer()
         return false
     }
-
-
-
-
 
 
     /**

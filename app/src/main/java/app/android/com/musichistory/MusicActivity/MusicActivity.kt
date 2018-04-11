@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -194,7 +195,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                 seek_bar.progress = 0
                 stopSeekbarUpdate()
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
-
             }
         }
 
@@ -274,10 +274,9 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         setSupportActionBar(toolbar)
-        if(intent.getStringExtra("songId")==null||intent.getStringExtra("songId")=="")
-        songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
-        else
-        {
+        if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
+            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+        else {
             songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
         }
         mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
@@ -297,6 +296,45 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         iv_next.setOnClickListener(this)
         iv_repeat.setOnClickListener(this)
         seek_bar.max = songData[0]!!.songDuration.toInt()
+
+        repeatCount = getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
+
+
+
+        when (repeatCount) {
+            0 -> {
+                iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
+                tv_repeat_count.text = ""
+            }
+            -1 -> {
+                iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
+                tv_repeat_count.text = ""
+            }
+            1 -> {
+                iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
+                tv_repeat_count.text = "1"
+            }
+            2 -> {
+                iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
+                tv_repeat_count.text = "2"
+            }
+            3 -> {
+                iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
+                tv_repeat_count.text = "2"
+            }
+        }
+//        if (repeatCount == -1) {
+//            iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
+//            tv_repeat_count.text = ""
+//        } else {
+//            tv_repeat_count.text = (repeatCount).toString()
+//            if (repeatCount > 3) {
+//                tv_repeat_count.text = ""
+//                iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
+//            }
+//        }
+
+
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 tv_song_current_position.text = DateUtils.formatElapsedTime((progress / 1000).toLong())
@@ -369,9 +407,16 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                     }
 
 
-                    var bundle = Bundle()
-                    bundle.putInt("Music_History_Repeat_Count", repeatCount)
-                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder(MUSIC_HISTORY_ACTION_REPEAT_ALL, "REPEAT_SONG", 1).build(), bundle)
+                    val preference: SharedPreferences = getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE)
+                    preference.edit().putInt(PREFERENCE_KEY_REPEAT_COUNT, repeatCount).apply()
+
+//                    Realm.getDefaultInstance().executeTransactionAsync {
+//                        songData[0]!!.repeatCount=repeatCount
+//                    }
+
+//                    var bundle = Bundle()
+//                    bundle.putInt("Music_History_Repeat_Count", repeatCount)
+//                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder(MUSIC_HISTORY_ACTION_REPEAT_ALL, "REPEAT_SONG", 1).build(), bundle)
                 }
 
                 R.id.iv_next -> {

@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.Realm
 import io.realm.RealmResults
@@ -26,7 +25,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick {
 
         (activity as MainActivity).onRecycleItemClick(null, list[position]!!.songId.toInt())
         val intent = Intent(activity, MusicActivity::class.java)
-        intent.putExtra(PREFERENCE_KEY_SONG_ID, list[position]!!.songId)
+        intent.putExtra(REALM_FIELD_SONG_ID, list[position]!!.songId)
         Realm.getDefaultInstance().executeTransaction({
             list[position]!!.playCount++
         })
@@ -51,7 +50,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick {
         val rvMusicHistory: RecyclerView = view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
-        list = realm.where(SongHistory::class.java).findAll().sort(PREFERENCE_KEY_SONG_NAME, Sort.ASCENDING)
+        list = realm.where(SongHistory::class.java).findAll().sort(REALM_FIELD_SONG_NAME, Sort.ASCENDING)
         rvMusicHistory.adapter = MusicRecyclerAdapter(activity!!.applicationContext, list, false, this)
     }
 }
