@@ -27,11 +27,11 @@
         android:paddingTop="@dimen/dimen_10dp"
         android:textColor="@color/darker_gray"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/tv_song_duration"
+        app:layout_constraintEnd_toStartOf="@id/tv_list_song_duration"
         app:layout_constraintLeft_toRightOf="@id/iv_song_image" />
 
     <TextView
-        android:id="@+id/tv_song_duration"
+        android:id="@+id/tv_list_song_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/dimen_10dp"
@@ -51,7 +51,7 @@
         android:paddingLeft="@dimen/dimen_10dp"
         android:paddingRight="@dimen/dimen_10dp"
         android:textColor="@color/lighter_gray"
-        app:layout_constraintEnd_toStartOf="@id/tv_song_duration"
+        app:layout_constraintEnd_toStartOf="@id/tv_list_song_duration"
         app:layout_constraintLeft_toRightOf="@id/iv_song_image"
         app:layout_constraintTop_toBottomOf="@id/tv_song_name" />
 

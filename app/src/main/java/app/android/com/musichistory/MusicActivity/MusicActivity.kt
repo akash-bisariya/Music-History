@@ -11,29 +11,22 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.LayerDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_music.*
-import android.media.MediaPlayer
-import android.media.browse.MediaBrowser
 
 
 import android.os.Handler
 import android.os.SystemClock
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v7.graphics.Palette
 import android.view.View
-import android.widget.Toast
 import io.realm.Realm
 import io.realm.RealmResults
 import android.support.v4.media.session.PlaybackStateCompat
@@ -51,7 +44,9 @@ import java.util.concurrent.TimeUnit
  * Created by akash
  * on 22/2/18.
  */
-class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, AudioManager.OnAudioFocusChangeListener, IMusicPlayerPlayback {
+class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, AudioManager.OnAudioFocusChangeListener {
+
+
     private var mScheduleFuture: ScheduledFuture<*>? = null
     private var mediaPlayerPause = false
     private var audioFocusCanDuck = false
@@ -82,13 +77,13 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             playbackStateCompat = state
-            updateUIState(state)
             if (state!!.state == PlaybackStateCompat.STATE_STOPPED || state.state == PlaybackStateCompat.STATE_NONE) {
                 mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
             } else {
                 buildNotification()
                 mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
             }
+            updateUIState(state)
         }
 
     }
@@ -107,12 +102,19 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         } else {
             bitmap = BitmapFactory.decodeResource(resources, R.drawable.music_icon)
         }
+
+
+        val notificationIntent = Intent(applicationContext, MusicActivity::class.java)
+        notificationIntent.putExtra("fromFloatingButton", true)
+        notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        val contentIntent = PendingIntent.getActivity(this, 2500, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(this)
                 .setContentTitle(songData[0]?.songName)
                 .setAutoCancel(false)
                 .setOngoing(playbackStateCompat!!.state == PlaybackStateCompat.STATE_PLAYING)
                 .setSmallIcon(R.drawable.music_icon)
                 .setLargeIcon(bitmap)
+                .setContentIntent(contentIntent)
                 .setColor(resources.getColor(R.color.color_red))
                 .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mMediaBrowserCompat!!.sessionToken)
@@ -207,13 +209,8 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
             mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
             mMediaControllerCompat!!.registerCallback(mMediaControllerCompatCallback)
-
-            mMediaControllerCompatCallback.onMetadataChanged(
-                    mMediaControllerCompat!!.metadata);
-            mMediaControllerCompatCallback
-                    .onPlaybackStateChanged(mMediaControllerCompat!!.playbackState);
-//            mediaController.getTransportControls().playFromMediaId(String.valueOf(R.raw.warner_tautz_off_broadway), null);
-//            MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.playFromMediaId(intent.getStringExtra("songId"), null)
+            mMediaControllerCompatCallback.onMetadataChanged(mMediaControllerCompat!!.metadata);
+            mMediaControllerCompatCallback.onPlaybackStateChanged(mMediaControllerCompat!!.playbackState)
             startServiceToPlay()
 
         }
@@ -297,9 +294,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         iv_repeat.setOnClickListener(this)
         seek_bar.max = songData[0]!!.songDuration.toInt()
 
-        repeatCount = getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
-
-
+        repeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
 
         when (repeatCount) {
             0 -> {
@@ -407,16 +402,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                     }
 
 
-                    val preference: SharedPreferences = getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE)
+                    val preference: SharedPreferences = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE)
                     preference.edit().putInt(PREFERENCE_KEY_REPEAT_COUNT, repeatCount).apply()
 
-//                    Realm.getDefaultInstance().executeTransactionAsync {
-//                        songData[0]!!.repeatCount=repeatCount
-//                    }
-
-//                    var bundle = Bundle()
-//                    bundle.putInt("Music_History_Repeat_Count", repeatCount)
-//                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder(MUSIC_HISTORY_ACTION_REPEAT_ALL, "REPEAT_SONG", 1).build(), bundle)
+                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.sendCustomAction(PlaybackStateCompat.CustomAction.Builder(MUSIC_HISTORY_MUSIC_REPEAT_COUNT_CUSTOM_ACTION, "REPEAT_SONG", 1).build(), null)
                 }
 
                 R.id.iv_next -> {
@@ -493,28 +482,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
             }
         else Color.BLUE
     }
-
-
-    override fun onPauseMusicPlayer(position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onStopMusicPlayer() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onStartMusicPlayer() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onProgress(position: Int) {
-        runOnUiThread({
-            //            tv_song_current_position.text = "%.2f".format((musicPlayer.currentPosition).toFloat() / (1000 * 60))
-//            tv_song_current_position.text = (musicPlayer.currentPosition / 1000).toString()
-        })
-
-    }
-
 
     override fun onAudioFocusChange(result: Int) {
 

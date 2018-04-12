@@ -31,7 +31,7 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
     class ViewHolder(itemView: View?, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         private val tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
         private val tvArtistName = itemView!!.findViewById(R.id.tv_artist_name) as TextView
-        private val tvSongDuration = itemView!!.findViewById(R.id.tv_song_duration) as TextView
+        private val tvSongDuration = itemView!!.findViewById(R.id.tv_list_song_duration) as TextView
         private val tvSongPlayCount = itemView!!.findViewById(R.id.tv_song_play_count) as TextView
         private val ivSongImage = itemView!!.findViewById(R.id.iv_song_image) as ImageView
         override fun onClick(view: View?) {
