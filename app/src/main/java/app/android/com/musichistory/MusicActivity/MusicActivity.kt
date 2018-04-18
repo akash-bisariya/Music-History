@@ -105,9 +105,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
 
         val notificationIntent = Intent(applicationContext, MusicActivity::class.java)
+        val backIntent = Intent(applicationContext,MainActivity::class.java)
         notificationIntent.putExtra("fromFloatingButton", true)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        val contentIntent = PendingIntent.getActivity(this, 2500, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val contentIntent = PendingIntent.getActivities(this, 2500,  arrayOf(backIntent,notificationIntent), PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(this)
                 .setContentTitle(songData[0]?.songName)
                 .setAutoCancel(false)
@@ -286,7 +287,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
         tv_song_artist.text = songData[0]!!.songArtist
         tv_song_current_position.text = getString(R.string.txt_initial_position_media_player)
-        tv_song_name.text = songData[0]!!.songName
+        tv_song_name.text = songData[0]!!.songName +" (${songData.get(0)!!.albumName})"
         tv_song_play_count.text = songData[0]!!.playCount.toString()
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)

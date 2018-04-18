@@ -7,8 +7,25 @@
     tools:context="app.android.com.musichistory.MainActivity">
 
     <android.support.v7.widget.RecyclerView
-        android:layout_width="match_parent"
+        android:id="@+id/rv_music_history"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:id="@+id/rv_music_history"/>
+        app:layout_constraintEnd_toStartOf="@+id/rv_play_list"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:id="@+id/rv_play_list"-->
+        <!--android:layout_width="80dp"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toEndOf="@id/rv_music_history" />-->
+    <TextView
+        android:id="@+id/rv_play_list"
+        android:layout_width="80dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/rv_music_history" />
 
 </android.support.constraint.ConstraintLayout>

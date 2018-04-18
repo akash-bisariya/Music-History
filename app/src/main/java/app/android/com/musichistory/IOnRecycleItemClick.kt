@@ -8,4 +8,5 @@ import android.view.View
  */
 interface IOnRecycleItemClick {
     fun onRecycleItemClick(view: View?, position:Int)
+    fun onRecycleItemLongClick(view: View?, position:Int)
 }

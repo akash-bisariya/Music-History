@@ -1,5 +1,7 @@
 package app.android.com.musichistory
 
+import android.content.ClipData
+import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -25,6 +27,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import android.webkit.MimeTypeMap
 import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.RealmResults
 
@@ -32,6 +35,10 @@ import io.realm.RealmResults
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener {
+    override fun onRecycleItemLongClick(view: View?, position: Int) {
+
+    }
+
     private var mSongId: String? = null
     private var viewPager: ViewPager? = null
 
@@ -47,9 +54,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             songData[0]!!.isCurrentlyPlaying = true
             it.copyToRealmOrUpdate(songData[0])
         })
-//        Realm.getDefaultInstance().executeTransaction({
-//
-//        })
         customView(fab_music_playing, songData[0]!!.songImage)
 
 

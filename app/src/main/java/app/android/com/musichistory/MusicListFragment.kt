@@ -20,6 +20,10 @@ import io.realm.Sort
  */
 
 class MusicListFragment : Fragment(), IOnRecycleItemClick {
+    override fun onRecycleItemLongClick(view: View?, position: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     lateinit var list: RealmResults<SongHistory>
     override fun onRecycleItemClick(view: View?, position: Int) {
 
