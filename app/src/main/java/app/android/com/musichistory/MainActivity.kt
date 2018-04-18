@@ -1,7 +1,5 @@
 package app.android.com.musichistory
 
-import android.content.ClipData
-import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,17 +15,11 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.View
-
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
-import android.webkit.MimeTypeMap
 import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.RealmResults
 
@@ -47,9 +39,9 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         fab_music_playing.visibility = View.VISIBLE
         var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
         Realm.getDefaultInstance().executeTransaction({
-            val result =it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying",true).findAll()
+            val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
             for (music in result) {
-                music.isCurrentlyPlaying=false
+                music.isCurrentlyPlaying = false
             }
             songData[0]!!.isCurrentlyPlaying = true
             it.copyToRealmOrUpdate(songData[0])
@@ -62,7 +54,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val view  = layoutInflater.inflate(R.layout.music_history_title_layout,null)
+        val view = layoutInflater.inflate(R.layout.music_history_title_layout, null)
         toolbar.addView(view)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
@@ -219,7 +211,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             vp_pager.visibility = View.VISIBLE
         }
     }
-
 
 
     override fun onResume() {

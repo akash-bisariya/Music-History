@@ -23,23 +23,8 @@ import kotlinx.android.synthetic.main.fragment_music_history.*
  * Created by akash on 12/2/18.
  */
 
-class MusicHistoryFragment : Fragment(), IOnRecycleItemClick,View.OnDragListener {
-
-
-//    val onDragListener = View.OnDragListener(over)
-
+class MusicHistoryFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
     override fun onDrag(view: View?, dragEvent: DragEvent?): Boolean {
-
-
-//        if (dragEvent!!.action == DragEvent.ACTION_DRAG_STARTED) {
-//            Toast.makeText(activity, "Started", Toast.LENGTH_SHORT).show()
-//            return true
-//        } else if (dragEvent.action == DragEvent.ACTION_DROP) {
-//            Toast.makeText(activity, "drop", Toast.LENGTH_SHORT).show()
-//            return true
-//        }
-//        return true
-
         when (dragEvent?.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 Toast.makeText(activity, "Started", Toast.LENGTH_SHORT).show()
@@ -51,6 +36,9 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick,View.OnDragListener
             }
             DragEvent.ACTION_DROP -> {
                 Toast.makeText(activity, "DROP", Toast.LENGTH_SHORT).show()
+                val songId:String = dragEvent.clipData.getItemAt(0).intent.extras.get("songId").toString()
+                playList.add(Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId",songId).findAll()[0]!!.songImage)
+                playListAdapter.notifyDataSetChanged()
                 return true
             }
             DragEvent.ACTION_DRAG_ENDED -> {
@@ -67,32 +55,25 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick,View.OnDragListener
 
         }
     }
-//    }
-
-//        if(dragEvent!!.action==DragEvent.ACTION_DROP)
-//        {
-//            val songId:String= dragEvent.clipData.description.label.toString()
-//            Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId",songId).findAll()
-//
-//        }
-//        else if(dragEvent.action==DragEvent.ACTION_DRAG_STARTED) {
-//            val s= dragEvent.clipDescription.label
-//            return true
-//        }
-
 
     private lateinit var list: RealmResults<SongHistory>
+    private lateinit var playList:ArrayList<String>
     private lateinit var musicHistoryRecyclerAdapter: MusicHistoryRecyclerAdapter
+    private lateinit var playListAdapter: PlayListAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val rvMusicHistory: RecyclerView = view.findViewById(R.id.rv_music_history)
         rvMusicHistory.layoutManager = LinearLayoutManager(activity)
+        rv_play_list.layoutManager = LinearLayoutManager(activity)
         val realm: Realm = Realm.getDefaultInstance()
         list = realm.where(SongHistory::class.java).findAll().sort("playCount", Sort.DESCENDING)
         musicHistoryRecyclerAdapter = MusicHistoryRecyclerAdapter(activity!!.applicationContext, list, true, this)
         rvMusicHistory.adapter = musicHistoryRecyclerAdapter
-        rv_play_list.setOnDragListener(this)
+        playList= ArrayList()
+        playListAdapter = PlayListAdapter(activity!!.applicationContext,playList,this)
+        rv_play_list.adapter = playListAdapter
+        rl_play_list.setOnDragListener(this)
 
     }
 
@@ -114,8 +95,10 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick,View.OnDragListener
     }
 
     override fun onRecycleItemLongClick(view: View?, position: Int) {
-        rv_play_list.visibility = View.VISIBLE
-        val clipDataItem: ClipData.Item = ClipData.Item(Intent())
+//        rv_play_list.visibility = View.VISIBLE
+        val intent = Intent()
+        intent.putExtra("songId", list[position]!!.songId)
+        val clipDataItem: ClipData.Item = ClipData.Item(intent)
         clipDataItem.intent.putExtra("songId", list[position]!!.songId)
         val clipData = ClipData(ClipDescription("Music", arrayOf()), clipDataItem)
         val shadow = View.DragShadowBuilder((view as ViewGroup).getChildAt(0))
@@ -134,37 +117,4 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick,View.OnDragListener
         super.onActivityResult(requestCode, resultCode, data)
         musicHistoryRecyclerAdapter.notifyDataSetChanged()
     }
-
-
-//    class DragEventListener : View.OnDragListener {
-//        override fun onDrag(p0: View?, dragEvent: DragEvent?): Boolean {
-//            if (dragEvent!!.action == DragEvent.ACTION_DROP) {
-//                Log.d("ACTION_DROP","ACTION_DROP")
-//                val songId: String = dragEvent.clipData.description.label.toString()
-//                Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", songId).findAll()
-//
-//            } else if (dragEvent.action == DragEvent.ACTION_DRAG_STARTED) {
-//                val s = dragEvent.clipDescription.label
-//                Log.d("STARTED","STARTED")
-//                return true
-//            }
-//            else if (dragEvent.action == DragEvent.ACTION_DRAG_ENTERED) {
-//                val s = dragEvent.clipDescription.label
-//                Log.d("ENTERED","ENTERED")
-//                return true
-//            }
-//            else if (dragEvent.action == DragEvent.ACTION_DRAG_EXITED) {
-//                val s = dragEvent.clipDescription.label
-//                Log.d("_EXITED","_EXITED")
-//                return true
-//            }
-//            else if (dragEvent.action == DragEvent.ACTION_DRAG_ENDED) {
-//                val s = dragEvent.clipDescription.label
-//                Log.d("_EXITED","_EXITED")
-//                return true
-//            }
-//            return true
-//        }
-//
-//    }
 }
