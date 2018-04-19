@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:paddingLeft="@dimen/dimen_10dp"
     android:paddingRight="@dimen/dimen_10dp"
-    android:paddingTop="@dimen/dimen_10dp"
+    android:paddingBottom="@dimen/dimen_10dp"
     tools:context="app.android.com.musichistory.MainActivity">
 
 

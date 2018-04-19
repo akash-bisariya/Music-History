@@ -35,7 +35,19 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_play_list"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fadeScrollbars="false"
+            android:paddingTop="@dimen/dimen_10dp"
+            android:scrollbarStyle="insideInset"
+            android:scrollbars="vertical"/>
+
+        <View
+            android:id="@+id/view_divider_play_list"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/lighter_gray"
+            app:layout_constraintStart_toEndOf="@id/rv_play_list"/>
+
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
