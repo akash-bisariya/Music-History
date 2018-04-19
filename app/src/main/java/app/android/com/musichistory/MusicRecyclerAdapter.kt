@@ -28,15 +28,22 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
         return if (arrayList.size > 0) arrayList.size else 0
     }
 
-    class ViewHolder(itemView: View?, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    class ViewHolder(itemView: View?, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener ,View.OnLongClickListener{
         private val tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
         private val tvArtistName = itemView!!.findViewById(R.id.tv_artist_name) as TextView
         private val tvSongDuration = itemView!!.findViewById(R.id.tv_list_song_duration) as TextView
         private val tvSongPlayCount = itemView!!.findViewById(R.id.tv_song_play_count) as TextView
         private val ivSongImage = itemView!!.findViewById(R.id.iv_song_image) as ImageView
+
         override fun onClick(view: View?) {
             onItemClick.onRecycleItemClick(view, adapterPosition)
         }
+
+        override fun onLongClick(view: View?): Boolean {
+            onItemClick.onRecycleItemLongClick(view,adapterPosition)
+            return true
+        }
+
 
         fun viewHolderBind(isHistory: Boolean, context: Context, songInfo: SongHistory?, listener: IOnRecycleItemClick): Unit {
             onItemClick = listener
@@ -57,6 +64,7 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
             }
             tvSongPlayCount.visibility = if (isHistory) View.VISIBLE else View.GONE
             itemView.setOnClickListener(this)
+            itemView.setOnLongClickListener(this)
         }
     }
 }

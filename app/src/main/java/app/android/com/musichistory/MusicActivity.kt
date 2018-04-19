@@ -1,4 +1,4 @@
-package app.android.com.musichistory.MusicActivity
+package app.android.com.musichistory
 
 import android.app.Activity
 import android.app.Notification
@@ -34,7 +34,6 @@ import android.support.v4.media.session.PlaybackStateCompat.*
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
-import app.android.com.musichistory.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -44,9 +43,7 @@ import java.util.concurrent.TimeUnit
  * Created by akash
  * on 22/2/18.
  */
-class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, AudioManager.OnAudioFocusChangeListener {
-
-
+class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.OnAudioFocusChangeListener {
     private var mScheduleFuture: ScheduledFuture<*>? = null
     private var mediaPlayerPause = false
     private var audioFocusCanDuck = false
@@ -92,7 +89,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
     /**
      *   Created mediaStyle notifications
      */
-
     private fun buildNotification() {
         val bitmap: Bitmap
         val bmOptions = BitmapFactory.Options()
@@ -105,10 +101,10 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
 
         val notificationIntent = Intent(applicationContext, MusicActivity::class.java)
-        val backIntent = Intent(applicationContext,MainActivity::class.java)
+        val backIntent = Intent(applicationContext, MainActivity::class.java)
         notificationIntent.putExtra("fromFloatingButton", true)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        val contentIntent = PendingIntent.getActivities(this, 2500,  arrayOf(backIntent,notificationIntent), PendingIntent.FLAG_UPDATE_CURRENT)
+        val contentIntent = PendingIntent.getActivities(this, 2500, arrayOf(backIntent, notificationIntent), PendingIntent.FLAG_UPDATE_CURRENT)
         val builder = NotificationCompat.Builder(this)
                 .setContentTitle(songData[0]?.songName)
                 .setAutoCancel(false)
@@ -287,7 +283,7 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
 
         tv_song_artist.text = songData[0]!!.songArtist
         tv_song_current_position.text = getString(R.string.txt_initial_position_media_player)
-        tv_song_name.text = songData[0]!!.songName +" (${songData.get(0)!!.albumName})"
+        tv_song_name.text = songData[0]!!.songName + " (${songData.get(0)!!.albumName})"
         tv_song_play_count.text = songData[0]!!.playCount.toString()
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
@@ -319,17 +315,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
                 tv_repeat_count.text = "2"
             }
         }
-//        if (repeatCount == -1) {
-//            iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
-//            tv_repeat_count.text = ""
-//        } else {
-//            tv_repeat_count.text = (repeatCount).toString()
-//            if (repeatCount > 3) {
-//                tv_repeat_count.text = ""
-//                iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
-//            }
-//        }
-
 
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -425,24 +410,6 @@ class MusicActivity : AppCompatActivity(), MusicView, View.OnClickListener, Audi
         super.onDestroy()
         if (mMediaBrowserCompat!!.isConnected) mMediaBrowserCompat?.disconnect()
     }
-
-
-    override fun playSong() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun stopSong() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun nextSong() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun prevSong() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 
     private fun getGradientDrawable(topColor: Int, centerColor: Int, bottomColor: Int): GradientDrawable {
         val gradientDrawable = GradientDrawable()

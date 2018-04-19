@@ -10,34 +10,32 @@
         android:id="@+id/rv_music_history"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:fadeScrollbars="false"
+        android:scrollbarStyle="insideInset"
+        android:scrollbars="vertical"
         app:layout_constraintEnd_toStartOf="@+id/rl_play_list"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!--<RelativeLayout-->
-        <!--android:layout_width="80dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--app:layout_constraintTop_toTopOf="parent"-->
-        <!--app:layout_constraintStart_toEndOf="@id/rv_music_history"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--android:id="@+id/rl_play_list">-->
-        <!--&lt;!&ndash;<android.support.v7.widget.RecyclerView&ndash;&gt;-->
-            <!--&lt;!&ndash;android:id="@+id/rv_play_list"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_height="wrap_content" />&ndash;&gt;-->
-    <!--</RelativeLayout>-->
-
+    <View
+        android:id="@+id/view_divider"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="@color/lighter_gray"
+        app:layout_constraintStart_toEndOf="@id/rv_music_history"/>
 
     <RelativeLayout
         android:id="@+id/rl_play_list"
         android:layout_width="80dp"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/rv_music_history">
+        app:layout_constraintStart_toEndOf="@id/rv_music_history"
+        app:layout_constraintTop_toTopOf="parent">
+
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_play_list"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/rv_play_list"/>
+            android:layout_height="wrap_content" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -14,7 +14,7 @@ import io.realm.RealmResults
 /**
  * Created by akash bisariya on 18-04-2018.
  */
-class PlayListAdapter(val context: Context, private val playList: ArrayList<String>, private val onItemClick: IOnRecycleItemClick):View.OnDragListener, RecyclerView.Adapter<PlayListAdapter.ViewHolder>()
+class PlayListAdapter(val context: Context, private val playList: RealmResults<SongQueue>, private val onItemClick: IOnRecycleItemClick):View.OnDragListener, RecyclerView.Adapter<PlayListAdapter.ViewHolder>()
 {
     override fun onDrag(view: View?, dragEvent: DragEvent?): Boolean {
             when (dragEvent?.action) {
@@ -54,7 +54,7 @@ class PlayListAdapter(val context: Context, private val playList: ArrayList<Stri
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.viewHolderBind(context,playList[position],onItemClick)
+        holder.viewHolderBind(context,playList[position]!!.song!!.songImage,onItemClick)
     }
 
     class ViewHolder(itemView:View,private var onItemClick: IOnRecycleItemClick) :RecyclerView.ViewHolder(itemView)

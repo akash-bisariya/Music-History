@@ -20,7 +20,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
-import app.android.com.musichistory.MusicActivity.MusicActivity
 import io.realm.RealmResults
 
 
@@ -64,12 +63,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         vp_pager.visibility = View.GONE
         fab_music_playing.setOnClickListener(this)
 
-
-
-
-
-
-
         try {
             val bitmap = BitmapFactory.decodeResource(resources, R.drawable.screen_home)
             Palette.from(bitmap).generate { palette ->
@@ -78,7 +71,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 collapsing_toolbar.setContentScrimColor(vibrantColor)
                 collapsing_toolbar.setStatusBarScrimColor(vibrantDarkColor)
             }
-
 
         } catch (e: Exception) {
             collapsing_toolbar.setContentScrimColor(
@@ -89,9 +81,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             )
         }
 
-
-
-
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_PERMISSION_STORAGE)
         } else {
@@ -101,7 +90,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             }
         }
     }
-
 
     /**
      * Created round bitmap image for floating view
@@ -128,18 +116,15 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         return output
     }
 
-
     override fun onClick(view: View?) {
         when (view?.id) {
             R.id.fab_music_playing -> {
                 val intent = Intent(this, MusicActivity::class.java)
-//                intent.putExtra("songId", mSongId)
                 intent.putExtra("fromFloatingButton", true)
                 startActivity(intent)
             }
         }
     }
-
 
     /**
      * getting album art from cursor
@@ -165,7 +150,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     /**
      * Generated Floating View for the playing song
      */
-
     private fun customView(v: View, imagePath: String) {
 
         var drawable: Drawable? = if (!imagePath.equals("")) {
@@ -215,7 +199,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
     override fun onResume() {
         super.onResume()
-        var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+        val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
         if (songData.size > 0) {
             customView(fab_music_playing, songData[0]!!.songImage)
             fab_music_playing.visibility = View.VISIBLE

@@ -29,8 +29,6 @@ class MusicHistoryRecyclerAdapter(val context: Context, private val arrayList: R
     }
 
     class ViewHolder(itemView: View?, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener,View.OnLongClickListener {
-
-
         private val tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
         private val tvArtistName = itemView!!.findViewById(R.id.tv_artist_name) as TextView
         private val tvSongDuration = itemView!!.findViewById(R.id.tv_list_song_duration) as TextView
@@ -40,7 +38,6 @@ class MusicHistoryRecyclerAdapter(val context: Context, private val arrayList: R
         override fun onClick(view: View?) {
             onItemClick.onRecycleItemClick(view, adapterPosition)
         }
-
 
         override fun onLongClick(view: View?): Boolean {
             onItemClick.onRecycleItemLongClick(view,adapterPosition)
