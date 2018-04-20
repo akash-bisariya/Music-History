@@ -74,9 +74,9 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         if (intent != null) {
             if (intent.getStringExtra("songId") != null) {
-                if (!(mMusicPlayer.isPlaying && intent!!.getBooleanExtra("fromFloatingButton", false))) {
+                if (!(mMusicPlayer.isPlaying && intent.getBooleanExtra("fromFloatingButton", false))) {
                     mSongId = intent.getStringExtra("songId")
-                    songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent!!.getStringExtra("songId")).findAll()
+                    songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()
                     mMusicPlayer.stop()
                     mMusicPlayer.reset()
                     mRepeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
@@ -208,11 +208,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                 mMusicPlayer.start()
-            } else {
-                val intent1 = Intent(this, MusicService::class.java)
-//                intent1.putExtra("songId", intent.getStringExtra("songId"))
-//                intent1.putExtra("fromFloatingButton", intent.getBooleanExtra("fromFloatingButton", false))
-//                startService(intent1)
             }
         }
     }

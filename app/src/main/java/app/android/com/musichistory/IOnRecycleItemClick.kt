@@ -10,5 +10,4 @@ import android.view.View
 interface IOnRecycleItemClick {
     fun onRecycleItemClick(view: View?, position:Int)
     fun onRecycleItemLongClick(view: View?, position:Int)
-    fun onRecycleItemTouch(view: View?, motionEvent:MotionEvent?,songId:String)
 }

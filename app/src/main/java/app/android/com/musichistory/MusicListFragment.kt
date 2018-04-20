@@ -21,15 +21,6 @@ import kotlinx.android.synthetic.main.fragment_music_history.*
  */
 
 class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
-    override fun onRecycleItemTouch(view: View?, motionEvent: MotionEvent?,songId:String) {
-//        rv_music_history.setOnDragListener(this)
-        val intent = Intent()
-        intent.putExtra("position", songId)
-        val clipDataItem: ClipData.Item = ClipData.Item(intent)
-        val clipData = ClipData(ClipDescription("Music", arrayOf()), clipDataItem)
-        val shadow = View.DragShadowBuilder((view as ViewGroup).getChildAt(0))
-        view.startDrag(clipData, shadow, null, 0)
-    }
 
     private lateinit var list: RealmResults<SongHistory>
     private lateinit var playListAdapter: PlayListAdapter
@@ -96,6 +87,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
 
 
     override fun onRecycleItemLongClick(view: View?, position: Int) {
+        rl_play_list.visibility = View.VISIBLE
         rl_play_list.setOnDragListener(this)
         val intent = Intent()
         intent.putExtra("position", position)

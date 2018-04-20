@@ -20,20 +20,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
-import android.view.MotionEvent
 import io.realm.RealmResults
-
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener {
-    override fun onRecycleItemTouch(view: View?, motionEvent: MotionEvent?, songId: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onRecycleItemLongClick(view: View?, position: Int) {
-
-    }
 
     private var mSongId: String? = null
     private var viewPager: ViewPager? = null
@@ -94,6 +85,9 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
             }
         }
+    }
+
+    override fun onRecycleItemLongClick(view: View?, position: Int) {
     }
 
     /**

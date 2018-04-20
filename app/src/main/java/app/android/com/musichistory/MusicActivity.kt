@@ -121,9 +121,9 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 .setContentInfo(songData[0]?.songName)
 
 
-        var label: String? = null
-        var icon: Int? = null
-        var intent: PendingIntent? = null
+        val label: String?
+        val icon: Int?
+        val intent: PendingIntent?
         if (playbackStateCompat!!.state == PlaybackStateCompat.STATE_PLAYING) {
             label = "pause"
             icon = R.drawable.ic_pause_circle_filled_red_400_48dp

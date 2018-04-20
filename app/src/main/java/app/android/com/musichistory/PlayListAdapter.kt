@@ -15,32 +15,7 @@ import io.realm.RealmResults
 /**
  * Created by akash bisariya on 18-04-2018.
  */
-class PlayListAdapter(val context: Context, private val playList: RealmResults<SongQueue>, private val onItemClick: IOnRecycleItemClick) : View.OnDragListener, RecyclerView.Adapter<PlayListAdapter.ViewHolder>() {
-    override fun onDrag(view: View?, dragEvent: DragEvent?): Boolean {
-        when (dragEvent?.action) {
-            DragEvent.ACTION_DRAG_STARTED -> {
-                Log.d("ACTION_DRAG_ENDED","DRAG_ENDED")
-                return true
-            }
-            DragEvent.ACTION_DRAG_ENTERED -> {
-                Log.d("ACTION_DRAG_ENDED","DRAG_ENDED")
-                return true
-            }
-            DragEvent.ACTION_DROP -> {
-                Log.d("ACTION_DRAG_ENDED","DRAG_ENDED")
-                return true
-            }
-            DragEvent.ACTION_DRAG_ENDED -> {
-                Log.d("ACTION_DRAG_ENDED","DRAG_ENDED")
-                return true
-            }
-            DragEvent.ACTION_DRAG_EXITED -> {
-                Log.d("ACTION_DRAG_EXITED","DRAG_EXITED")
-                return true
-            }
-            else -> return true
-        }
-    }
+class PlayListAdapter(val context: Context, private val playList: RealmResults<SongQueue>, private val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<PlayListAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view: View = LayoutInflater.from(context).inflate(R.layout.row_play_list, parent, false)
@@ -50,20 +25,14 @@ class PlayListAdapter(val context: Context, private val playList: RealmResults<S
     override fun getItemCount() = if (playList.size > 0) playList.size else 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.viewHolderBind(context, playList[position]!!.song!!, onItemClick)
+        holder.viewHolderBind(context, playList[position]!!.song!!)
     }
 
-    class ViewHolder(itemView: View, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView),View.OnTouchListener {
+    class ViewHolder(itemView: View, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView) {
         private val ivSongImage = itemView.findViewById(R.id.iv_play_list_song_image) as ImageView
         private lateinit var song:SongHistory
-        override fun onTouch(view: View?, motionEvent: MotionEvent?): Boolean {
-            if(motionEvent!!.action== MotionEvent.ACTION_DOWN) {
-                onItemClick.onRecycleItemTouch(view, motionEvent,song.songId)
-            }
-            return true
-        }
 
-        fun viewHolderBind(context: Context, song: SongHistory, listener: IOnRecycleItemClick) {
+        fun viewHolderBind(context: Context, song: SongHistory) {
             this.song=song
             if (song.songImage == "") {
                 Glide.with(context)
@@ -74,7 +43,6 @@ class PlayListAdapter(val context: Context, private val playList: RealmResults<S
                         .load(song.songImage)
                         .into(ivSongImage)
             }
-            itemView.setOnTouchListener(this)
         }
     }
 }

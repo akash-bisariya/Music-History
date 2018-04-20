@@ -8,6 +8,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <declare-styleable name="KerningViews">
+        <attr name="kv_spacing" format="float" />
+    </declare-styleable>
+
     <style name="Theme.AppCompat.Light.NoActionBar.FullScreen">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
