@@ -20,19 +20,81 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
+import android.view.MotionEvent
+import android.widget.ImageView
 import io.realm.RealmResults
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
-class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener {
-
+class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener,View.OnTouchListener {
+    private var dX: Float = 0.toFloat()
+    private var dY:Float = 0.toFloat()
+    private var downRawX: Float = 0.toFloat()
+    private var downRawY:Float = 0.toFloat()
+    private val clickDragTolerance= 10f
     private var mSongId: String? = null
     private var viewPager: ViewPager? = null
+    private lateinit var fabMusicPlaying: ImageView
+
+    override fun onTouch(view: View?, motionEvent: MotionEvent?): Boolean {
+        val action = motionEvent!!.action
+        if (action == MotionEvent.ACTION_DOWN) {
+
+            downRawX = motionEvent.rawX
+            downRawY = motionEvent.rawY
+            dX = view!!.x - downRawX
+            dY = view.y - downRawY
+
+            return true // Consumed
+
+        } else if (action == MotionEvent.ACTION_MOVE) {
+
+            val viewWidth = view!!.width
+            val viewHeight = view.height
+
+            val viewParent = view.parent as View
+            val parentWidth = viewParent.width
+            val parentHeight = viewParent.height
+
+            var newX = motionEvent.rawX + dX
+            newX = Math.max(0f, newX) // Don't allow the FAB past the left hand side of the parent
+            newX = Math.min((parentWidth - viewWidth).toFloat(), newX) // Don't allow the FAB past the right hand side of the parent
+
+            var newY = motionEvent.rawY + dY
+            newY = Math.max(0f, newY) // Don't allow the FAB past the top of the parent
+            newY = Math.min((parentHeight - viewHeight).toFloat(), newY) // Don't allow the FAB past the bottom of the parent
+
+            view.animate()
+                    .x(newX)
+                    .y(newY)
+                    .setDuration(0)
+                    .start()
+
+            return true // Consumed
+
+        } else if (action == MotionEvent.ACTION_UP) {
+
+            val upRawX = motionEvent.rawX
+            val upRawY = motionEvent.rawY
+
+            val upDX = upRawX - downRawX
+            val upDY = upRawY - downRawY
+
+            return if (Math.abs(upDX) < clickDragTolerance && Math.abs(upDY) < clickDragTolerance) { // A click
+                fabMusicPlaying.performClick()
+            } else { // A drag
+                true // Consumed
+            }
+
+        } else {
+            return super.onTouchEvent(motionEvent)
+        }
+    }
 
     override fun onRecycleItemClick(view: View?, position: Int) {
         mSongId = position.toString()
         fab_music_playing.visibility = View.VISIBLE
-        var songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
+        val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
         Realm.getDefaultInstance().executeTransaction({
             val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
             for (music in result) {
@@ -53,6 +115,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         toolbar.addView(view)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
+        fabMusicPlaying = findViewById(R.id.fab_music_playing)
+        fabMusicPlaying.setOnTouchListener(this)
         viewPager = vp_pager
         tb_music.setupWithViewPager(vp_pager)
         pb_music.visibility = View.VISIBLE

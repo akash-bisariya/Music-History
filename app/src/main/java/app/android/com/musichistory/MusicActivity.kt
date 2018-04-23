@@ -294,25 +294,25 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         repeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
 
         when (repeatCount) {
-            0 -> {
+            MUSIC_HISTORY_SONG_REPEAT_INFINITE -> {
                 iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
                 tv_repeat_count.text = ""
             }
-            -1 -> {
+            MUSIC_HISTORY_SONG_REPEAT_NEVER -> {
                 iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
                 tv_repeat_count.text = ""
             }
-            1 -> {
+            MUSIC_HISTORY_SONG_REPEAT_ONE_TIME -> {
                 iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
                 tv_repeat_count.text = "1"
             }
-            2 -> {
+            MUSIC_HISTORY_SONG_REPEAT_TWO_TIME -> {
                 iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
                 tv_repeat_count.text = "2"
             }
-            3 -> {
+            MUSIC_HISTORY_SONG_REPEAT_THREE_TIME -> {
                 iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
-                tv_repeat_count.text = "2"
+                tv_repeat_count.text = "3"
             }
         }
 

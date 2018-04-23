@@ -3,11 +3,15 @@ package app.android.com.musichistory
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
+import android.support.design.widget.TabLayout
 import android.support.v4.view.GravityCompat
+import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.android.synthetic.main.app_bar_main2.*
 
@@ -16,6 +20,8 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
+        val view = layoutInflater.inflate(R.layout.music_history_title_layout, null)
+        toolbar_new.addView(view)
         setSupportActionBar(toolbar)
 
         val toggle = ActionBarDrawerToggle(
@@ -24,6 +30,14 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+        var tb_music_new = findViewById<TabLayout>(R.id.tb_music_new)
+        var vp_pager_new  = findViewById<ViewPager>(R.id.vp_pager_new)
+        tb_music_new.setupWithViewPager(vp_pager_new)
+//        pb_music.visibility = View.VISIBLE
+        vp_pager_new!!.adapter = PagerAdapter(supportFragmentManager)
+        tb_music_new.setupWithViewPager(vp_pager_new)
+        vp_pager_new.visibility = View.GONE
+//        fab_music_playing.setOnClickListener(this)
     }
 
     override fun onBackPressed() {
@@ -31,22 +45,6 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main2, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
         }
     }
 

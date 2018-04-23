@@ -208,6 +208,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                 mMusicPlayer.start()
+                mMediaSession!!.isActive = true
             }
         }
     }
@@ -216,6 +217,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMusicPlayer.pause()
         mStateBuilder?.setState(PlaybackStateCompat.STATE_PAUSED, mMusicPlayer.currentPosition.toLong(), 1.0f)
         mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+        mMediaSession!!.isActive = false
+
     }
 
 
@@ -230,14 +233,17 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         when (result) {
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT -> {
-                if (mMediaPlayerPause)
+                if (mMediaPlayerPause) {
                     playMediaPlayer()
+                    mMediaSession!!.isActive = true
+                }
                 Log.d("AudioFocus", "AUDIOFOCUS_GAIN_TRANSIENT")
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 if (mMusicPlayer.isPlaying) {
                     pauseMediaPlayer()
                     mMediaPlayerPause = true
+                    mMediaSession!!.isActive = false
                 }
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS_TRANSIENT")
             }
@@ -249,6 +255,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             AudioManager.AUDIOFOCUS_LOSS -> {
                 pauseMediaPlayer()
                 mMediaPlayerPause = true
+                mMediaSession!!.isActive = false
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS")
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
@@ -258,6 +265,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                     mMusicPlayer.setOnErrorListener(this)
                     mMusicPlayer.setOnPreparedListener {
                         it.start()
+                        mMediaSession!!.isActive = true
                     }
                 }
                 mAudioFocusCanDuck = false
@@ -266,25 +274,30 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             else -> {
                 stopMusicPlayer()
                 mMediaPlayerPause = false
+                mMediaSession!!.isActive = false
             }
         }
     }
 
     override fun onCompletion(p0: MediaPlayer?) {
         when (mRepeatCount) {
-            0, 2, 3 -> {
+            MUSIC_HISTORY_SONG_REPEAT_INFINITE,
+            MUSIC_HISTORY_SONG_REPEAT_TWO_TIME,
+            MUSIC_HISTORY_SONG_REPEAT_THREE_TIME -> {
                 p0!!.start()
+                mMediaSession!!.isActive = true
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                 mRepeatCount--
             }
-            1 -> {
+            MUSIC_HISTORY_SONG_REPEAT_ONE_TIME -> {
                 p0?.start()
+                mMediaSession!!.isActive = true
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                 mRepeatCount = -1
             }
-            -1 -> stopMusicPlayer()
+            MUSIC_HISTORY_SONG_REPEAT_NEVER -> stopMusicPlayer()
         }
     }
 
@@ -299,11 +312,11 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
      * Stop and release media player and session
      */
     private fun stopMusicPlayer() {
-//        mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
         mMusicPlayer.stop()
         mStateBuilder?.setState(PlaybackStateCompat.STATE_STOPPED, mMusicPlayer.currentPosition.toLong(), 1.0f)
         mMediaSession?.setPlaybackState(mStateBuilder!!.build())
         mMusicPlayer.reset()
+        mMediaSession!!.isActive = false
         mMediaSession?.release()
         mAudioManager?.abandonAudioFocus(this)
     }
