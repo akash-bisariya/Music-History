@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -206,7 +207,9 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
             mMediaControllerCompat!!.registerCallback(mMediaControllerCompatCallback)
-            mMediaControllerCompatCallback.onMetadataChanged(mMediaControllerCompat!!.metadata);
+
+//            mMediaControllerCompat!!.transportControls.playFromMediaId(songData[0]!!.songId,null)
+            mMediaControllerCompatCallback.onMetadataChanged(mMediaControllerCompat!!.metadata)
             mMediaControllerCompatCallback.onPlaybackStateChanged(mMediaControllerCompat!!.playbackState)
             startServiceToPlay()
 
@@ -225,11 +228,15 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     /**
      * started service to play music
      */
-    fun startServiceToPlay() {
+    private fun startServiceToPlay() {
         val intent1 = Intent(this@MusicActivity, MusicService::class.java)
         intent1.putExtra("songId", songData[0]!!.songId)
         intent1.putExtra("fromFloatingButton", intent.getBooleanExtra("fromFloatingButton", false))
-        startService(intent1)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent1)
+        }
+        else
+            startService(intent1)
         setResult(Activity.RESULT_OK)
     }
 
@@ -408,7 +415,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mMediaBrowserCompat!!.isConnected) mMediaBrowserCompat?.disconnect()
+        Realm.getDefaultInstance().close()
     }
 
     private fun getGradientDrawable(topColor: Int, centerColor: Int, bottomColor: Int): GradientDrawable {
