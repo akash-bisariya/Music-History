@@ -17,6 +17,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.widget.Toast
 import io.realm.Realm
+import io.realm.RealmChangeListener
 import io.realm.RealmResults
 
 
@@ -27,7 +28,7 @@ import io.realm.RealmResults
 class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
     private val MY_MEDIA_ROOT_ID = "media_root_id"
     private val MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id"
-    private var mSongQueue: RealmResults<SongQueue>? = null
+    private var mSongQueueRealmResult: RealmResults<SongQueue>? = null
     private var mMediaSession: MediaSessionCompat? = null
     private var mStateBuilder: PlaybackStateCompat.Builder? = null
     private var mPlaybackStateCompat: PlaybackStateCompat? = null
@@ -37,6 +38,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private var mAudioFocusCanDuck = false
     private var mRepeatCount = -1
     private var mSongId: String? = null
+    private var mCurrentSongIndex = 0
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
     private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
@@ -44,6 +46,10 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private val MUSIC_HISTORY_ACTION_REPEAT_ALL = "MUSIC_HISTORY_ACTION_REPEAT_ALL"
     val metaDataReceiver = MediaMetadataRetriever()
     private lateinit var songData: SongHistory
+//    private lateinit var mSongQueue:ArrayList<SongQueue>
+    private val listener = RealmChangeListener<RealmResults<SongQueue>> {
+//        results -> mSongQueue[0]=results[0] as SongQueue
+    }
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
     }
 
@@ -55,7 +61,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onCreate() {
         super.onCreate()
-        mMediaSession = MediaSessionCompat(this, MUSIC_HISTORY_MEDIA_SESSION )
+        mMediaSession = MediaSessionCompat(this, MUSIC_HISTORY_MEDIA_SESSION)
         mMediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS)
         mMediaSession!!.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
         mStateBuilder = PlaybackStateCompat.Builder()
@@ -65,11 +71,15 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMediaSession!!.setCallback(MediaCallbacks())
         sessionToken = mMediaSession!!.sessionToken
         mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+//        mSongQueue= ArrayList()
+        mSongQueueRealmResult = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
 
-        mSongQueue=Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
+        (mSongQueueRealmResult as RealmResults<SongQueue>).addChangeListener(listener)
 
-        if(mSongQueue!=null && (mSongQueue as RealmResults<SongQueue>).size>0) {
-            songData = (mSongQueue as RealmResults<SongQueue>)[0]!!.song as SongHistory
+//        mSongQueue.addAll(.add)
+
+        if ((mSongQueueRealmResult as RealmResults<SongQueue>) .size > 0) {
+            songData = (mSongQueueRealmResult as RealmResults<SongQueue>)[mCurrentSongIndex]!!.song as SongHistory
         }
 
 
@@ -86,8 +96,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                     mRepeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
                     val result = mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
                     if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                        mMusicPlayer.setDataSource(songData.songData)
-                        metaDataReceiver.setDataSource(songData.songData)
+                        mMusicPlayer.setDataSource(songData.songDataPath)
+                        metaDataReceiver.setDataSource(songData.songDataPath)
                         mMusicPlayer.prepareAsync()
                         mMusicPlayer.setOnCompletionListener(this@MusicService)
                         mMusicPlayer.setOnErrorListener(this@MusicService)
@@ -102,21 +112,39 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                                     .build()
 
                             mMediaSession!!.setMetadata(metadata)
-                            Realm.getDefaultInstance().executeTransaction {
-                                (mSongQueue as RealmResults<SongQueue>).deleteAllFromRealm()
-                            }
+//                            mSongQueue.clear()
 
-                            (mSongQueue as RealmResults<SongQueue>).fill(SongQueue(songId = intent.getStringExtra("songId") as String,song = songData))
+//                            mSongQueueRealmResult!!.deleteAllFromRealm()
+//                            Realm.getDefaultInstance().executeTransaction {
+//                                it.insertOrUpdate(SongQueue(songId = intent.getStringExtra("songId") as String, song = songData))
+//                            }
+//                            mSongQueue.add(SongQueue(songId = intent.getStringExtra("songId") as String, song = songData))
+                            Log.d("songDataPath",""+(songData.songId)+songData.songDataPath+""+songData.albumName)
+                            Toast.makeText(this,""+(songData.songId)+songData.songDataPath+""+songData.albumName,Toast.LENGTH_SHORT).show()
 
+
+                            Realm.getDefaultInstance().executeTransactionAsync({
+                                it.delete(SongQueue::class.java)
+                                it.insertOrUpdate(SongQueue(songId = intent.getStringExtra("songId") as String, song = songData))
+                            })
+
+                            Log.d("songDataPath",""+(songData.songId)+songData.songDataPath+""+songData.albumName)
                         }
                     }
                 }
             } else {
                 when (intent.action) {
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY -> { playMediaPlayer() }
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS -> { }
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT -> { }
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE -> { if (mMusicPlayer.isPlaying) pauseMediaPlayer() else playMediaPlayer() }
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY -> {
+                        playMediaPlayer()
+                    }
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS -> {
+                    }
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT -> {
+                        playNextSong()
+                    }
+                    MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE -> {
+                        if (mMusicPlayer.isPlaying) pauseMediaPlayer() else playMediaPlayer()
+                    }
                 }
             }
         }
@@ -134,18 +162,15 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             songData = (Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", mediaId).findAll()[0]) as SongHistory
             mMusicPlayer.stop()
             mMusicPlayer.reset()
-//            mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
-            mMusicPlayer.setDataSource(songData.songData)
+            mMusicPlayer.setDataSource(songData.songDataPath)
             mMusicPlayer.prepareAsync()
             mMusicPlayer.setOnPreparedListener {
                 it.start()
-//                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 0.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-                val song:SongQueue= SongQueue()
+//                mSongQueue.clear()
+//                mSongQueue.add(SongQueue(songId = mediaId as String, song = songData))
 
-                (mSongQueue as RealmResults<SongQueue>).fill(SongQueue(songId = mediaId as String,song = songData))
-//                buildNotification()
             }
         }
 
@@ -185,6 +210,9 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         override fun onSkipToNext() {
             super.onSkipToNext()
+            playNextSong()
+
+
         }
 
         override fun onPlay() {
@@ -198,16 +226,29 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         }
     }
 
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopMusicPlayer()
-        Realm.getDefaultInstance().close()
+    private fun playNextSong() {
+//        mSongQueue = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
+        mMusicPlayer.reset()
+        mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mMusicPlayer.currentPosition.toLong(), 1.0f)
+        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+        if ((mSongQueueRealmResult as RealmResults<SongQueue>).size > 1) {
+            if(mCurrentSongIndex<(mSongQueueRealmResult as RealmResults<SongQueue>).size-1) mCurrentSongIndex++ else (mSongQueueRealmResult as RealmResults<SongQueue>).size-1
+        }
+        else mCurrentSongIndex=0
+        songData = (mSongQueueRealmResult as RealmResults<SongQueue>)[mCurrentSongIndex]!!.song as SongHistory
+        Toast.makeText(this,""+(songData.songId)+songData.songDataPath+""+songData.albumName,Toast.LENGTH_SHORT).show()
+        Log.d("songDataPath",""+(songData.songId)+songData.songDataPath+""+songData.albumName)
+        mMusicPlayer.setDataSource(songData.songDataPath)
+        mMusicPlayer.prepareAsync()
+        mMusicPlayer.setOnPreparedListener {
+            it.start()
+            mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 0.0f)
+            mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+        }
     }
 
     fun playMediaPlayer() {
-        val result = mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+        if (getAudioFocus()) {
             if (mPlaybackStateCompat!!.state != PlaybackStateCompat.STATE_STOPPED) {
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
@@ -225,14 +266,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     }
 
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        super.onTaskRemoved(rootIntent)
-        stopMusicPlayer()
-        Realm.getDefaultInstance().close()
-        stopSelf()
-    }
-
+    private fun getAudioFocus(): Boolean = (mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED)
 
     override fun onAudioFocusChange(result: Int) {
 
@@ -265,7 +299,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
                 if (!mAudioFocusCanDuck) {
-                    mMusicPlayer.setDataSource(songData.songData)
+                    mMusicPlayer.setDataSource(songData.songDataPath)
                     mMusicPlayer.prepareAsync()
                     mMusicPlayer.setOnErrorListener(this)
                     mMusicPlayer.setOnPreparedListener {
@@ -286,14 +320,18 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onCompletion(p0: MediaPlayer?) {
         when (mRepeatCount) {
-            MUSIC_HISTORY_SONG_REPEAT_INFINITE,
+            MUSIC_HISTORY_SONG_REPEAT_INFINITE -> {
+                p0!!.start()
+                mMediaSession!!.isActive = true
+                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
+                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+            }
             MUSIC_HISTORY_SONG_REPEAT_TWO_TIME,
             MUSIC_HISTORY_SONG_REPEAT_THREE_TIME -> {
                 p0!!.start()
                 mMediaSession!!.isActive = true
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-                if(mRepeatCount!= MUSIC_HISTORY_SONG_REPEAT_INFINITE)
                 mRepeatCount--
             }
             MUSIC_HISTORY_SONG_REPEAT_ONE_TIME -> {
@@ -313,7 +351,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         return false
     }
 
-
     /**
      * Stop and release media player and session
      */
@@ -327,5 +364,17 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mAudioManager?.abandonAudioFocus(this)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopMusicPlayer()
+        Realm.getDefaultInstance().close()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        stopMusicPlayer()
+        Realm.getDefaultInstance().close()
+        stopSelf()
+    }
 
 }

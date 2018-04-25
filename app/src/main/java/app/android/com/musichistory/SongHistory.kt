@@ -19,7 +19,7 @@ open class SongHistory(
         var songName: String = "",
         var songArtist: String = "",
         var albumName: String = "",
-        var songData: String = "",
+        var songDataPath: String = "",
         var songDuration: String = "",
         var lastPlayed: String = "",
         var songImage: String = "",

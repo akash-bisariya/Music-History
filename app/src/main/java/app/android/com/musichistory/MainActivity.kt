@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.View
