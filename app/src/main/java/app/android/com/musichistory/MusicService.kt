@@ -19,6 +19,7 @@ import android.widget.Toast
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.RealmResults
+import java.util.ArrayList
 
 
 /**
@@ -112,6 +113,29 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                                     .build()
 
                             mMediaSession!!.setMetadata(metadata)
+//
+//                            val queue = ArrayList<MediaSessionCompat.QueueItem>()
+////                            val media = MediaDescriptionCompat(mSongId,songData.songName,songData.songArtist,
+////                                    songData.albumName,null,songData.songDataPath,null,songData.songDataPath)
+//
+//                            val track = MediaMetadataCompat.Builder()
+//                                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId)
+//                                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM,songData.albumName)
+//                                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songData.songArtist)
+//                                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE,songData.songName)
+//                                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART,songData.songImage)
+//                                    .build()
+//                            val track2 = MediaMetadataCompat.Builder()
+//                                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "2751")
+//                                    .build()
+//                            val item = MediaSessionCompat.QueueItem(track.description,0)
+//                            val item2 = MediaSessionCompat.QueueItem(track2.description,0)
+//                            queue.add(item)
+//                            queue.add(item2)
+//                            (mMediaSession as MediaSessionCompat).setQueue(queue)
+
+
+
 //                            mSongQueue.clear()
 
 //                            mSongQueueRealmResult!!.deleteAllFromRealm()
@@ -229,8 +253,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private fun playNextSong() {
 //        mSongQueue = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
         mMusicPlayer.reset()
-        mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mMusicPlayer.currentPosition.toLong(), 1.0f)
-        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+//        mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mMusicPlayer.currentPosition.toLong(), 1.0f)
+//        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
         if ((mSongQueueRealmResult as RealmResults<SongQueue>).size > 1) {
             if(mCurrentSongIndex<(mSongQueueRealmResult as RealmResults<SongQueue>).size-1) mCurrentSongIndex++ else (mSongQueueRealmResult as RealmResults<SongQueue>).size-1
         }

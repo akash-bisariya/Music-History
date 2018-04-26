@@ -1,5 +1,6 @@
 package app.android.com.musichistory
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,9 @@ import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.View
@@ -23,7 +27,9 @@ import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
 import android.view.MotionEvent
 import android.widget.ImageView
+import android.widget.Toast
 import io.realm.RealmResults
+import java.util.ArrayList
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
@@ -109,6 +115,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
     }
 
+    private lateinit var mMediaBrowserCompat: MediaBrowserCompat
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -150,9 +158,50 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
             }
         }
+
+        mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, MusicService::class.java), mMediaBrowserCompatConnectionCallback, null)
+        mMediaBrowserCompat.connect()
+
+
+
+    }
+
+    private lateinit var mMediaControllerCompat: MediaControllerCompat
+    private val mMediaBrowserCompatConnectionCallback: MediaBrowserCompat.ConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
+        override fun onConnected() {
+            super.onConnected()
+            mMediaControllerCompat = MediaControllerCompat(this@MainActivity, mMediaBrowserCompat.sessionToken)
+
+
+        }
+
+        override fun onConnectionSuspended() {
+            super.onConnectionSuspended()
+        }
+
+        override fun onConnectionFailed() {
+            super.onConnectionFailed()
+        }
     }
 
     override fun onRecycleItemLongClick(view: View?, position: Int) {
+//        val queue = ArrayList<MediaSessionCompat.QueueItem>()
+        val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
+
+        Toast.makeText(this,""+(songData[0]!!.songId)+songData[0]!!.songDataPath+""+songData[0]!!.albumName, Toast.LENGTH_SHORT).show()
+        val track = MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM,songData[0]!!.albumName)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songData[0]!!.songArtist)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE,songData[0]!!.songName)
+                .build()
+
+
+
+        val item = MediaSessionCompat.QueueItem(track.description,0)
+//        queue.add(item)
+//        (mMediaSession as MediaSessionCompat).setQueue(queue)
+        mMediaControllerCompat.queue.set(0,item)
     }
 
     /**

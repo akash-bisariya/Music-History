@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.SystemClock
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v7.graphics.Palette
 import android.view.View
@@ -312,6 +313,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             updateUIState(state)
         }
 
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            super.onMetadataChanged(metadata)
+        }
+
     }
 
 
@@ -321,6 +326,8 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
             mMediaControllerCompat!!.registerCallback(mMediaControllerCompatCallback)
+
+
 
 //            mMediaControllerCompat!!.transportControls.playFromMediaId(songDataPath[0]!!.songId,null)
             mMediaControllerCompatCallback.onMetadataChanged(mMediaControllerCompat!!.metadata)
