@@ -47,10 +47,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private val MUSIC_HISTORY_ACTION_REPEAT_ALL = "MUSIC_HISTORY_ACTION_REPEAT_ALL"
     val metaDataReceiver = MediaMetadataRetriever()
     private lateinit var songData: SongHistory
-//    private lateinit var mSongQueue:ArrayList<SongQueue>
-    private val listener = RealmChangeListener<RealmResults<SongQueue>> {
-//        results -> mSongQueue[0]=results[0] as SongQueue
-    }
+
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
     }
 
@@ -72,12 +69,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMediaSession!!.setCallback(MediaCallbacks())
         sessionToken = mMediaSession!!.sessionToken
         mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-//        mSongQueue= ArrayList()
+
         mSongQueueRealmResult = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
-
-        (mSongQueueRealmResult as RealmResults<SongQueue>).addChangeListener(listener)
-
-//        mSongQueue.addAll(.add)
 
         if ((mSongQueueRealmResult as RealmResults<SongQueue>) .size > 0) {
             songData = (mSongQueueRealmResult as RealmResults<SongQueue>)[mCurrentSongIndex]!!.song as SongHistory
@@ -113,16 +106,10 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                                     .build()
 
                             mMediaSession!!.setMetadata(metadata)
-                            Log.d("songDataPath",""+(songData.songId)+songData.songDataPath+""+songData.albumName)
-                            Toast.makeText(this,""+(songData.songId)+songData.songDataPath+""+songData.albumName,Toast.LENGTH_SHORT).show()
-
-
                             Realm.getDefaultInstance().executeTransactionAsync({
                                 it.delete(SongQueue::class.java)
                                 it.insertOrUpdate(SongQueue(songId = intent.getStringExtra("songId") as String, song = songData))
                             })
-
-                            Log.d("songDataPath",""+(songData.songId)+songData.songDataPath+""+songData.albumName)
                         }
                     }
                 }
@@ -232,8 +219,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMediaSession?.setPlaybackState(mStateBuilder!!.build())
 
         songData = (mSongQueueRealmResult as RealmResults<SongQueue>)[mCurrentSongIndex]!!.song as SongHistory
-        Toast.makeText(this,""+(songData.songId)+songData.songDataPath+""+songData.albumName,Toast.LENGTH_SHORT).show()
-        Log.d("songDataPath",""+(songData.songId)+songData.songDataPath+""+songData.albumName)
         mMusicPlayer.reset()
         mMusicPlayer.setDataSource(songData.songDataPath)
         mMusicPlayer.prepareAsync()

@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.*
 import android.widget.Toast
 import io.realm.Realm
+import io.realm.RealmChangeListener
 import io.realm.RealmResults
 import io.realm.Sort
 import kotlinx.android.synthetic.main.fragment_music_history.*
@@ -23,11 +24,15 @@ import kotlinx.android.synthetic.main.fragment_music_history.*
 class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
 
     private lateinit var list: RealmResults<SongHistory>
-    private lateinit var playListAdapter: PlayListAdapter
     private lateinit var playList: RealmResults<SongQueue>
+    private lateinit var playListAdapter: PlayListAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return LayoutInflater.from(activity).inflate(R.layout.fragment_music_history, null)
+    }
+
+    private val listener = RealmChangeListener<RealmResults<SongQueue>> {
+        playListAdapter.notifyDataSetChanged()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,6 +46,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
         playListAdapter = PlayListAdapter(activity!!.applicationContext, playList, this)
         rv_play_list.adapter = playListAdapter
         if (playList.size > 0) rl_play_list.visibility = View.VISIBLE
+        playList.addChangeListener(listener)
     }
 
 
@@ -60,11 +66,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
                     it.insert(SongQueue(list[position.toInt()]!!.songId, list[position.toInt()]))
                     playListAdapter.notifyDataSetChanged()
                 }
-//                (activity as MainActivity).onRecycleItemLongClick(null, list[(dragEvent.clipData.getItemAt(0).intent.extras.get("position")) as Int]!!.songId.toInt())
                 Log.d("ACTION_DROP", "DROP")
-
-
-
                 return true
             }
             DragEvent.ACTION_DRAG_ENDED -> {

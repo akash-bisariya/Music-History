@@ -1,5 +1,6 @@
 package app.android.com.musichistory
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -13,10 +14,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.View
@@ -27,9 +24,7 @@ import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
 import android.view.MotionEvent
 import android.widget.ImageView
-import android.widget.Toast
 import io.realm.RealmResults
-import java.util.ArrayList
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
@@ -113,9 +108,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         customView(fab_music_playing, songData[0]!!.songImage)
 
 
-    }
 
-    private lateinit var mMediaBrowserCompat: MediaBrowserCompat
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -200,8 +194,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 bitmap.width / 2.toFloat(), paint)
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
         canvas.drawBitmap(bitmap, rect, rect, paint)
-        //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
-        //return _bmp;
         return output
     }
 
@@ -315,6 +307,14 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                     vp_pager.visibility = View.VISIBLE
                 }
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode==10001 && resultCode== Activity.RESULT_OK)
+        {
+            customView(fab_music_playing, data!!.getStringExtra("songPath"))
         }
     }
 }

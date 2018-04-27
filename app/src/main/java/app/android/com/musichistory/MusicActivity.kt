@@ -358,9 +358,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             startForegroundService(intent1)
         } else
             startService(intent1)
-        setResult(Activity.RESULT_OK)
     }
-
 
     private fun playbackAction(actionNumber: Int): PendingIntent? {
         val playbackAction = Intent(this, MusicService::class.java)
@@ -470,6 +468,14 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 stopSeekbarUpdate()
                 if(Realm.getDefaultInstance().where(SongQueue::class.java).findAll().size>0)
                 songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
+                Realm.getDefaultInstance().executeTransaction({
+                    val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+                    for (music in result) {
+                        music.isCurrentlyPlaying = false
+                    }
+                    songData.isCurrentlyPlaying = true
+                    it.copyToRealmOrUpdate(songData)
+                })
                 setData()
             }
         }

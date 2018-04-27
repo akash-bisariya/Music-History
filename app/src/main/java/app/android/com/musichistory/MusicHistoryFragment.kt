@@ -24,6 +24,14 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick, View.OnDragListene
     private lateinit var playListAdapter: PlayListAdapter
     private lateinit var playList: RealmResults<SongQueue>
 
+    private val listener = RealmChangeListener<RealmResults<SongQueue>> {
+        playListAdapter.notifyDataSetChanged()
+    }
+
+    private val musicHistoryListener = RealmChangeListener<RealmResults<SongHistory>> {
+        musicHistoryRecyclerAdapter.notifyDataSetChanged()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         rv_music_history.layoutManager = LinearLayoutManager(activity)
@@ -36,6 +44,8 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick, View.OnDragListene
         playListAdapter = PlayListAdapter(activity!!.applicationContext, playList, this)
         rv_play_list.adapter = playListAdapter
         if (playList.size > 0) rl_play_list.visibility = View.VISIBLE
+        playList.addChangeListener(listener)
+        list.addChangeListener(musicHistoryListener)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
