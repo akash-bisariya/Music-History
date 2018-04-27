@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
      */
     private fun customView(v: View, imagePath: String) {
 
-        var drawable: Drawable? = if (!imagePath.equals("")) {
+        val drawable: Drawable? = if (!imagePath.equals("")) {
             BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath)))
         } else {
             BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeResource(resources, R.drawable.music_icon)))

@@ -15,11 +15,8 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import android.widget.Toast
 import io.realm.Realm
-import io.realm.RealmChangeListener
 import io.realm.RealmResults
-import java.util.ArrayList
 
 
 /**
@@ -72,7 +69,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         mSongQueueRealmResult = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
 
-        if ((mSongQueueRealmResult as RealmResults<SongQueue>) .size > 0) {
+        if ((mSongQueueRealmResult as RealmResults<SongQueue>).size > 0) {
             songData = (mSongQueueRealmResult as RealmResults<SongQueue>)[mCurrentSongIndex]!!.song as SongHistory
         }
 
@@ -121,7 +118,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                     MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS -> {
                     }
                     MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT -> {
-                        playNextSong()
+                        handlePlayRequest(1)
                     }
                     MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE -> {
                         if (mMusicPlayer.isPlaying) pauseMediaPlayer() else playMediaPlayer()
@@ -149,9 +146,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 it.start()
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 0.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-//                mSongQueue.clear()
-//                mSongQueue.add(SongQueue(songId = mediaId as String, song = songData))
-
+                mMediaSession!!.isActive = true
             }
         }
 
@@ -191,9 +186,12 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         override fun onSkipToNext() {
             super.onSkipToNext()
-            playNextSong()
+            handlePlayRequest(1)
+        }
 
-
+        override fun onSkipToPrevious() {
+            super.onSkipToPrevious()
+            handlePlayRequest(-1)
         }
 
         override fun onPlay() {
@@ -207,14 +205,11 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         }
     }
 
-    private fun playNextSong() {
-//        mSongQueue = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
-        if ((mSongQueueRealmResult as RealmResults<SongQueue>).size > 1) {
-            if(mCurrentSongIndex<(mSongQueueRealmResult as RealmResults<SongQueue>).size-1) mCurrentSongIndex++ else (mSongQueueRealmResult as RealmResults<SongQueue>).size-1
-        }
-        else mCurrentSongIndex=0
-        val extras:Bundle = Bundle()
-        extras.putString("currentIndex",mCurrentSongIndex.toString())
+    private fun handlePlayRequest(amount: Int) {
+        mCurrentSongIndex += amount
+        if (mCurrentSongIndex < 0) mCurrentSongIndex = 0 else mCurrentSongIndex %= mSongQueueRealmResult!!.size
+        val extras = Bundle()
+        extras.putString("currentIndex", mCurrentSongIndex.toString())
         mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mCurrentSongIndex.toLong(), 1.0f)!!.setExtras(extras)
         mMediaSession?.setPlaybackState(mStateBuilder!!.build())
 
@@ -226,6 +221,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             it.start()
             mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 0.0f)
             mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+            mMediaSession!!.isActive = true
         }
     }
 
@@ -303,25 +299,31 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     override fun onCompletion(p0: MediaPlayer?) {
         when (mRepeatCount) {
             MUSIC_HISTORY_SONG_REPEAT_INFINITE -> {
-                p0!!.start()
-                mMediaSession!!.isActive = true
-                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
-                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+                if (getAudioFocus()) {
+                    p0!!.start()
+                    mMediaSession!!.isActive = true
+                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
+                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+                }
             }
             MUSIC_HISTORY_SONG_REPEAT_TWO_TIME,
             MUSIC_HISTORY_SONG_REPEAT_THREE_TIME -> {
-                p0!!.start()
-                mMediaSession!!.isActive = true
-                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
-                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-                mRepeatCount--
+                if (getAudioFocus()) {
+                    p0!!.start()
+                    mMediaSession!!.isActive = true
+                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
+                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+                    mRepeatCount--
+                }
             }
             MUSIC_HISTORY_SONG_REPEAT_ONE_TIME -> {
-                p0?.start()
-                mMediaSession!!.isActive = true
-                mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
-                mMediaSession?.setPlaybackState(mStateBuilder!!.build())
-                mRepeatCount = -1
+                if (getAudioFocus()) {
+                    p0?.start()
+                    mMediaSession!!.isActive = true
+                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
+                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+                    mRepeatCount = -1
+                }
             }
             MUSIC_HISTORY_SONG_REPEAT_NEVER -> stopMusicPlayer()
         }
@@ -329,7 +331,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
         stopMusicPlayer()
-        Toast.makeText(this, "Error occurred - p1 $p1 p2 $p2", Toast.LENGTH_SHORT).show()
+        Log.d("MusicHistoryError", "Error occurred - p1 $p1 p2 $p2")
         return false
     }
 

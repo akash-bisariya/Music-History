@@ -134,6 +134,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
         iv_next.setOnClickListener(this)
+        iv_previous.setOnClickListener(this)
         iv_repeat.setOnClickListener(this)
         seek_bar.max = songData.songDuration.toInt()
 
@@ -195,6 +196,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
                 R.id.iv_next -> {
                     MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.skipToNext()
+                }
+
+                R.id.iv_previous -> {
+                    MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.skipToPrevious()
                 }
             }
         }
