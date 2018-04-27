@@ -60,7 +60,7 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
                     it.insert(SongQueue(list[position.toInt()]!!.songId, list[position.toInt()]))
                     playListAdapter.notifyDataSetChanged()
                 }
-                (activity as MainActivity).onRecycleItemLongClick(null, list[(dragEvent.clipData.getItemAt(0).intent.extras.get("position")) as Int]!!.songId.toInt())
+//                (activity as MainActivity).onRecycleItemLongClick(null, list[(dragEvent.clipData.getItemAt(0).intent.extras.get("position")) as Int]!!.songId.toInt())
                 Log.d("ACTION_DROP", "DROP")
 
 

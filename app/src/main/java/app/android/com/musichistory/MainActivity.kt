@@ -158,50 +158,26 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
             }
         }
-
-        mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, MusicService::class.java), mMediaBrowserCompatConnectionCallback, null)
-        mMediaBrowserCompat.connect()
-
-
-
-    }
-
-    private lateinit var mMediaControllerCompat: MediaControllerCompat
-    private val mMediaBrowserCompatConnectionCallback: MediaBrowserCompat.ConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
-        override fun onConnected() {
-            super.onConnected()
-            mMediaControllerCompat = MediaControllerCompat(this@MainActivity, mMediaBrowserCompat.sessionToken)
-
-
-        }
-
-        override fun onConnectionSuspended() {
-            super.onConnectionSuspended()
-        }
-
-        override fun onConnectionFailed() {
-            super.onConnectionFailed()
-        }
     }
 
     override fun onRecycleItemLongClick(view: View?, position: Int) {
-//        val queue = ArrayList<MediaSessionCompat.QueueItem>()
-        val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
-
-        Toast.makeText(this,""+(songData[0]!!.songId)+songData[0]!!.songDataPath+""+songData[0]!!.albumName, Toast.LENGTH_SHORT).show()
-        val track = MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM,songData[0]!!.albumName)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songData[0]!!.songArtist)
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE,songData[0]!!.songName)
-                .build()
-
-
-
-        val item = MediaSessionCompat.QueueItem(track.description,0)
-//        queue.add(item)
-//        (mMediaSession as MediaSessionCompat).setQueue(queue)
-        mMediaControllerCompat.queue.set(0,item)
+////        val queue = ArrayList<MediaSessionCompat.QueueItem>()
+//        val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
+//
+//        Toast.makeText(this,""+(songData[0]!!.songId)+songData[0]!!.songDataPath+""+songData[0]!!.albumName, Toast.LENGTH_SHORT).show()
+//        val track = MediaMetadataCompat.Builder()
+//                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId)
+//                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM,songData[0]!!.albumName)
+//                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songData[0]!!.songArtist)
+//                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE,songData[0]!!.songName)
+//                .build()
+//
+//
+//
+//        val item = MediaSessionCompat.QueueItem(track.description,0)
+////        queue.add(item)
+////        (mMediaSession as MediaSessionCompat).setQueue(queue)
+//        mMediaControllerCompat.queue.set(0,item)
     }
 
     /**
@@ -328,6 +304,15 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 launch {
                     getSong(applicationContext)
                     Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
+                }
+            }
+            else->
+            {
+                launch(UI) {
+                    viewPager!!.adapter = PagerAdapter(supportFragmentManager)
+                    tb_music.setupWithViewPager(vp_pager)
+                    pb_music.visibility = View.GONE
+                    vp_pager.visibility = View.VISIBLE
                 }
             }
         }

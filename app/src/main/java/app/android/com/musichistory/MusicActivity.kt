@@ -120,7 +120,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
     private fun setData()
     {
-        Glide.with(this)
+        Glide.with(applicationContext)
                 .applyDefaultRequestOptions(RequestOptions()
                         .placeholder(R.drawable.music_icon)
                         .useAnimationPool(true))
@@ -311,6 +311,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
             }
             updateUIState(state)
+
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
@@ -437,6 +438,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             icon = R.drawable.ic_play_circle_filled_red_400_48dp
             intent = playbackAction(3)
         }
+
         builder.addAction(R.drawable.ic_skip_previous_red_400_48dp, "previous", playbackAction(1))
         mNotification = builder.addAction(NotificationCompat.Action(icon, label, intent))
                 .addAction(R.drawable.ic_skip_next_red_400_48dp, "next", playbackAction(2))
@@ -444,7 +446,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     private fun updateUIState(state: PlaybackStateCompat?) {
-
         when (state!!.state) {
             STATE_PLAYING -> {
                 tv_song_duration.text = String.format("%02d:%02d",
@@ -464,10 +465,11 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             }
 
             STATE_SKIPPING_TO_NEXT -> {
+                val index:Int = state.extras?.getString("currentIndex","0")!!.toInt()
                 seek_bar.progress = 0
                 stopSeekbarUpdate()
                 if(Realm.getDefaultInstance().where(SongQueue::class.java).findAll().size>0)
-                songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[1]!!.song as SongHistory
+                songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
                 setData()
             }
         }

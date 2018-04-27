@@ -49,7 +49,7 @@
         app:layout_constraintTop_toBottomOf="@id/tv_song_play_count" />
 
 
-    <ImageView
+    <app.android.com.musichistory.ShadowImageView
         android:id="@+id/iv_song_image"
         android:layout_width="@dimen/dimen_song_image_250dp"
         android:layout_height="@dimen/dimen_song_image_250dp"

@@ -8,8 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <declare-styleable name="KerningViews">
-        <attr name="kv_spacing" format="float" />
+    <declare-styleable name="ShadowView">
+        <attr name="radiusOffset" format="float" />
+        <attr name="shadowColor" format="color" />
     </declare-styleable>
 
     <style name="Theme.AppCompat.Light.NoActionBar.FullScreen">
