@@ -12,9 +12,12 @@ import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
+import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
 import android.view.View
 import io.realm.Realm
@@ -22,13 +25,20 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.ImageView
 import io.realm.RealmResults
+import kotlinx.android.synthetic.main.activity_main2.*
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
-class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener,View.OnTouchListener {
+class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener,View.OnTouchListener, NavigationView.OnNavigationItemSelectedListener {
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        drawer_layout_new.closeDrawer(GravityCompat.START)
+        return true
+    }
+
     private var dX: Float = 0.toFloat()
     private var dY:Float = 0.toFloat()
     private var downRawX: Float = 0.toFloat()
@@ -111,6 +121,14 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
     }
 
+    override fun onBackPressed() {
+        if (drawer_layout_new.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout_new.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -125,6 +143,12 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         pb_music.visibility = View.VISIBLE
         vp_pager.visibility = View.GONE
         fab_music_playing.setOnClickListener(this)
+
+        val toggle = ActionBarDrawerToggle(
+                this, drawer_layout_new, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout_new.addDrawerListener(toggle)
+        toggle.syncState()
+        nav_view_new.setNavigationItemSelectedListener(this)
 
         try {
             val bitmap = BitmapFactory.decodeResource(resources, R.drawable.screen_home)
@@ -233,8 +257,10 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
      */
     private fun customView(v: View, imagePath: String) {
 
-        val drawable: Drawable? = if (!imagePath.equals("")) {
-            BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath)))
+        val drawable: Drawable? = if (imagePath != "") {
+            val option = BitmapFactory.Options()
+            option.inSampleSize=2
+            BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath,option)))
         } else {
             BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeResource(resources, R.drawable.music_icon)))
         }
@@ -307,14 +333,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                     vp_pager.visibility = View.VISIBLE
                 }
             }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode==10001 && resultCode== Activity.RESULT_OK)
-        {
-            customView(fab_music_playing, data!!.getStringExtra("songPath"))
         }
     }
 }

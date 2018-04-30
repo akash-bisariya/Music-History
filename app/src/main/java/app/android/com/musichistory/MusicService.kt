@@ -116,6 +116,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                         playMediaPlayer()
                     }
                     MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS -> {
+                        handlePlayRequest(-1)
                     }
                     MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT -> {
                         handlePlayRequest(1)

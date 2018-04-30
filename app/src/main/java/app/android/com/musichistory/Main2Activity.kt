@@ -30,6 +30,7 @@ class Main2Activity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+
         var tb_music_new = findViewById<TabLayout>(R.id.tb_music_new)
         var vp_pager_new  = findViewById<ViewPager>(R.id.vp_pager_new)
         tb_music_new.setupWithViewPager(vp_pager_new)
