@@ -21,7 +21,7 @@ import kotlin.properties.Delegates
 class ShadowImageView(context: Context, attributes: AttributeSet? = null) : AppCompatImageView(context, attributes) {
 
     companion object {
-        private const val DEFAULT_RADIUS = 0.5f
+        private const val DEFAULT_RADIUS = 0.7f
         private const val DEFAULT_COLOR = -1
         private const val BRIGHTNESS = -25f
         private const val SATURATION = 1.3f
@@ -117,7 +117,7 @@ class ShadowImageView(context: Context, attributes: AttributeSet? = null) : AppC
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun makeBlurShadow() {
-        var radius = 3.toFloat()
+        var radius = 4.toFloat()
         radius *= 2 * radiusOffset
         val blur = BlurShadow.blur(this, width, height - dpToPx(TOP_OFFSET), radius)
         //brightness -255..255 -25 is default

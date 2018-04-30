@@ -99,22 +99,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
         mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, MusicService::class.java), mMediaBrowserCompatConnectionCallback, null)
         mMediaBrowserCompat!!.connect()
-
-        seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                tv_song_current_position.text = DateUtils.formatElapsedTime((progress / 1000).toLong())
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-                stopSeekbarUpdate()
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.seekTo(seekBar.progress.toLong())
-                scheduleSeekbarUpdate()
-            }
-        })
-
     }
 
 
@@ -149,6 +133,22 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         toolbar.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
                     })
         }
+
+        seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                tv_song_current_position.text = DateUtils.formatElapsedTime((progress / 1000).toLong())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                stopSeekbarUpdate()
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.seekTo(seekBar.progress.toLong())
+                scheduleSeekbarUpdate()
+            }
+        })
+
     }
 
     override fun onClick(view: View?) {
@@ -196,10 +196,12 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
                 R.id.iv_next -> {
                     MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.skipToNext()
+                    stopSeekbarUpdate()
                 }
 
                 R.id.iv_previous -> {
                     MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.skipToPrevious()
+                    stopSeekbarUpdate()
                 }
             }
         }
@@ -332,10 +334,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             mMediaControllerCompat = MediaControllerCompat(this@MusicActivity, mMediaBrowserCompat!!.sessionToken)
             MediaControllerCompat.setMediaController(this@MusicActivity, mMediaControllerCompat)
             mMediaControllerCompat!!.registerCallback(mMediaControllerCompatCallback)
-
-
-
-//            mMediaControllerCompat!!.transportControls.playFromMediaId(songDataPath[0]!!.songId,null)
             mMediaControllerCompatCallback.onMetadataChanged(mMediaControllerCompat!!.metadata)
             mMediaControllerCompatCallback.onPlaybackStateChanged(mMediaControllerCompat!!.playbackState)
             startServiceToPlay()
@@ -417,7 +415,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 .setContentTitle(songData.songName)
                 .setAutoCancel(false)
                 .setOngoing(playbackStateCompat!!.state == PlaybackStateCompat.STATE_PLAYING)
-                .setSmallIcon(R.drawable.music_icon)
+                .setSmallIcon(R.drawable.screen_home)
                 .setLargeIcon(bitmap)
                 .setContentIntent(contentIntent)
                 .setColor(resources.getColor(R.color.color_red))
@@ -427,7 +425,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         .setShowActionsInCompactView(1))
                 .setContentText(songData.songArtist)
                 .setContentInfo(songData.songName)
-
 
         val label: String?
         val icon: Int?
@@ -470,7 +467,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             STATE_SKIPPING_TO_NEXT -> {
                 val index:Int = state.extras?.getString("currentIndex","0")!!.toInt()
                 seek_bar.progress = 0
-                stopSeekbarUpdate()
+                scheduleSeekbarUpdate()
                 if(Realm.getDefaultInstance().where(SongQueue::class.java).findAll().size>0)
                 songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
                 Realm.getDefaultInstance().executeTransaction({
