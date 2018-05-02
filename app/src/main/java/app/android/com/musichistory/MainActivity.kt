@@ -1,7 +1,5 @@
 package app.android.com.musichistory
 
-import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -29,13 +27,12 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.ImageView
 import io.realm.RealmResults
-import kotlinx.android.synthetic.main.activity_main2.*
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener,View.OnTouchListener, NavigationView.OnNavigationItemSelectedListener {
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        drawer_layout_new.closeDrawer(GravityCompat.START)
+        drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
@@ -122,8 +119,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     }
 
     override fun onBackPressed() {
-        if (drawer_layout_new.isDrawerOpen(GravityCompat.START)) {
-            drawer_layout_new.closeDrawer(GravityCompat.START)
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }
@@ -145,8 +142,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         fab_music_playing.setOnClickListener(this)
 
         val toggle = ActionBarDrawerToggle(
-                this, drawer_layout_new, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout_new.addDrawerListener(toggle)
+                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view_new.setNavigationItemSelectedListener(this)
 

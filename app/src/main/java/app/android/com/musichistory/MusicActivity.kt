@@ -62,6 +62,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
             songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
         else {
