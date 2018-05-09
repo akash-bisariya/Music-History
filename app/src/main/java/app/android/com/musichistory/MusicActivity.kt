@@ -325,7 +325,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
         }
-
     }
 
 
@@ -365,7 +364,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     private fun playbackAction(actionNumber: Int): PendingIntent? {
-        val playbackAction = Intent(this, MusicService::class.java)
+        val playbackAction:Intent = Intent(this, MusicService::class.java)
         when (actionNumber) {
             3 -> {
                 // Play
@@ -399,13 +398,12 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     private fun buildNotification() {
         val bitmap: Bitmap
         val bmOptions = BitmapFactory.Options()
-//        Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPla")
+        bmOptions.inSampleSize=2
         if (songData.songImage != "") {
             bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
         } else {
             bitmap = BitmapFactory.decodeResource(resources, R.drawable.music_icon)
         }
-
 
         val notificationIntent = Intent(applicationContext, MusicActivity::class.java)
         val backIntent = Intent(applicationContext, MainActivity::class.java)

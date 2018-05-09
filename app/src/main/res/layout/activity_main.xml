@@ -7,110 +7,107 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="app.android.com.musichistory.MainActivity">
 
-    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="app.android.com.musichistory.MainActivity">
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/collapsing_toolbar"
+        <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="256dp"
-            android:fitsSystemWindows="true"
-            app:contentScrim="@color/color_red"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:titleEnabled="false">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/iv_home_image"
+            <android.support.design.widget.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.design.widget.CollapsingToolbarLayout
+                    android:id="@+id/collapsing_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="256dp"
+                    android:fitsSystemWindows="true"
+                    app:contentScrim="@color/color_red"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+                    app:titleEnabled="false">
+
+                    <ImageView
+                        android:id="@+id/iv_home_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/screen_home"
+                        android:fitsSystemWindows="true"
+                        android:scaleType="centerCrop"
+                        app:layout_collapseMode="parallax" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:alpha="0.3"
+                        android:background="@android:color/black"
+                        android:fitsSystemWindows="true" />
+
+                    <android.support.v7.widget.Toolbar
+                        android:id="@+id/toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_gravity="top"
+                        android:layout_marginBottom="48dp"
+                        app:layout_collapseMode="pin"
+                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+                    </android.support.v7.widget.Toolbar>
+
+
+                    <android.support.design.widget.TabLayout
+                        android:id="@+id/tb_music"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        app:tabIndicatorColor="@android:color/white"
+                        app:tabSelectedTextColor="@android:color/white"
+                        app:tabTextAppearance="@style/MineCustomTabText"
+                        app:tabTextColor="@color/tab_normal_color">
+
+                    </android.support.design.widget.TabLayout>
+
+                </android.support.design.widget.CollapsingToolbarLayout>
+
+            </android.support.design.widget.AppBarLayout>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/vp_pager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/screen_home"
-                android:fitsSystemWindows="true"
-                android:scaleType="centerCrop"
-                app:layout_collapseMode="parallax" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:alpha="0.3"
-                android:background="@android:color/black"
-                android:fitsSystemWindows="true" />
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_gravity="top"
-                android:layout_marginBottom="48dp"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-
-            </android.support.v7.widget.Toolbar>
+                android:visibility="gone"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tb_music"
-                android:layout_width="match_parent"
+            </android.support.v4.view.ViewPager>
+
+            <ProgressBar
+                android:id="@+id/pb_music"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                app:tabIndicatorColor="@android:color/white"
-                app:tabSelectedTextColor="@android:color/white"
-                app:tabTextAppearance="@style/MineCustomTabText"
-                app:tabTextColor="@color/tab_normal_color">
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:visibility="gone" />
+        </android.support.design.widget.CoordinatorLayout>
 
-            </android.support.design.widget.TabLayout>
-
-        </android.support.design.widget.CollapsingToolbarLayout>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/vp_pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-
-    </android.support.v4.view.ViewPager>
-
-    <ProgressBar
-        android:id="@+id/pb_music"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:visibility="gone" />
-    </android.support.design.widget.CoordinatorLayout>
-    <ImageView
-        android:id="@+id/fab_music_playing"
-        android:layout_width="@dimen/s_floating_button"
-        android:layout_height="@dimen/s_floating_button"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/dimen_20dp"
-        android:elevation="20dp"
-        android:padding="@dimen/dimen_10dp"
-        android:scaleType="centerCrop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:src="@drawable/ic_pause_black_18dp"
-        android:visibility="gone" />
+        <ImageView
+            android:id="@+id/fab_music_playing"
+            android:layout_width="@dimen/s_floating_button"
+            android:layout_height="@dimen/s_floating_button"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="@dimen/dimen_20dp"
+            android:elevation="20dp"
+            android:padding="@dimen/dimen_10dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_pause_black_18dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 
+    </android.support.constraint.ConstraintLayout>
 
-</android.support.constraint.ConstraintLayout>
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view_new"
         android:layout_width="wrap_content"

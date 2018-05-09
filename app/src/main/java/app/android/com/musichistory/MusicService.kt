@@ -110,6 +110,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                         }
                     }
                 }
+//                startForeground()
             } else {
                 when (intent.action) {
                     MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY -> {
@@ -231,6 +232,17 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             if (mPlaybackStateCompat!!.state != PlaybackStateCompat.STATE_STOPPED) {
                 mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
                 mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+//                if (!mMusicPlayer.isPlaying)
+//                {
+//                    mMusicPlayer.prepareAsync()
+//                    mMusicPlayer.setOnPreparedListener {
+//                        it.start()
+//                        mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 0.0f)
+//                        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+//                        mMediaSession!!.isActive = true
+//                    }
+//                }
+//                else
                 mMusicPlayer.start()
                 mMediaSession!!.isActive = true
             }
