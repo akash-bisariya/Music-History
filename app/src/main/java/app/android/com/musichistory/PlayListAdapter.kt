@@ -1,14 +1,11 @@
 package app.android.com.musichistory
 
-import android.content.ClipData
-import android.content.ClipDescription
 import android.content.Context
-import android.content.Intent
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
-import android.widget.Toast
+import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.models.SongQueue
 import com.bumptech.glide.Glide
 import io.realm.RealmResults
 
@@ -30,7 +27,7 @@ class PlayListAdapter(val context: Context, private val playList: RealmResults<S
 
     class ViewHolder(itemView: View, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView) {
         private val ivSongImage = itemView.findViewById(R.id.iv_play_list_song_image) as ImageView
-        private lateinit var song:SongHistory
+        private lateinit var song: SongHistory
 
         fun viewHolderBind(context: Context, song: SongHistory) {
             this.song=song

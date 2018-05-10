@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.customViews
 
 /**
  * Created by akash
@@ -16,7 +16,7 @@ import android.renderscript.ScriptIntrinsicBlur
 import android.support.annotation.RequiresApi
 
 import android.widget.ImageView
-import app.android.com.musichistory.ShadowImageView.Companion.DOWNSCALE_FACTOR
+import app.android.com.musichistory.customViews.ShadowImageView.Companion.DOWNSCALE_FACTOR
 
 
 object BlurShadow {
@@ -30,7 +30,8 @@ object BlurShadow {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     fun blur(view: ImageView, width: Int, height: Int, radius: Float): Bitmap? {
-        val src = getBitmapForView(view, DOWNSCALE_FACTOR, width, height) ?: return null
+        val src = getBitmapForView(view, DOWNSCALE_FACTOR, width, height)
+                ?: return null
         val input = Allocation.createFromBitmap(renderScript, src)
         val output = Allocation.createTyped(renderScript, input.type)
         val script = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript))

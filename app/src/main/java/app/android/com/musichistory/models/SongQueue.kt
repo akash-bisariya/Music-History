@@ -1,9 +1,8 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.models
 
-import io.realm.RealmModel
+import app.android.com.musichistory.models.SongHistory
 import io.realm.RealmObject
 import io.realm.annotations.Index
-import io.realm.annotations.PrimaryKey
 import io.realm.annotations.Required
 import java.io.Serializable
 
@@ -15,5 +14,5 @@ open class SongQueue(
         @Required
         @Index
         var songId: String="",
-        var song: SongHistory?=SongHistory()
+        var song: SongHistory?= SongHistory()
 ) : Serializable, RealmObject()

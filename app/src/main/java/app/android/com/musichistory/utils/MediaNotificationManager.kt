@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.utils
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -10,53 +10,122 @@ import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.support.v4.app.NotificationCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import app.android.com.musichistory.MainActivity
+import app.android.com.musichistory.MusicActivity
+import app.android.com.musichistory.MusicService
+import app.android.com.musichistory.R
+import app.android.com.musichistory.constants.*
+import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.models.SongQueue
 import io.realm.Realm
 
 /**
  * Created by akash
  * on 8/5/18.
  */
-class MediaNotificationManager(val mMusicService: MusicService) : BroadcastReceiver() {
+class MediaNotificationManager(private val mMusicService: MusicService) : BroadcastReceiver() {
     private val mNotificationManager: NotificationManager = mMusicService.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private lateinit var mTransportControl: MediaControllerCompat.TransportControls
     private var mStarted = false
-    private lateinit var mMediaSessionToken:MediaSessionCompat.Token
-    private lateinit var mMediaControllerCompat:MediaControllerCompat
-    private var songData:SongHistory
+    private lateinit var mMediaSessionToken: MediaSessionCompat.Token
+    private lateinit var mMediaControllerCompat: MediaControllerCompat
+    private var songData: SongHistory
+
     private lateinit var mNotification: Notification
     private val REQUEST_CODE = 100
-    private val MUSIC_HISTORY_NOTIFICATION_ID = 1001
+    private lateinit var mPlaybackState: PlaybackStateCompat
+    private val mMediaControllerCompatCallback: MediaControllerCompat.Callback
 
-    private var mPlaybackState: PlaybackStateCompat? = null
 
     init {
+         mMediaControllerCompatCallback= object : MediaControllerCompat.Callback() {
+            override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+                super.onPlaybackStateChanged(state)
+                mPlaybackState = state!!
+                Logger.d("""PlayBack State Changed${state.actions}""")
+                if (state.state == PlaybackStateCompat.STATE_STOPPED || state.state == PlaybackStateCompat.STATE_NONE) {
+                    stopNotification()
+                } else if(state.state ==PlaybackStateCompat.STATE_SKIPPING_TO_NEXT) {
+                    val index:Int = state.extras?.getString("currentIndex","0")!!.toInt()
+                    songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
+                    buildNotification()
+                    mNotificationManager.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+                }
+                else {
+                    buildNotification()
+                    mNotificationManager.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+                }
+
+            }
+
+            override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+                super.onMetadataChanged(metadata)
+//                buildNotification()
+//                mNotificationManager.notify(MUSIC_HISTORY_NOTIFICATION_ID,mNotification)
+            }
+
+            override fun onSessionReady() {
+                super.onSessionReady()
+            }
+
+            override fun onSessionDestroyed() {
+                super.onSessionDestroyed()
+                Logger.d("Session Destroyed")
+                updateSessionToken()
+            }
+        }
         mNotificationManager.cancelAll()
         updateSessionToken()
-        songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying",true).findFirst()!!
+        songData = Realm.getDefaultInstance().where(SongQueue::class.java).findFirst()!!.song as SongHistory
     }
 
-    private val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            super.onPlaybackStateChanged(state)
-        }
 
-        override fun onSessionReady() {
-            super.onSessionReady()
-        }
 
-        override fun onSessionDestroyed() {
-            super.onSessionDestroyed()
-            updateSessionToken()
+    /**
+     * Posts the notification start tracking the music session
+     */
+    fun startNotification() {
+        if (!mStarted) {
+            mPlaybackState = mMediaControllerCompat.playbackState
+            mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+            buildNotification()
+            val filter = IntentFilter()
+            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT)
+            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE)
+            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY)
+            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS)
+            mMusicService.registerReceiver(this, filter)
+
+            mMusicService.startForeground(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+            mStarted = true
+
         }
     }
 
-    fun buildNotification() {
+
+    /**
+     * Removes the notification and stops tracking the music session
+     */
+    fun stopNotification() {
+        if (mStarted) {
+            mStarted = false
+            mMediaControllerCompat.unregisterCallback(mMediaControllerCompatCallback)
+            mNotificationManager.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
+            mMusicService.unregisterReceiver(this)
+            mMusicService.stopForeground(true)
+
+        }
+    }
+
+
+    private fun buildNotification() {
         val bitmap: Bitmap
         val bmOptions = BitmapFactory.Options()
-        bmOptions.inSampleSize=2
+        bmOptions.inSampleSize = 2
         if (songData.songImage != "") {
             bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
         } else {
@@ -71,7 +140,7 @@ class MediaNotificationManager(val mMusicService: MusicService) : BroadcastRecei
         val builder = NotificationCompat.Builder(mMusicService)
                 .setContentTitle(songData.songName)
                 .setAutoCancel(false)
-                .setOngoing(mPlaybackState!!.state == PlaybackStateCompat.STATE_PLAYING)
+                .setOngoing(mPlaybackState.state == PlaybackStateCompat.STATE_PLAYING)
                 .setSmallIcon(R.drawable.screen_home)
                 .setLargeIcon(bitmap)
                 .setContentIntent(contentIntent)
@@ -86,17 +155,18 @@ class MediaNotificationManager(val mMusicService: MusicService) : BroadcastRecei
         val label: String?
         val icon: Int?
         val intent: PendingIntent?
-        if (mPlaybackState!!.state == PlaybackStateCompat.STATE_PLAYING) {
-            label = "pause"
+        if (mPlaybackState.state == PlaybackStateCompat.STATE_PLAYING) {
+            label = mMusicService.getString(R.string.label_txt_pause)
             icon = R.drawable.ic_pause_circle_filled_red_400_48dp
             intent = playbackAction(0)
         } else {
-            label = "play"
+            label = mMusicService.getString(R.string.label_txt_play)
             icon = R.drawable.ic_play_circle_filled_red_400_48dp
             intent = playbackAction(3)
         }
 
         builder.addAction(R.drawable.ic_skip_previous_red_400_48dp, "previous", playbackAction(1))
+
         mNotification = builder.addAction(NotificationCompat.Action(icon, label, intent))
                 .addAction(R.drawable.ic_skip_next_red_400_48dp, "next", playbackAction(2))
                 .build()
@@ -104,8 +174,7 @@ class MediaNotificationManager(val mMusicService: MusicService) : BroadcastRecei
 
 
     private fun playbackAction(actionNumber: Int): PendingIntent? {
-        val playbackActionIntent:Intent = Intent().setPackage(mMusicService.packageName)
-        val pkg = mMusicService.packageName
+        val playbackActionIntent: Intent = Intent().setPackage(mMusicService.packageName)
         when (actionNumber) {
             3 -> {
                 // Play
@@ -134,35 +203,12 @@ class MediaNotificationManager(val mMusicService: MusicService) : BroadcastRecei
     }
 
 
-    fun startNotification()
-    {
-        if(!mStarted)
-        {
-            mPlaybackState = mMediaControllerCompat.playbackState
-            mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
-            buildNotification()
-            val filter = IntentFilter()
-            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT)
-            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE)
-            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY)
-            filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS)
-            mMusicService.registerReceiver(this, filter)
-
-            mMusicService.startForeground(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
-            mStarted = true
-
-        }
-    }
-
-
-    fun updateSessionToken()
-    {
-        mMediaSessionToken= mMusicService.sessionToken!!
-        mMediaControllerCompat= MediaControllerCompat(mMusicService,mMediaSessionToken)
+    fun updateSessionToken() {
+        mMediaSessionToken = mMusicService.sessionToken!!
+        mMediaControllerCompat = MediaControllerCompat(mMusicService, mMediaSessionToken)
         mMediaControllerCompat.unregisterCallback(mMediaControllerCompatCallback)
-        mTransportControl=mMediaControllerCompat.transportControls
-        if(mStarted)
-        {
+        mTransportControl = mMediaControllerCompat.transportControls
+        if (mStarted) {
             mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
         }
     }

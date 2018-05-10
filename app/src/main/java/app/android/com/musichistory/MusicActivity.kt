@@ -1,6 +1,5 @@
 package app.android.com.musichistory
 
-import android.app.Activity
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -33,6 +32,10 @@ import android.support.v4.media.session.PlaybackStateCompat.*
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
+import app.android.com.musichistory.constants.*
+import app.android.com.musichistory.customViews.MusicPlayer
+import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.models.SongQueue
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -254,7 +257,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     override fun onAudioFocusChange(result: Int) {
-
         when (result) {
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT -> {
                 if (mediaPlayerPause)
@@ -300,6 +302,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             }
         }
     }
+
     val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
         override fun onCaptioningEnabledChanged(enabled: Boolean) {
             super.onCaptioningEnabledChanged(enabled)
@@ -313,10 +316,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             super.onPlaybackStateChanged(state)
             playbackStateCompat = state
             if (state!!.state == PlaybackStateCompat.STATE_STOPPED || state.state == PlaybackStateCompat.STATE_NONE) {
-                mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
+//                mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
             } else {
-                buildNotification()
-                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
+//                buildNotification()
+//                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
             }
             updateUIState(state)
 

@@ -26,6 +26,7 @@ import android.support.v7.graphics.Palette
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.ImageView
+import app.android.com.musichistory.models.SongHistory
 import io.realm.RealmResults
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000

@@ -43,18 +43,19 @@
         android:layout_marginLeft="@dimen/dimen_10dp"
         android:text="times"
         android:textColor="@android:color/black"
-        android:textSize="8sp"
+        android:textSize="@dimen/txt_size_8sp"
         android:textStyle="bold"
         app:layout_constraintLeft_toRightOf="@id/iv_song_image"
-        app:layout_constraintTop_toBottomOf="@id/tv_song_play_count" />
+        app:layout_constraintTop_toBottomOf="@id/tv_song_play_count"
+        android:layout_marginStart="@dimen/dimen_10dp" />
 
 
-    <app.android.com.musichistory.ShadowImageView
+    <app.android.com.musichistory.customViews.ShadowImageView
         android:id="@+id/iv_song_image"
-        android:layout_width="@dimen/dimen_song_image_250dp"
-        android:layout_height="@dimen/dimen_song_image_250dp"
+        android:layout_width="@dimen/dimen_song_image_280dp"
+        android:layout_height="@dimen/dimen_song_image_280dp"
         android:layout_marginBottom="@dimen/dimen_10dp"
-        android:layout_marginTop="@dimen/dimen_30dp"
+        android:layout_marginTop="@dimen/dimen_10dp"
         android:elevation="@dimen/dimen_10dp"
         android:src="@drawable/x_ds_background"
         app:layout_constraintLeft_toRightOf="parent"

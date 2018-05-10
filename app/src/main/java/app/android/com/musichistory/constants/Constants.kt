@@ -1,5 +1,5 @@
 @file:JvmName("Constants")
-package app.android.com.musichistory
+package app.android.com.musichistory.constants
 
 /**
  * Created by akash
@@ -21,3 +21,5 @@ const val MUSIC_HISTORY_SONG_REPEAT_ONE_TIME = 1
 const val MUSIC_HISTORY_SONG_REPEAT_TWO_TIME=2
 const val MUSIC_HISTORY_SONG_REPEAT_THREE_TIME=3
 const val MUSIC_HISTORY_MEDIA_SESSION="MusicHistoryMediaSession"
+const val MUSIC_HISTORY_NOTIFICATION_ID = 1001
+const val MUSIC_HISTORY_LOGGER_STATUS=true

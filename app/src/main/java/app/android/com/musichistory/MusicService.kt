@@ -15,6 +15,11 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import app.android.com.musichistory.constants.*
+import app.android.com.musichistory.customViews.MusicPlayer
+import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.models.SongQueue
+import app.android.com.musichistory.utils.MediaNotificationManager
 import io.realm.Realm
 import io.realm.RealmResults
 
@@ -37,11 +42,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private var mRepeatCount = -1
     private var mSongId: String? = null
     private var mCurrentSongIndex = 0
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE = "MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE"
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT = "MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT"
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS = "MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS"
-    private val MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY = "MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY"
-    private val MUSIC_HISTORY_ACTION_REPEAT_ALL = "MUSIC_HISTORY_ACTION_REPEAT_ALL"
+    private lateinit var mMediaNotificationManager:MediaNotificationManager
+
     val metaDataReceiver = MediaMetadataRetriever()
     private lateinit var songData: SongHistory
 
@@ -74,9 +76,14 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         }
 
 
+
+
+
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        mMediaNotificationManager = MediaNotificationManager(this)
+        mMediaNotificationManager.startNotification()
         if (intent != null) {
             if (intent.getStringExtra("songId") != null) {
                 if (!(mMusicPlayer.isPlaying && intent.getBooleanExtra("fromFloatingButton", false))) {
@@ -110,23 +117,25 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                         }
                     }
                 }
-//                startForeground()
-            } else {
-                when (intent.action) {
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY -> {
-                        playMediaPlayer()
-                    }
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS -> {
-                        handlePlayRequest(-1)
-                    }
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT -> {
-                        handlePlayRequest(1)
-                    }
-                    MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE -> {
-                        if (mMusicPlayer.isPlaying) pauseMediaPlayer() else playMediaPlayer()
-                    }
-                }
+
             }
+
+//             else {
+//                when (intent.action) {
+//                    MUSIC_HISTORY_NOTIFICATION_ACTION_PLAY -> {
+//                        playMediaPlayer()
+//                    }
+//                    MUSIC_HISTORY_NOTIFICATION_ACTION_PREVIOUS -> {
+//                        handlePlayRequest(-1)
+//                    }
+//                    MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT -> {
+//                        handlePlayRequest(1)
+//                    }
+//                    MUSIC_HISTORY_NOTIFICATION_ACTION_PAUSE -> {
+//                        if (mMusicPlayer.isPlaying) pauseMediaPlayer() else playMediaPlayer()
+//                    }
+//                }
+//            }
         }
         return Service.START_STICKY
     }
@@ -135,6 +144,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
             return super.onMediaButtonEvent(mediaButtonEvent)
         }
+
+
 
 
         override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
@@ -187,22 +198,18 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         }
 
         override fun onSkipToNext() {
-            super.onSkipToNext()
             handlePlayRequest(1)
         }
 
         override fun onSkipToPrevious() {
-            super.onSkipToPrevious()
             handlePlayRequest(-1)
         }
 
         override fun onPlay() {
-            super.onPlay()
             playMediaPlayer()
         }
 
         override fun onPause() {
-            super.onPause()
             pauseMediaPlayer()
         }
     }
@@ -359,6 +366,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMediaSession!!.isActive = false
         mMediaSession?.release()
         mAudioManager?.abandonAudioFocus(this)
+        mMediaNotificationManager.stopNotification()
     }
 
     override fun onDestroy() {

@@ -5,7 +5,7 @@
     <dimen name="txt_size_20sp">20sp</dimen>
     <dimen name="txt_size_15sp">15sp</dimen>
     <dimen name="dimen_play_pause_80dp">80dp</dimen>
-    <dimen name="dimen_song_image_250dp">250dp</dimen>
+    <dimen name="dimen_song_image_280dp">280dp</dimen>
     <dimen name="dimen_5dp">5dp</dimen>
     <dimen name="dimen_20dp">20dp</dimen>
     <dimen name="s_floating_button">100dp</dimen>
@@ -16,5 +16,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
     <dimen name="nav_header_height">176dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="txt_size_8sp">8sp</dimen>
 </resources>

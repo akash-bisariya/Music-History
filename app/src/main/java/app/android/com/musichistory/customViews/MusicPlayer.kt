@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.customViews
 
 import android.media.MediaPlayer
 

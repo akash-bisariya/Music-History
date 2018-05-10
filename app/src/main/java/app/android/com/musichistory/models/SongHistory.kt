@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.models
 
 import io.realm.RealmModel
 import io.realm.RealmObject

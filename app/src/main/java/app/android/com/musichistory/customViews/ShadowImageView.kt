@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.customViews
 
 import android.content.Context
 import android.graphics.*
@@ -12,6 +12,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
+import app.android.com.musichistory.R
 import kotlin.properties.Delegates
 
 /**

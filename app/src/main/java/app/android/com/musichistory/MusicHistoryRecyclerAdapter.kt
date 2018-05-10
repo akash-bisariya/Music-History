@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import app.android.com.musichistory.models.SongHistory
 import com.bumptech.glide.Glide
 import io.realm.RealmResults
 import java.util.concurrent.TimeUnit
