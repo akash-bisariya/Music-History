@@ -114,9 +114,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             it.copyToRealmOrUpdate(songData[0])
         })
         customView(fab_music_playing, songData[0]!!.songImage)
-
-
-
     }
 
     override fun onBackPressed() {
@@ -280,7 +277,10 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                     val albumId = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
                     realm.insert(SongHistory(
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)),
-                            cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)).replace(Regex("^(-+|\\d+)"),"").trim().replace(Regex("^-+"),"").trim(),
+                            cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME))
+                                    .replace(Regex("^(-+|\\d+)"),"").trim()
+                                    .replace(Regex("^-+"),"").trim()
+                                    .replace(Regex("_+")," "),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)).replace(Regex("^-+\\d+-+"),"").trim(),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)),

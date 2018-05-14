@@ -316,12 +316,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             playbackStateCompat = state
-            if (state!!.state == PlaybackStateCompat.STATE_STOPPED || state.state == PlaybackStateCompat.STATE_NONE) {
-//                mNotificationManager!!.cancel(MUSIC_HISTORY_NOTIFICATION_ID)
-            } else {
-//                buildNotification()
-//                mNotificationManager!!.notify(MUSIC_HISTORY_NOTIFICATION_ID, mNotification)
-            }
             updateUIState(state)
 
         }
@@ -368,7 +362,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     private fun playbackAction(actionNumber: Int): PendingIntent? {
-        val playbackAction: Intent = Intent(this, MusicService::class.java)
+        val playbackAction = Intent(this, MusicService::class.java)
         when (actionNumber) {
             3 -> {
                 // Play

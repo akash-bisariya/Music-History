@@ -42,7 +42,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private var mRepeatCount = -1
     private var mSongId: String? = null
     private var mCurrentSongIndex = 0
-    private lateinit var mMediaNotificationManager:MediaNotificationManager
+    private lateinit var mMediaNotificationManager: MediaNotificationManager
 
     val metaDataReceiver = MediaMetadataRetriever()
     private lateinit var songData: SongHistory
@@ -74,9 +74,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         if ((mSongQueueRealmResult as RealmResults<SongQueue>).size > 0) {
             songData = (mSongQueueRealmResult as RealmResults<SongQueue>)[mCurrentSongIndex]!!.song as SongHistory
         }
-
-
-
 
 
     }
@@ -113,7 +110,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                                 it.delete(SongQueue::class.java)
                                 it.insertOrUpdate(SongQueue(songId = intent.getStringExtra("songId") as String, song = songData))
                                 mMediaNotificationManager = MediaNotificationManager(this)
-                                mMediaNotificationManager.startNotification()
+                                mMediaNotificationManager.startNotification(false, mCurrentSongIndex)
                             })
                         }
                     }
@@ -145,8 +142,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
             return super.onMediaButtonEvent(mediaButtonEvent)
         }
-
-
 
 
         override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
@@ -208,10 +203,12 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
         override fun onPlay() {
             playMediaPlayer()
+            mMediaNotificationManager.startNotification(true, mCurrentSongIndex)
         }
 
         override fun onPause() {
             pauseMediaPlayer()
+            mMediaNotificationManager.startNotification(true, mCurrentSongIndex)
         }
     }
 
@@ -220,9 +217,13 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         if (mCurrentSongIndex < 0) mCurrentSongIndex = 0 else mCurrentSongIndex %= mSongQueueRealmResult!!.size
         val extras = Bundle()
         extras.putString("currentIndex", mCurrentSongIndex.toString())
-        mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mCurrentSongIndex.toLong(), 1.0f)!!.setExtras(extras)
-        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
 
+        if (amount > 0)
+            mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mCurrentSongIndex.toLong(), 1.0f)!!.setExtras(extras)
+        else
+            mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS, mCurrentSongIndex.toLong(), 1.0f)!!.setExtras(extras)
+
+        mMediaSession?.setPlaybackState(mStateBuilder!!.build())
         songData = (mSongQueueRealmResult as RealmResults<SongQueue>)[mCurrentSongIndex]!!.song as SongHistory
         mMusicPlayer.reset()
         mMusicPlayer.setDataSource(songData.songDataPath)
@@ -232,6 +233,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 0.0f)
             mMediaSession?.setPlaybackState(mStateBuilder!!.build())
             mMediaSession!!.isActive = true
+            mMediaNotificationManager.startNotification(true, mCurrentSongIndex)
         }
     }
 

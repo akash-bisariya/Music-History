@@ -14,6 +14,7 @@
         android:id="@+id/iv_play_list_song_image"
         android:layout_width="@dimen/s_album_art"
         android:layout_height="@dimen/s_album_art"
+        android:scaleType="fitXY"
         app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
