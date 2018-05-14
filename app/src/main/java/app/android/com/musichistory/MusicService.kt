@@ -82,8 +82,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        mMediaNotificationManager = MediaNotificationManager(this)
-        mMediaNotificationManager.startNotification()
+
         if (intent != null) {
             if (intent.getStringExtra("songId") != null) {
                 if (!(mMusicPlayer.isPlaying && intent.getBooleanExtra("fromFloatingButton", false))) {
@@ -113,6 +112,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                             Realm.getDefaultInstance().executeTransactionAsync({
                                 it.delete(SongQueue::class.java)
                                 it.insertOrUpdate(SongQueue(songId = intent.getStringExtra("songId") as String, song = songData))
+                                mMediaNotificationManager = MediaNotificationManager(this)
+                                mMediaNotificationManager.startNotification()
                             })
                         }
                     }

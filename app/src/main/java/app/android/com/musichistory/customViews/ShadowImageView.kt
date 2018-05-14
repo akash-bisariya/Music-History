@@ -40,7 +40,7 @@ class ShadowImageView(context: Context, attributes: AttributeSet? = null) : AppC
     init {
         BlurShadow.init(context.applicationContext)
         cropToPadding = true
-        super.setScaleType(ScaleType.CENTER_CROP)
+        super.setScaleType(ScaleType.FIT_XY)
         val padding = dpToPx(PADDING)
         setPadding(padding, padding, padding, padding)
         val typedArray = context.obtainStyledAttributes(attributes, R.styleable.ShadowView, 0, 0)
@@ -118,7 +118,7 @@ class ShadowImageView(context: Context, attributes: AttributeSet? = null) : AppC
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private fun makeBlurShadow() {
-        var radius = 4.toFloat()
+        var radius = 2.toFloat()
         radius *= 2 * radiusOffset
         val blur = BlurShadow.blur(this, width, height - dpToPx(TOP_OFFSET), radius)
         //brightness -255..255 -25 is default

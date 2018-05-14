@@ -59,13 +59,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     var mMediaControllerCompat: MediaControllerCompat? = null
     private var mNotificationManager: NotificationManager? = null
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val MUSIC_HISTORY_NOTIFICATION_ID = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
             songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
         else {
@@ -106,8 +103,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
 
-    private fun setData()
-    {
+    private fun setData() {
         Glide.with(applicationContext)
                 .applyDefaultRequestOptions(RequestOptions()
                         .placeholder(R.drawable.music_icon)
@@ -117,13 +113,15 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
         tv_song_artist.text = songData.songArtist
         tv_song_current_position.text = getString(R.string.txt_initial_position_media_player)
-        tv_song_name.text = songData.songName + " (${songData.albumName})"
+        tv_song_name.text = songData.songName
+        tv_song_album.text = songData.albumName
         tv_song_play_count.text = songData.playCount.toString()
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
         iv_next.setOnClickListener(this)
         iv_previous.setOnClickListener(this)
         iv_repeat.setOnClickListener(this)
+        iv_back.setOnClickListener(this)
         seek_bar.max = songData.songDuration.toInt()
 
         var bitmap: Bitmap?
@@ -134,8 +132,9 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             Palette.from(bitmap).generate(
                     {
                         music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
-                        toolbar.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
                     })
+        } else {
+            music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
         }
 
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -172,6 +171,8 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         }
                     }
                 }
+
+                R.id.iv_back -> onBackPressed()
 
                 R.id.iv_like -> {
                     iv_like.setImageResource(R.drawable.ic_thumb_up_red_400_36dp)
@@ -367,7 +368,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     private fun playbackAction(actionNumber: Int): PendingIntent? {
-        val playbackAction:Intent = Intent(this, MusicService::class.java)
+        val playbackAction: Intent = Intent(this, MusicService::class.java)
         when (actionNumber) {
             3 -> {
                 // Play
@@ -401,7 +402,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     private fun buildNotification() {
         val bitmap: Bitmap
         val bmOptions = BitmapFactory.Options()
-        bmOptions.inSampleSize=2
+        bmOptions.inSampleSize = 2
         if (songData.songImage != "") {
             bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
         } else {
@@ -467,11 +468,11 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             }
 
             STATE_SKIPPING_TO_NEXT -> {
-                val index:Int = state.extras?.getString("currentIndex","0")!!.toInt()
+                val index: Int = state.extras?.getString("currentIndex", "0")!!.toInt()
                 seek_bar.progress = 0
                 scheduleSeekbarUpdate()
-                if(Realm.getDefaultInstance().where(SongQueue::class.java).findAll().size>0)
-                songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
+                if (Realm.getDefaultInstance().where(SongQueue::class.java).findAll().size > 0)
+                    songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
                 Realm.getDefaultInstance().executeTransaction({
                     val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
                     for (music in result) {

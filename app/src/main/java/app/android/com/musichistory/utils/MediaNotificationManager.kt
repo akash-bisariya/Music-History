@@ -33,7 +33,7 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
     private var mStarted = false
     private lateinit var mMediaSessionToken: MediaSessionCompat.Token
     private lateinit var mMediaControllerCompat: MediaControllerCompat
-    private var songData: SongHistory
+    private lateinit var songData: SongHistory
 
     private lateinit var mNotification: Notification
     private val REQUEST_CODE = 100
@@ -80,7 +80,6 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
         }
         mNotificationManager.cancelAll()
         updateSessionToken()
-        songData = Realm.getDefaultInstance().where(SongQueue::class.java).findFirst()!!.song as SongHistory
     }
 
 
@@ -123,6 +122,7 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
 
 
     private fun buildNotification() {
+        songData = Realm.getDefaultInstance().where(SongQueue::class.java).findFirst()!!.song as SongHistory
         val bitmap: Bitmap
         val bmOptions = BitmapFactory.Options()
         bmOptions.inSampleSize = 2
