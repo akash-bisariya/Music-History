@@ -461,7 +461,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
             }
 
-            STATE_SKIPPING_TO_NEXT -> {
+            STATE_SKIPPING_TO_NEXT, STATE_SKIPPING_TO_PREVIOUS-> {
                 val index: Int = state.extras?.getString("currentIndex", "0")!!.toInt()
                 seek_bar.progress = 0
                 scheduleSeekbarUpdate()

@@ -9,4 +9,7 @@
     <color name="lighter_gray">#919191</color>
     <color name="lighter_gray_transparent">#20919191</color>
     <color name="darker_gray">#6b6b6b</color>
+    <color name="color_top">#FF478594</color>
+    <color name="color_bottom">#FFA3968D</color>
+    <color name="color_middle">#FFBCC8CA</color>
 </resources>
