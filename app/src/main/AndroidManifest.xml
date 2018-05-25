@@ -24,8 +24,8 @@
         </activity>
         <activity
             android:name=".MusicActivity"
-            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
 
         <service
@@ -36,6 +36,7 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".CurrentQueue.CurrentQueueActivity"></activity>
     </application>
 
 </manifest>

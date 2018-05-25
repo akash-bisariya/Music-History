@@ -107,8 +107,10 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
                             mMediaSession!!.setMetadata(metadata)
                             Realm.getDefaultInstance().executeTransactionAsync({
-                                it.delete(SongQueue::class.java)
-                                it.insertOrUpdate(SongQueue(songId = intent.getStringExtra("songId") as String, song = songData))
+                                if(!intent.getBooleanExtra("fromFloatingButton", false)) {
+                                    it.delete(SongQueue::class.java)
+                                    it.insertOrUpdate(SongQueue(intent.getStringExtra("songId") as String, songData))
+                                }
                                 mMediaNotificationManager = MediaNotificationManager(this)
                                 mMediaNotificationManager.startNotification(false, mCurrentSongIndex)
                             })
