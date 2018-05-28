@@ -317,7 +317,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode == REQUEST_PERMISSION_STORAGE) {
             grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
-                launch(BACKGROUND) {
+                launch() {
                     getSong(applicationContext)
                     Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
                 }
