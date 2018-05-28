@@ -98,7 +98,7 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick, View.OnDragListene
             DragEvent.ACTION_DROP -> {
                 val position: String = dragEvent.clipData.getItemAt(0).intent.extras.get("position").toString()
                 Realm.getDefaultInstance().executeTransaction {
-                    it.insert(SongQueue(list[position.toInt()]!!.songId, list[position.toInt()]))
+                    it.insert(SongQueue(list[position.toInt()]))
                     playListAdapter.notifyDataSetChanged()
                 }
                 Log.d("ACTION_DROP", "DROP")

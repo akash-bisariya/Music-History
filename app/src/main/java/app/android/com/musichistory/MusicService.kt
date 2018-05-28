@@ -109,7 +109,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                             Realm.getDefaultInstance().executeTransactionAsync({
                                 if(!intent.getBooleanExtra("fromFloatingButton", false)) {
                                     it.delete(SongQueue::class.java)
-                                    it.insertOrUpdate(SongQueue(intent.getStringExtra("songId") as String, songData))
+                                    it.insertOrUpdate(SongQueue( songData))
                                 }
                                 mMediaNotificationManager = MediaNotificationManager(this)
                                 mMediaNotificationManager.startNotification(false, mCurrentSongIndex)

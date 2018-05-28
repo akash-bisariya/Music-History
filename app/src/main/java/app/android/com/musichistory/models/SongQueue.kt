@@ -11,8 +11,5 @@ import java.io.Serializable
  * on 20/2/18.
  */
 open class SongQueue(
-        @Required
-        @Index
-        var songId: String="",
         var song: SongHistory?= SongHistory()
 ) : Serializable, RealmObject()

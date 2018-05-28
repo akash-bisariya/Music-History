@@ -31,17 +31,17 @@ import io.realm.RealmResults
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
-class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener,View.OnTouchListener, NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener, View.OnTouchListener, NavigationView.OnNavigationItemSelectedListener {
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
     private var dX: Float = 0.toFloat()
-    private var dY:Float = 0.toFloat()
+    private var dY: Float = 0.toFloat()
     private var downRawX: Float = 0.toFloat()
-    private var downRawY:Float = 0.toFloat()
-    private val clickDragTolerance= 10f
+    private var downRawY: Float = 0.toFloat()
+    private val clickDragTolerance = 10f
     private var mSongId: String? = null
     private var viewPager: ViewPager? = null
     private lateinit var fabMusicPlaying: ImageView
@@ -254,8 +254,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
         val drawable: Drawable? = if (imagePath != "") {
             val option = BitmapFactory.Options()
-            option.inSampleSize=2
-            BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath,option)))
+            option.inSampleSize = 2
+            BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath, option)))
         } else {
             BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeResource(resources, R.drawable.music_icon)))
         }
@@ -278,11 +278,11 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                     realm.insert(SongHistory(
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME))
-                                    .replace(Regex("^(-+|\\d+)"),"").trim()
-                                    .replace(Regex("^-+"),"").trim()
-                                    .replace(Regex("_+")," "),
+                                    .replace(Regex("^(-+|\\d+)"), "").trim()
+                                    .replace(Regex("^-+"), "").trim()
+                                    .replace(Regex("_+"), " "),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
-                            cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)).replace(Regex("^-+\\d+-+"),"").trim(),
+                            cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)).replace(Regex("^-+\\d+-+"), "").trim(),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)),
                             cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)),
@@ -317,13 +317,12 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode == REQUEST_PERMISSION_STORAGE) {
             grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
-                launch {
+                launch(BACKGROUND) {
                     getSong(applicationContext)
                     Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
                 }
             }
-            else->
-            {
+            else -> {
                 launch(UI) {
                     viewPager!!.adapter = PagerAdapter(supportFragmentManager)
                     tb_music.setupWithViewPager(vp_pager)

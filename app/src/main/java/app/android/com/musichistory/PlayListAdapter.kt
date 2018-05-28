@@ -3,6 +3,7 @@ package app.android.com.musichistory
 import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.*
+import android.widget.AdapterView
 import android.widget.ImageView
 import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.models.SongQueue
@@ -25,7 +26,11 @@ class PlayListAdapter(val context: Context, private val playList: RealmResults<S
         holder.viewHolderBind(context, playList[position]!!.song!!)
     }
 
-    class ViewHolder(itemView: View, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView),AdapterView.OnItemClickListener {
+        override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+            onItemClick.onRecycleItemClick(itemView,adapterPosition)
+        }
+
         private val ivSongImage = itemView.findViewById(R.id.iv_play_list_song_image) as ImageView
         private lateinit var song: SongHistory
 
