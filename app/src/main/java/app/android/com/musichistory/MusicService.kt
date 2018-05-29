@@ -97,6 +97,10 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                         mMusicPlayer.setOnErrorListener(this@MusicService)
                         mMusicPlayer.setOnPreparedListener {
                             it.start()
+                            Realm.getDefaultInstance().executeTransaction({
+                                songData.playCount++
+                                it.copyToRealmOrUpdate(songData)
+                            })
                             mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
                             mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                             mMediaSession!!.isActive = true
@@ -107,9 +111,9 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
 
                             mMediaSession!!.setMetadata(metadata)
                             Realm.getDefaultInstance().executeTransactionAsync({
-                                if(!intent.getBooleanExtra("fromFloatingButton", false)) {
+                                if (!intent.getBooleanExtra("fromFloatingButton", false)) {
                                     it.delete(SongQueue::class.java)
-                                    it.insertOrUpdate(SongQueue( songData))
+                                    it.insertOrUpdate(SongQueue(songData))
                                 }
                                 mMediaNotificationManager = MediaNotificationManager(this)
                                 mMediaNotificationManager.startNotification(false, mCurrentSongIndex)

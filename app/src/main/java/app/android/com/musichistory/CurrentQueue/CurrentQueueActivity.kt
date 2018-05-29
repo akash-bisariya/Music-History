@@ -16,7 +16,7 @@ import app.android.com.musichistory.models.SongQueue
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_current_queue.*
 
-class CurrentQueueActivity : AppCompatActivity(),IOnRecycleItemClick {
+class CurrentQueueActivity : AppCompatActivity(), IOnRecycleItemClick {
     override fun onRecycleItemLongClick(view: View?, position: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -26,18 +26,16 @@ class CurrentQueueActivity : AppCompatActivity(),IOnRecycleItemClick {
     }
 
     var mSongQueue = ArrayList<SongHistory?>()
-    lateinit var mMusicRecyclerAdapter:CurrentQueueRecyclerAdapter
+    lateinit var mMusicRecyclerAdapter: CurrentQueueRecyclerAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_current_queue)
-        rv_current_queue.layoutManager =LinearLayoutManager(this)
+        rv_current_queue.layoutManager = LinearLayoutManager(this)
         val realmResult = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
         for (songQueue in realmResult)
-        {
             mSongQueue.add(songQueue.song)
-        }
-        mMusicRecyclerAdapter = CurrentQueueRecyclerAdapter(this,mSongQueue,this)
-
+        mMusicRecyclerAdapter = CurrentQueueRecyclerAdapter(this, mSongQueue, this)
+        rv_current_queue.adapter=mMusicRecyclerAdapter
 
 
     }

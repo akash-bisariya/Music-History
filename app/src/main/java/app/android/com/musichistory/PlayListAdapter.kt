@@ -26,11 +26,7 @@ class PlayListAdapter(val context: Context, private val playList: RealmResults<S
         holder.viewHolderBind(context, playList[position]!!.song!!)
     }
 
-    class ViewHolder(itemView: View, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView),AdapterView.OnItemClickListener {
-        override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-            onItemClick.onRecycleItemClick(itemView,adapterPosition)
-        }
-
+    class ViewHolder(itemView: View,  var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView),AdapterView.OnItemClickListener {
         private val ivSongImage = itemView.findViewById(R.id.iv_play_list_song_image) as ImageView
         private lateinit var song: SongHistory
 
@@ -45,6 +41,9 @@ class PlayListAdapter(val context: Context, private val playList: RealmResults<S
                         .load(song.songImage)
                         .into(ivSongImage)
             }
+        }
+        override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+            onItemClick.onRecycleItemClick(itemView,adapterPosition)
         }
     }
 }

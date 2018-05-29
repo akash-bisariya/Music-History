@@ -7,10 +7,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
+import android.graphics.*
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.PaintDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
@@ -32,6 +33,7 @@ import android.support.v4.media.session.PlaybackStateCompat.*
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
+import app.android.com.musichistory.CurrentQueue.CurrentQueueActivity
 import app.android.com.musichistory.constants.*
 import app.android.com.musichistory.customViews.MusicPlayer
 import app.android.com.musichistory.models.SongHistory
@@ -55,7 +57,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     private var mMediaBrowserCompat: MediaBrowserCompat? = null
     private var playbackStateCompat: PlaybackStateCompat? = null
     private val mHandler = Handler()
-    lateinit var mNotification: Notification
+    private lateinit var mNotification: Notification
     var mMediaControllerCompat: MediaControllerCompat? = null
     private var mNotificationManager: NotificationManager? = null
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -63,15 +65,18 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
-        if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
-            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
-        else {
-            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
-        }
 
         mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
 
         setData()
+
+        iv_like.setOnClickListener(this)
+        iv_play_pause.setOnClickListener(this)
+        iv_next.setOnClickListener(this)
+        iv_previous.setOnClickListener(this)
+        iv_repeat.setOnClickListener(this)
+        iv_back.setOnClickListener(this)
+        iv_play_list.setOnClickListener(this)
 
         repeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
 
@@ -104,6 +109,11 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
 
     private fun setData() {
+        if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
+            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
+        else {
+            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
+        }
         Glide.with(applicationContext)
                 .applyDefaultRequestOptions(RequestOptions()
                         .placeholder(R.drawable.music_icon)
@@ -116,12 +126,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         tv_song_name.text = songData.songName
         tv_song_album.text = songData.albumName
         tv_song_play_count.text = songData.playCount.toString()
-        iv_like.setOnClickListener(this)
-        iv_play_pause.setOnClickListener(this)
-        iv_next.setOnClickListener(this)
-        iv_previous.setOnClickListener(this)
-        iv_repeat.setOnClickListener(this)
-        iv_back.setOnClickListener(this)
         seek_bar.max = songData.songDuration.toInt()
 
         var bitmap: Bitmap?
@@ -151,7 +155,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 scheduleSeekbarUpdate()
             }
         })
-
     }
 
     override fun onClick(view: View?) {
@@ -207,6 +210,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 R.id.iv_previous -> {
                     MediaControllerCompat.getMediaController(this@MusicActivity).transportControls.skipToPrevious()
                     stopSeekbarUpdate()
+                }
+
+                R.id.iv_play_list-> {
+                    startActivity(Intent(this@MusicActivity,CurrentQueueActivity::class.java))
                 }
             }
         }
@@ -450,6 +457,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         TimeUnit.MILLISECONDS.toSeconds(musicPlayer.duration.toLong()) % TimeUnit.MINUTES.toSeconds(1))
                 iv_play_pause.setImageResource(R.drawable.ic_pause_circle_filled_red_400_48dp)
                 scheduleSeekbarUpdate()
+                setData()
             }
             STATE_PAUSED -> {
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
@@ -475,7 +483,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                     songData.isCurrentlyPlaying = true
                     it.copyToRealmOrUpdate(songData)
                 })
-                setData()
+
             }
         }
     }

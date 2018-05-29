@@ -45,7 +45,7 @@ class CurrentQueueRecyclerAdapter(val context: Context, private val arrayList: A
             return true
         }
 
-        fun viewHolderBind( context: Context, songInfo: SongHistory?, listener: IOnRecycleItemClick): Unit {
+        fun viewHolderBind( context: Context, songInfo: SongHistory?, listener: IOnRecycleItemClick) {
             onItemClick = listener
             tvSongName.text = songInfo!!.songName
             tvArtistName.text = songInfo.songArtist
