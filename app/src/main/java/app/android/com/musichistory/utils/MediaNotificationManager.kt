@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Icon
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -134,7 +136,6 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
         } else {
             bitmap = BitmapFactory.decodeResource(mMusicService.resources, R.drawable.music_icon)
         }
-
         val notificationIntent = Intent(mMusicService, MusicActivity::class.java)
         val backIntent = Intent(mMusicService, MainActivity::class.java)
         notificationIntent.putExtra("fromFloatingButton", true)
@@ -144,7 +145,7 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
                 .setContentTitle(songData.songName)
                 .setAutoCancel(false)
                 .setOngoing(mPlaybackState.state == PlaybackStateCompat.STATE_PLAYING)
-                .setSmallIcon(R.drawable.screen_home)
+                .setSmallIcon(R.drawable.circular_img)
                 .setLargeIcon(bitmap)
                 .setContentIntent(contentIntent)
                 .setColor(mMusicService.resources.getColor(R.color.color_red))

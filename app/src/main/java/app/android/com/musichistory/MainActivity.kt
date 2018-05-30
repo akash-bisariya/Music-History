@@ -27,6 +27,8 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.ImageView
 import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.utils.Utils
+import app.android.com.musichistory.utils.Utils.Companion.getCroppedBitmap
 import io.realm.RealmResults
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
@@ -114,6 +116,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             it.copyToRealmOrUpdate(songData[0])
         })
         customView(fab_music_playing, songData[0]!!.songImage)
+
+        fabMusicPlaying.customView(songData[0]!!.songImage)
     }
 
     override fun onBackPressed() {
@@ -192,28 +196,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 //        mMediaControllerCompat.queue.set(0,item)
     }
 
-    /**
-     * Created round bitmap image for floating view
-     */
-    private fun getCroppedBitmap(bitmap: Bitmap): Bitmap {
-        val output = Bitmap.createBitmap(bitmap.width,
-                bitmap.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(output)
 
-        val color = -0xbdbdbe
-        val paint = Paint()
-        val rect = Rect(0, 0, bitmap.width, bitmap.height)
-        paint.isAntiAlias = true
-        canvas.drawARGB(0, 0, 0, 0)
-        paint.color = color
-        paint.alpha = 180
-        // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-        canvas.drawCircle(bitmap.width / 2.toFloat(), bitmap.height / 2f,
-                bitmap.width / 2.toFloat(), paint)
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawBitmap(bitmap, rect, rect, paint)
-        return output
-    }
 
     override fun onClick(view: View?) {
         when (view?.id) {
@@ -331,6 +314,17 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             }
         }
     }
+}
+
+private fun ImageView.customView(imagePath: String) {
+    val drawable: Drawable? = if (imagePath != "") {
+        val option = BitmapFactory.Options()
+        option.inSampleSize = 2
+        BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeFile(imagePath, option)))
+    } else {
+        BitmapDrawable(resources, getCroppedBitmap(BitmapFactory.decodeResource(resources, R.drawable.music_icon)))
+    }
+    this.background = drawable
 }
 
 
