@@ -22,7 +22,7 @@ class CurrentQueueActivity : AppCompatActivity(), IOnRecycleItemClick {
     }
 
     override fun onRecycleItemClick(view: View?, position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     var mSongQueue = ArrayList<SongHistory?>()
@@ -36,7 +36,5 @@ class CurrentQueueActivity : AppCompatActivity(), IOnRecycleItemClick {
             mSongQueue.add(songQueue.song)
         mMusicRecyclerAdapter = CurrentQueueRecyclerAdapter(this, mSongQueue, this)
         rv_current_queue.adapter=mMusicRecyclerAdapter
-
-
     }
 }

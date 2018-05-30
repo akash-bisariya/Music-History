@@ -86,10 +86,8 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
     override fun onRecycleItemClick(view: View?, position: Int) {
         (activity as MainActivity).onRecycleItemClick(null, list[position]!!.songId.toInt())
         val intent = Intent(activity, MusicActivity::class.java)
+        intent.putExtra("fromFloatingButton", false)
         intent.putExtra(MUSIC_HISTORY_REALM_FIELD_SONG_ID, list[position]!!.songId)
-//        Realm.getDefaultInstance().executeTransaction({
-//            list[position]!!.playCount++
-//        })
         startActivity(intent)
     }
 
