@@ -121,7 +121,9 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
         }
     }
 
-
+    /**
+     *   Create mediaStyle notifications
+     */
     private fun buildNotification(currentIndex: Int) {
         songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[currentIndex]!!.song as SongHistory
         val bitmap: Bitmap

@@ -124,6 +124,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             Log.d("MusicHistory onSeekTo:", "" + pos)
+            if(mMusicPlayer.isPlaying)
+                mMusicPlayer.seekTo(pos.toInt())
         }
 
         override fun onPrepare() {
@@ -295,10 +297,11 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         when (mRepeatCount) {
             MUSIC_HISTORY_SONG_REPEAT_INFINITE -> {
                 if (getAudioFocus()) {
-                    mediaPlayer!!.start()
-                    mMediaSession!!.isActive = true
-                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
-                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
+                    handlePlayRequest(1)
+//                    mediaPlayer!!.start()
+//                    mMediaSession!!.isActive = true
+//                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
+//                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                 }
             }
             MUSIC_HISTORY_SONG_REPEAT_TWO_TIME,

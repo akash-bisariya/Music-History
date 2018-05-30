@@ -397,58 +397,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         }
     }
 
-    /**
-     *   Created mediaStyle notifications
-     */
-    private fun buildNotification() {
-        val bitmap: Bitmap
-        val bmOptions = BitmapFactory.Options()
-        bmOptions.inSampleSize = 2
-        if (songData.songImage != "") {
-            bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
-        } else {
-            bitmap = BitmapFactory.decodeResource(resources, R.drawable.music_icon)
-        }
-
-        val notificationIntent = Intent(applicationContext, MusicActivity::class.java)
-        val backIntent = Intent(applicationContext, MainActivity::class.java)
-        notificationIntent.putExtra("fromFloatingButton", true)
-        notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        val contentIntent = PendingIntent.getActivities(this, 2500, arrayOf(backIntent, notificationIntent), PendingIntent.FLAG_UPDATE_CURRENT)
-        val builder = NotificationCompat.Builder(this)
-                .setContentTitle(songData.songName)
-                .setAutoCancel(false)
-                .setOngoing(playbackStateCompat!!.state == PlaybackStateCompat.STATE_PLAYING)
-                .setSmallIcon(R.drawable.screen_home)
-                .setLargeIcon(bitmap)
-                .setContentIntent(contentIntent)
-                .setColor(resources.getColor(R.color.color_red))
-                .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
-                        .setMediaSession(mMediaBrowserCompat!!.sessionToken)
-                        .setShowCancelButton(true)
-                        .setShowActionsInCompactView(1))
-                .setContentText(songData.songArtist)
-                .setContentInfo(songData.songName)
-
-        val label: String?
-        val icon: Int?
-        val intent: PendingIntent?
-        if (playbackStateCompat!!.state == PlaybackStateCompat.STATE_PLAYING) {
-            label = "pause"
-            icon = R.drawable.ic_pause_circle_filled_red_400_48dp
-            intent = playbackAction(0)
-        } else {
-            label = "play"
-            icon = R.drawable.ic_play_circle_filled_red_400_48dp
-            intent = playbackAction(3)
-        }
-
-        builder.addAction(R.drawable.ic_skip_previous_red_400_48dp, "previous", playbackAction(1))
-        mNotification = builder.addAction(NotificationCompat.Action(icon, label, intent))
-                .addAction(R.drawable.ic_skip_next_red_400_48dp, "next", playbackAction(2))
-                .build()
-    }
-
     private fun updateUIState(state: PlaybackStateCompat?) {
         when (state!!.state) {
             STATE_PLAYING -> {
