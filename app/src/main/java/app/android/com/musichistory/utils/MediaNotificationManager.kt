@@ -1,6 +1,7 @@
 package app.android.com.musichistory.utils
 
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -11,6 +12,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
+import android.os.Build
+import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -141,6 +144,11 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
         notificationIntent.putExtra("fromFloatingButton", true)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         val contentIntent = PendingIntent.getActivities(mMusicService, 2500, arrayOf(backIntent, notificationIntent), PendingIntent.FLAG_UPDATE_CURRENT)
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createChannel()
+        }
         val builder = NotificationCompat.Builder(mMusicService)
                 .setContentTitle(songData.songName)
                 .setAutoCancel(false)
@@ -148,6 +156,8 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
                 .setSmallIcon(R.drawable.circular_img)
                 .setLargeIcon(bitmap)
                 .setContentIntent(contentIntent)
+//                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setChannelId(MUSIC_HISTORY_NOTIFICATION_CHANNEL_ID)
                 .setColor(mMusicService.resources.getColor(R.color.color_red))
                 .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setMediaSession(mMediaSessionToken)
@@ -174,6 +184,17 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
         mNotification = builder.addAction(NotificationCompat.Action(icon, label, intent))
                 .addAction(R.drawable.ic_skip_next_red_400_48dp, "next", playbackAction(2))
                 .build()
+    }
+
+
+    /**
+     * Added notification channel for Build.VERSION_CODES.O
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createChannel() {
+        val notifictionChannel = NotificationChannel(MUSIC_HISTORY_NOTIFICATION_CHANNEL_ID,"music_history_channel",NotificationManager.IMPORTANCE_HIGH)
+        notifictionChannel.description = mMusicService.getString(R.string.txt_channel_desc) as String
+        mNotificationManager.createNotificationChannel(notifictionChannel)
     }
 
 

@@ -24,3 +24,4 @@ const val MUSIC_HISTORY_SONG_REPEAT_THREE_TIME = 3
 const val MUSIC_HISTORY_MEDIA_SESSION = "MusicHistoryMediaSession"
 const val MUSIC_HISTORY_NOTIFICATION_ID = 1001
 const val MUSIC_HISTORY_LOGGER_STATUS = true
+const val MUSIC_HISTORY_NOTIFICATION_CHANNEL_ID = "music_history_channel_id_01"

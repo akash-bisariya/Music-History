@@ -286,6 +286,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 Log.d("AudioFocus", "AUDIOFOCUS_GAIN")
             }
             else -> {
+                if(mMusicPlayer.isPlaying)
                 stopMusicPlayer()
                 mMediaPlayerPause = false
                 mMediaSession!!.isActive = false
