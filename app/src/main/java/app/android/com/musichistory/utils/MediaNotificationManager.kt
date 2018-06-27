@@ -192,7 +192,7 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
      */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createChannel() {
-        val notifictionChannel = NotificationChannel(MUSIC_HISTORY_NOTIFICATION_CHANNEL_ID,"music_history_channel",NotificationManager.IMPORTANCE_HIGH)
+        val notifictionChannel = NotificationChannel(MUSIC_HISTORY_NOTIFICATION_CHANNEL_ID,"music_history_channel",NotificationManager.IMPORTANCE_LOW)
         notifictionChannel.description = mMusicService.getString(R.string.txt_channel_desc) as String
         mNotificationManager.createNotificationChannel(notifictionChannel)
     }

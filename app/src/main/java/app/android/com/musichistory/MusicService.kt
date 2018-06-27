@@ -329,6 +329,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
+        if(mMusicPlayer.isPlaying)
         stopMusicPlayer()
         Log.d("MusicHistoryError", "Error occurred - p1 $p1 p2 $p2")
         return false
