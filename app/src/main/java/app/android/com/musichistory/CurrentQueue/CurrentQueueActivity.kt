@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.MotionEvent
 import android.view.View
 import android.widget.AdapterView
@@ -13,6 +14,7 @@ import app.android.com.musichistory.MusicHistoryRecyclerAdapter
 import app.android.com.musichistory.R
 import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.models.SongQueue
+import app.android.com.musichistory.utils.SwipeRemoveSong
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_current_queue.*
 
@@ -36,5 +38,16 @@ class CurrentQueueActivity : AppCompatActivity(), IOnRecycleItemClick {
             mSongQueue.add(songQueue.song)
         mMusicRecyclerAdapter = CurrentQueueRecyclerAdapter(this, mSongQueue, this)
         rv_current_queue.adapter=mMusicRecyclerAdapter
+        val swipeHandler = object : SwipeRemoveSong(this)
+        {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
+                val adapter = rv_current_queue.adapter as CurrentQueueRecyclerAdapter
+                mSongQueue.removeAt(viewHolder!!.adapterPosition)
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(rv_current_queue)
     }
 }
