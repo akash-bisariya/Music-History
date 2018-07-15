@@ -16,9 +16,9 @@ import app.android.com.musichistory.R
 /**
  * Created by akash bisariya on 28-06-2018.
  */
-abstract class SwipeRemoveSong(val context:Context): ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT) {
+abstract class SwipeRemoveSong(val context: Context) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
     private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_delete_sweep_white_24dp)
-    private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)}
+    private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
     override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?, target: RecyclerView.ViewHolder?): Boolean {
         return false
     }
@@ -30,7 +30,7 @@ abstract class SwipeRemoveSong(val context:Context): ItemTouchHelper.SimpleCallb
         val isCanceled = dX == 0f && !isCurrentlyActive
 
         if (isCanceled) {
-            c!!.drawRect(itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(),clearPaint)
+            c!!.drawRect(itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), clearPaint)
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             return
         }
@@ -42,7 +42,7 @@ abstract class SwipeRemoveSong(val context:Context): ItemTouchHelper.SimpleCallb
         val deleteIconLeft = itemView.right - deleteIconMargin - deleteIcon.intrinsicWidth
         val deleteIconRight = itemView.right - deleteIconMargin
         val deleteIconBottom = deleteIconTop + deleteIcon.intrinsicHeight
-        view.setBounds(deleteIconLeft,deleteIconTop, deleteIconRight,deleteIconBottom)
+        view.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom)
         view.draw(c)
 
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)

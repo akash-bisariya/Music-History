@@ -5,45 +5,47 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.view.MotionEvent
 import android.view.View
-import android.widget.AdapterView
 import app.android.com.musichistory.CurrentQueueRecyclerAdapter
 import app.android.com.musichistory.IOnRecycleItemClick
-import app.android.com.musichistory.MusicHistoryRecyclerAdapter
 import app.android.com.musichistory.R
-import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.models.SongQueue
 import app.android.com.musichistory.utils.SwipeRemoveSong
 import io.realm.Realm
+import io.realm.RealmChangeListener
+import io.realm.RealmResults
 import kotlinx.android.synthetic.main.activity_current_queue.*
 
 class CurrentQueueActivity : AppCompatActivity(), IOnRecycleItemClick {
+    private var mSongQueue: RealmResults<SongQueue>? = null
+    lateinit var mMusicRecyclerAdapter: CurrentQueueRecyclerAdapter
     override fun onRecycleItemLongClick(view: View?, position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onRecycleItemClick(view: View?, position: Int) {
-
     }
 
-    var mSongQueue = ArrayList<SongHistory?>()
-    lateinit var mMusicRecyclerAdapter: CurrentQueueRecyclerAdapter
+    private val listener = RealmChangeListener<RealmResults<SongQueue>> {
+        mMusicRecyclerAdapter.notifyDataSetChanged()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_current_queue)
         rv_current_queue.layoutManager = LinearLayoutManager(this)
-        val realmResult = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
-        for (songQueue in realmResult)
-            mSongQueue.add(songQueue.song)
-        mMusicRecyclerAdapter = CurrentQueueRecyclerAdapter(this, mSongQueue, this)
-        rv_current_queue.adapter=mMusicRecyclerAdapter
-        val swipeHandler = object : SwipeRemoveSong(this)
-        {
+        mSongQueue = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
+        mMusicRecyclerAdapter = CurrentQueueRecyclerAdapter(this, mSongQueue as RealmResults<SongQueue>, this)
+        mSongQueue!!.addChangeListener(listener)
+        rv_current_queue.adapter = mMusicRecyclerAdapter
+
+        val swipeHandler = object : SwipeRemoveSong(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
-                val adapter = rv_current_queue.adapter as CurrentQueueRecyclerAdapter
-                mSongQueue.removeAt(viewHolder!!.adapterPosition)
-                adapter.notifyDataSetChanged()
+                Realm.getDefaultInstance().executeTransaction(
+                        {
+                            val result = it.where(SongQueue::class.java).findAll()
+                            (result as RealmResults).deleteFromRealm(viewHolder!!.adapterPosition)
+                        }
+                )
             }
         }
 

@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.models.SongQueue
 import com.bumptech.glide.Glide
 import io.realm.RealmResults
 import java.util.concurrent.TimeUnit
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Created by akash bisariya on 13-02-2018.
  */
-class CurrentQueueRecyclerAdapter(val context: Context, private val arrayList: ArrayList<SongHistory?>, private val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<CurrentQueueRecyclerAdapter.ViewHolder>() {
+class CurrentQueueRecyclerAdapter(val context: Context, private val arrayList: RealmResults<SongQueue>, private val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<CurrentQueueRecyclerAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.viewHolderBind(context, arrayList[position], onItemClick)
     }
@@ -45,21 +45,22 @@ class CurrentQueueRecyclerAdapter(val context: Context, private val arrayList: A
             return true
         }
 
-        fun viewHolderBind( context: Context, songInfo: SongHistory?, listener: IOnRecycleItemClick) {
+        fun viewHolderBind( context: Context, songInfo: SongQueue?, listener: IOnRecycleItemClick) {
             onItemClick = listener
-            tvSongName.text = songInfo!!.songName
-            tvArtistName.text = songInfo.songArtist
+            val songHistory = songInfo!!.song
+            tvSongName.text = songHistory!!.songName
+            tvArtistName.text = songHistory.songArtist
             tvSongDuration.text = String.format("%02d:%02d",
-                    TimeUnit.MILLISECONDS.toMinutes((((songInfo.songDuration))).toLong()) % TimeUnit.HOURS.toMinutes(1),
-                    TimeUnit.MILLISECONDS.toSeconds((((songInfo.songDuration))).toLong()) % TimeUnit.MINUTES.toSeconds(1))
-            tvSongPlayCount.text = context.resources.getQuantityString(R.plurals.numberOfTimeSongPlayed, songInfo.playCount, songInfo.playCount)
-            if (songInfo.songImage == "") {
+                    TimeUnit.MILLISECONDS.toMinutes((((songHistory.songDuration))).toLong()) % TimeUnit.HOURS.toMinutes(1),
+                    TimeUnit.MILLISECONDS.toSeconds((((songHistory.songDuration))).toLong()) % TimeUnit.MINUTES.toSeconds(1))
+            tvSongPlayCount.text = context.resources.getQuantityString(R.plurals.numberOfTimeSongPlayed, songHistory.playCount, songHistory.playCount)
+            if (songHistory.songImage == "") {
                 Glide.with(context)
                         .load(R.drawable.music_icon)
                         .into(ivSongImage)
             } else {
                 Glide.with(context)
-                        .load(songInfo.songImage)
+                        .load(songHistory.songImage)
                         .into(ivSongImage)
             }
             itemView.setOnClickListener(this)

@@ -28,7 +28,7 @@ import io.realm.RealmResults
  * Created by akash
  * on 5/3/18.
  */
-class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListener,MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
+class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
     private val MY_MEDIA_ROOT_ID = "media_root_id"
     private val MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id"
     private var mSongQueueRealmResult: RealmResults<SongQueue>? = null
@@ -81,25 +81,25 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-            if (intent?.getStringExtra("songId") != null) {
-                isFromFloatingButton = intent.getBooleanExtra("fromFloatingButton", false)
-                if (!(mMusicPlayer.isPlaying && intent.getBooleanExtra("fromFloatingButton", false))) {
-                    mSongId = intent.getStringExtra("songId")
-                    songData = (Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0]) as SongHistory
-                    mMusicPlayer.stop()
-                    mMusicPlayer.reset()
-                    mRepeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
-                    val result = mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
-                    if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                        mMusicPlayer.setDataSource(songData.songDataPath)
-                        metaDataReceiver.setDataSource(songData.songDataPath)
-                        mMusicPlayer.setOnPreparedListener(this@MusicService)
-                        mMusicPlayer.prepareAsync()
-                        mMusicPlayer.setOnCompletionListener(this@MusicService)
-                        mMusicPlayer.setOnErrorListener(this@MusicService)
-                    }
+        if (intent?.getStringExtra("songId") != null) {
+            isFromFloatingButton = intent.getBooleanExtra("fromFloatingButton", false)
+            if (!(mMusicPlayer.isPlaying && intent.getBooleanExtra("fromFloatingButton", false))) {
+                mSongId = intent.getStringExtra("songId")
+                songData = (Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0]) as SongHistory
+                mMusicPlayer.stop()
+                mMusicPlayer.reset()
+                mRepeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
+                val result = mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+                if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    mMusicPlayer.setDataSource(songData.songDataPath)
+                    metaDataReceiver.setDataSource(songData.songDataPath)
+                    mMusicPlayer.setOnPreparedListener(this@MusicService)
+                    mMusicPlayer.prepareAsync()
+                    mMusicPlayer.setOnCompletionListener(this@MusicService)
+                    mMusicPlayer.setOnErrorListener(this@MusicService)
                 }
             }
+        }
         return Service.START_STICKY
     }
 
@@ -124,7 +124,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             Log.d("MusicHistory onSeekTo:", "" + pos)
-            if(mMusicPlayer.isPlaying)
+            if (mMusicPlayer.isPlaying)
                 mMusicPlayer.seekTo(pos.toInt())
         }
 
@@ -286,8 +286,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 Log.d("AudioFocus", "AUDIOFOCUS_GAIN")
             }
             else -> {
-                if(mMusicPlayer.isPlaying)
-                stopMusicPlayer()
+                if (mMusicPlayer.isPlaying)
+                    stopMusicPlayer()
                 mMediaPlayerPause = false
                 mMediaSession!!.isActive = false
             }
@@ -329,8 +329,8 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
-        if(mMusicPlayer.isPlaying)
-        stopMusicPlayer()
+        if (mMusicPlayer.isPlaying)
+            stopMusicPlayer()
         Log.d("MusicHistoryError", "Error occurred - p1 $p1 p2 $p2")
         return false
     }
@@ -346,7 +346,12 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         mMediaSession!!.isActive = false
         mMediaSession?.release()
         mAudioManager?.abandonAudioFocus(this)
-        mMediaNotificationManager.stopNotification()
+        try {
+            mMediaNotificationManager.stopNotification()
+        } catch (exp: UninitializedPropertyAccessException) {
+
+        }
+
     }
 
     override fun onDestroy() {

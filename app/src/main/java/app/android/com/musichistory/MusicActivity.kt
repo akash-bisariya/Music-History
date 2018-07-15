@@ -431,7 +431,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                     songData.isCurrentlyPlaying = true
                     it.copyToRealmOrUpdate(songData)
                 })
-
+1
             }
         }
     }
