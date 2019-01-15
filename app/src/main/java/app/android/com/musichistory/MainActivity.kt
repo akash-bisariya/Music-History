@@ -1,7 +1,9 @@
 package app.android.com.musichistory
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.*
@@ -13,6 +15,7 @@ import android.provider.MediaStore
 import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarDrawerToggle
@@ -26,19 +29,15 @@ import android.support.v7.graphics.Palette
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.ImageView
+import app.android.com.musichistory.constants.MUSIC_HISTORY_CHANGE_OBSERVE_IN_AUDIO_FILES
 import app.android.com.musichistory.models.SongHistory
-import app.android.com.musichistory.utils.Utils
 import app.android.com.musichistory.utils.Utils.Companion.getCroppedBitmap
 import io.realm.RealmResults
+import java.lang.Math.random
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener, View.OnTouchListener, NavigationView.OnNavigationItemSelectedListener {
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        drawer_layout.closeDrawer(GravityCompat.START)
-        return true
-    }
-
     private var dX: Float = 0.toFloat()
     private var dY: Float = 0.toFloat()
     private var downRawX: Float = 0.toFloat()
@@ -47,6 +46,16 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     private var mSongId: String? = null
     private var viewPager: ViewPager? = null
     private lateinit var fabMusicPlaying: ImageView
+
+    private var changeFileBroadcastReceiver = object : BroadcastReceiver()
+    {
+        override fun onReceive(p0: Context?, intent : Intent?) {
+            if (intent != null) {
+                Log.d("MusicHistory",intent.action.toString())
+            }
+        }
+
+    }
 
     override fun onTouch(view: View?, motionEvent: MotionEvent?): Boolean {
         val action = motionEvent!!.action
@@ -107,14 +116,14 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         mSongId = position.toString()
         fab_music_playing.visibility = View.VISIBLE
         val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
-        Realm.getDefaultInstance().executeTransaction({
+        Realm.getDefaultInstance().executeTransaction {
             val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
             for (music in result) {
                 music.isCurrentlyPlaying = false
             }
             songData[0]!!.isCurrentlyPlaying = true
             it.copyToRealmOrUpdate(songData[0])
-        })
+        }
         customView(fab_music_playing, songData[0]!!.songImage)
 
         fabMusicPlaying.customView(songData[0]!!.songImage)
@@ -171,9 +180,18 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         } else {
             launch {
                 getSong(applicationContext)
-                Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
+                Log.d("MusicHistory", "CoRoutine under launch method " + Thread.currentThread().name)
             }
         }
+    }
+
+
+
+
+    private fun registerReceiverForFileChange() {
+        val f = IntentFilter()
+        f.addAction(MUSIC_HISTORY_CHANGE_OBSERVE_IN_AUDIO_FILES)
+        LocalBroadcastManager.getInstance(this).registerReceiver(changeFileBroadcastReceiver,f)
     }
 
     override fun onRecycleItemLongClick(view: View?, position: Int) {
@@ -197,11 +215,17 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     }
 
 
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        drawer_layout.closeDrawer(GravityCompat.START)
+        return true
+    }
+
 
     override fun onClick(view: View?) {
         when (view?.id) {
             R.id.fab_music_playing -> {
                 val intent = Intent(this, MusicActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 intent.putExtra("fromFloatingButton", true)
                 startActivity(intent)
             }
@@ -213,7 +237,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
      */
     private fun getSongImageIcon(albumId: String): String {
         //Todo Use MediaMetaData Receiver to fetch album art using embedded image
-
         val uri: Uri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
         val cursor: Cursor = applicationContext.contentResolver.query(uri, null, MediaStore.Audio.Albums._ID + " = " + albumId, null, null)
         cursor.moveToFirst()
@@ -286,6 +309,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
     override fun onResume() {
         super.onResume()
+        registerReceiverForFileChange()
         val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
         if (songData.size > 0) {
             customView(fab_music_playing, songData[0]!!.songImage)
@@ -293,7 +317,11 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         } else {
             fab_music_playing.visibility = View.GONE
         }
+    }
 
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(changeFileBroadcastReceiver)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -314,6 +342,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             }
         }
     }
+
 }
 
 private fun ImageView.customView(imagePath: String) {
@@ -326,5 +355,9 @@ private fun ImageView.customView(imagePath: String) {
     }
     this.background = drawable
 }
+
+
+
+
 
 

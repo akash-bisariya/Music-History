@@ -25,3 +25,6 @@ const val MUSIC_HISTORY_MEDIA_SESSION = "MusicHistoryMediaSession"
 const val MUSIC_HISTORY_NOTIFICATION_ID = 1001
 const val MUSIC_HISTORY_LOGGER_STATUS = true
 const val MUSIC_HISTORY_NOTIFICATION_CHANNEL_ID = "music_history_channel_id_01"
+const val MUSIC_HISTORY_CHANGE_OBSERVE_IN_AUDIO_FILES = "change_in_audio_files"
+const val MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_PATH = "changed_audio_file_path"
+const val MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_EVENT_NAME = "changed_audio_file_event_name"

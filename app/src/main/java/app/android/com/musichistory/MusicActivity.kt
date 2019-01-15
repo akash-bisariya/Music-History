@@ -65,11 +65,8 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
-
         mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
-
         setData()
-
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
         iv_next.setOnClickListener(this)
@@ -77,7 +74,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         iv_repeat.setOnClickListener(this)
         iv_back.setOnClickListener(this)
         iv_play_list.setOnClickListener(this)
-
+        mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, MusicService::class.java), mMediaBrowserCompatConnectionCallback, null)
         repeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
 
         when (repeatCount) {
@@ -102,11 +99,27 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 tv_repeat_count.text = "3"
             }
         }
-
-        mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, MusicService::class.java), mMediaBrowserCompatConnectionCallback, null)
-        mMediaBrowserCompat!!.connect()
     }
 
+
+    override fun onStart() {
+        super.onStart()
+        if(mMediaBrowserCompat!=null)
+        mMediaBrowserCompat!!.connect()
+
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+        if(mMediaBrowserCompat!=null)
+            mMediaBrowserCompat!!.disconnect()
+        var controllerCompat = MediaControllerCompat.getMediaController(this@MusicActivity);
+        if (controllerCompat != null) {
+            controllerCompat.unregisterCallback(mMediaControllerCompatCallback)
+        }
+
+    }
 
     private fun setData() {
         if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
@@ -133,10 +146,9 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         if (!(songData.songImage).equals("")) {
             bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
             bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
-            Palette.from(bitmap).generate(
-                    {
-                        music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
-                    })
+            Palette.from(bitmap).generate {
+                music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
+            }
         } else {
             music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
         }
@@ -147,7 +159,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
-                stopSeekbarUpdate()
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
@@ -221,6 +232,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
     override fun onDestroy() {
         super.onDestroy()
+        stopSeekbarUpdate()
         Realm.getDefaultInstance().close()
     }
 
@@ -312,14 +324,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     val mMediaControllerCompatCallback: MediaControllerCompat.Callback = object : MediaControllerCompat.Callback() {
-        override fun onCaptioningEnabledChanged(enabled: Boolean) {
-            super.onCaptioningEnabledChanged(enabled)
-        }
-
-        override fun onRepeatModeChanged(repeatMode: Int) {
-            super.onRepeatModeChanged(repeatMode)
-        }
-
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             playbackStateCompat = state
@@ -329,6 +333,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
+            updateDuration(metadata)
         }
     }
 
@@ -411,6 +416,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
                 stopSeekbarUpdate()
             }
+            STATE_NONE,
             STATE_STOPPED -> {
                 seek_bar.progress = 0
                 stopSeekbarUpdate()
@@ -423,15 +429,14 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 scheduleSeekbarUpdate()
                 if (Realm.getDefaultInstance().where(SongQueue::class.java).findAll().size > 0)
                     songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
-                Realm.getDefaultInstance().executeTransaction({
+                Realm.getDefaultInstance().executeTransaction {
                     val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
                     for (music in result) {
                         music.isCurrentlyPlaying = false
                     }
                     songData.isCurrentlyPlaying = true
                     it.copyToRealmOrUpdate(songData)
-                })
-1
+                }
             }
         }
     }
@@ -440,11 +445,20 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         stopSeekbarUpdate()
         if (!mExecutorService.isShutdown) {
             mScheduleFuture = mExecutorService.scheduleAtFixedRate(
-                    Runnable {
-                        mHandler.post(mUpdateProgressTask)
+                    {
+                        this.mHandler.post(mUpdateProgressTask)
                     }, 100,
                     1000, TimeUnit.MILLISECONDS)
         }
+    }
+
+    private fun updateDuration(metadata: MediaMetadataCompat?) {
+        if (metadata == null) {
+            return
+        }
+        val duration = metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION).toInt()
+        seek_bar.setMax(duration)
+        tv_song_duration.text = DateUtils.formatElapsedTime((duration / 1000).toLong())
     }
 
     private fun updateProgress() {

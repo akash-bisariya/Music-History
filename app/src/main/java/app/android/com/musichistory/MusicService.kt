@@ -29,7 +29,6 @@ import io.realm.RealmResults
  * on 5/3/18.
  */
 class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, AudioManager.OnAudioFocusChangeListener {
-    private val MY_MEDIA_ROOT_ID = "media_root_id"
     private val MY_EMPTY_MEDIA_ROOT_ID = "empty_root_id"
     private var mSongQueueRealmResult: RealmResults<SongQueue>? = null
     private var mMediaSession: MediaSessionCompat? = null
@@ -45,8 +44,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private lateinit var mMediaNotificationManager: MediaNotificationManager
     private val metaDataReceiver = MediaMetadataRetriever()
     private var isFromFloatingButton = false
-
-
     private lateinit var songData: SongHistory
 
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
@@ -180,27 +177,24 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
      */
     override fun onPrepared(mediaPlayer: MediaPlayer?) {
         mediaPlayer!!.start()
-        Realm.getDefaultInstance().executeTransaction({
+        Realm.getDefaultInstance().executeTransaction {
             songData.playCount++
             it.copyToRealmOrUpdate(songData)
-        })
+        }
         mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
         mMediaSession?.setPlaybackState(mStateBuilder!!.build())
         mMediaSession!!.isActive = true
 
-        val metadata: MediaMetadataCompat = MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId)
-                .build()
 
-        mMediaSession!!.setMetadata(metadata)
-        Realm.getDefaultInstance().executeTransactionAsync({
+        mMediaSession!!.setMetadata(MediaMetadataCompat.Builder().putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId).build())
+        Realm.getDefaultInstance().executeTransactionAsync {
             if (!isFromFloatingButton) {
                 it.delete(SongQueue::class.java)
                 it.insertOrUpdate(SongQueue(songData))
             }
             mMediaNotificationManager = MediaNotificationManager(this)
             mMediaNotificationManager.startNotification(false, mCurrentSongIndex)
-        })
+        }
     }
 
 
@@ -358,6 +352,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         super.onDestroy()
         stopMusicPlayer()
         Realm.getDefaultInstance().close()
+        stopSelf()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
