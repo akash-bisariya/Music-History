@@ -10,18 +10,18 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import app.android.com.musichistory.MainActivity
-import app.android.com.musichistory.MusicActivity
-import app.android.com.musichistory.MusicService
+import app.android.com.musichistory.ui.MainActivity
+import app.android.com.musichistory.ui.MusicActivity
+import app.android.com.musichistory.service.MusicService
 import app.android.com.musichistory.R
 import app.android.com.musichistory.constants.*
 import app.android.com.musichistory.customViews.MusicPlayer
@@ -95,7 +95,7 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
     fun startNotification(isPlaybackStateChanged: Boolean, currentIndex: Int) {
         if (!mStarted) {
             mPlaybackState = mMediaControllerCompat.playbackState
-            mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+            mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback, Handler(Looper.getMainLooper()))
             buildNotification(currentIndex)
             val filter = IntentFilter()
             filter.addAction(MUSIC_HISTORY_NOTIFICATION_ACTION_NEXT)

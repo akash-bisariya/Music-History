@@ -1,8 +1,10 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.adapters
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
+import app.android.com.musichistory.ui.MusicHistoryFragment
+import app.android.com.musichistory.ui.MusicListFragment
 
 /**
  * Created by akash bisariya on 18-01-2018.

@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.ui
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -9,9 +9,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.*
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.PaintDrawable
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RectShape
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
@@ -21,7 +18,6 @@ import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_music.*
 import android.os.Handler
 import android.os.SystemClock
-import android.support.v4.app.NotificationCompat
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -34,6 +30,8 @@ import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
 import app.android.com.musichistory.CurrentQueue.CurrentQueueActivity
+import app.android.com.musichistory.service.MusicService
+import app.android.com.musichistory.R
 import app.android.com.musichistory.constants.*
 import app.android.com.musichistory.customViews.MusicPlayer
 import app.android.com.musichistory.models.SongHistory
@@ -159,6 +157,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
+                stopSeekbarUpdate()
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
@@ -223,7 +222,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                     stopSeekbarUpdate()
                 }
 
-                R.id.iv_play_list-> {
+                R.id.iv_play_list -> {
                     startActivity(Intent(this@MusicActivity,CurrentQueueActivity::class.java))
                 }
             }
@@ -328,12 +327,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             super.onPlaybackStateChanged(state)
             playbackStateCompat = state
             updateUIState(state)
-
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-            updateDuration(metadata)
         }
     }
 
@@ -347,6 +344,11 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             mMediaControllerCompatCallback.onMetadataChanged(mMediaControllerCompat!!.metadata)
             mMediaControllerCompatCallback.onPlaybackStateChanged(mMediaControllerCompat!!.playbackState)
             startServiceToPlay()
+            updateProgress()
+
+            if (mMediaControllerCompat!!.playbackState != null && (mMediaControllerCompat!!.playbackState.state == PlaybackStateCompat.STATE_PLAYING || mMediaControllerCompat!!.playbackState.getState() == PlaybackStateCompat.STATE_BUFFERING)) {
+                scheduleSeekbarUpdate()
+            }
 
         }
 
@@ -418,7 +420,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             }
             STATE_NONE,
             STATE_STOPPED -> {
-                seek_bar.progress = 0
                 stopSeekbarUpdate()
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
             }
@@ -452,15 +453,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         }
     }
 
-    private fun updateDuration(metadata: MediaMetadataCompat?) {
-        if (metadata == null) {
-            return
-        }
-        val duration = metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION).toInt()
-        seek_bar.setMax(duration)
-        tv_song_duration.text = DateUtils.formatElapsedTime((duration / 1000).toLong())
-    }
-
     private fun updateProgress() {
         if (playbackStateCompat == null) {
             return
@@ -472,7 +464,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             // latest position. This ensure that we do not repeatedly call the getPlaybackState()
             // on MediaControllerCompat.
             val timeDelta = SystemClock.elapsedRealtime() - playbackStateCompat!!.lastPositionUpdateTime
-            currentPosition += (timeDelta.toInt() * playbackStateCompat!!.playbackSpeed).toLong()
+            currentPosition += (timeDelta.toInt() * playbackStateCompat!!.playbackSpeed).toInt()
         }
         seek_bar.progress = currentPosition.toInt()
     }

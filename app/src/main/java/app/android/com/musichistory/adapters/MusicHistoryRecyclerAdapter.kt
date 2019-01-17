@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.adapters
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import app.android.com.musichistory.IOnRecycleItemClick
+import app.android.com.musichistory.R
 import app.android.com.musichistory.models.SongHistory
 import com.bumptech.glide.Glide
 import io.realm.RealmResults
@@ -15,7 +17,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Created by akash bisariya on 13-02-2018.
  */
-class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmResults<SongHistory>, val isHistory: Boolean, val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<MusicRecyclerAdapter.ViewHolder>() {
+class MusicHistoryRecyclerAdapter(val context: Context, private val arrayList: RealmResults<SongHistory>, private val isHistory: Boolean, private val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<MusicHistoryRecyclerAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.viewHolderBind(isHistory, context, arrayList[position], onItemClick)
     }
@@ -29,7 +31,7 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
         return if (arrayList.size > 0) arrayList.size else 0
     }
 
-    class ViewHolder(itemView: View?, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener ,View.OnLongClickListener{
+    class ViewHolder(itemView: View?, private var onItemClick: IOnRecycleItemClick) : RecyclerView.ViewHolder(itemView), View.OnClickListener,View.OnLongClickListener {
         private val tvSongName = itemView!!.findViewById(R.id.tv_song_name) as TextView
         private val tvArtistName = itemView!!.findViewById(R.id.tv_artist_name) as TextView
         private val tvSongDuration = itemView!!.findViewById(R.id.tv_list_song_duration) as TextView
@@ -44,7 +46,6 @@ class MusicRecyclerAdapter(val context: Context, private val arrayList: RealmRes
             onItemClick.onRecycleItemLongClick(view,adapterPosition)
             return true
         }
-
 
         fun viewHolderBind(isHistory: Boolean, context: Context, songInfo: SongHistory?, listener: IOnRecycleItemClick): Unit {
             onItemClick = listener

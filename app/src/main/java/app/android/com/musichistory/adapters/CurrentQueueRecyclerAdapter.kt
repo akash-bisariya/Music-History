@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.adapters
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.IOnRecycleItemClick
+import app.android.com.musichistory.R
+import app.android.com.musichistory.models.SongQueue
 import com.bumptech.glide.Glide
 import io.realm.RealmResults
 import java.util.concurrent.TimeUnit
@@ -15,9 +17,9 @@ import java.util.concurrent.TimeUnit
 /**
  * Created by akash bisariya on 13-02-2018.
  */
-class MusicHistoryRecyclerAdapter(val context: Context, private val arrayList: RealmResults<SongHistory>, private val isHistory: Boolean, private val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<MusicHistoryRecyclerAdapter.ViewHolder>() {
+class CurrentQueueRecyclerAdapter(val context: Context, private val arrayList: RealmResults<SongQueue>, private val onItemClick: IOnRecycleItemClick) : RecyclerView.Adapter<CurrentQueueRecyclerAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.viewHolderBind(isHistory, context, arrayList[position], onItemClick)
+        holder.viewHolderBind(context, arrayList[position], onItemClick)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -45,24 +47,24 @@ class MusicHistoryRecyclerAdapter(val context: Context, private val arrayList: R
             return true
         }
 
-        fun viewHolderBind(isHistory: Boolean, context: Context, songInfo: SongHistory?, listener: IOnRecycleItemClick): Unit {
+        fun viewHolderBind( context: Context, songInfo: SongQueue?, listener: IOnRecycleItemClick) {
             onItemClick = listener
-            tvSongName.text = songInfo!!.songName
-            tvArtistName.text = songInfo.songArtist
+            val songHistory = songInfo!!.song
+            tvSongName.text = songHistory!!.songName
+            tvArtistName.text = songHistory.songArtist
             tvSongDuration.text = String.format("%02d:%02d",
-                    TimeUnit.MILLISECONDS.toMinutes((((songInfo.songDuration))).toLong()) % TimeUnit.HOURS.toMinutes(1),
-                    TimeUnit.MILLISECONDS.toSeconds((((songInfo.songDuration))).toLong()) % TimeUnit.MINUTES.toSeconds(1))
-            tvSongPlayCount.text = context.resources.getQuantityString(R.plurals.numberOfTimeSongPlayed, songInfo.playCount, songInfo.playCount)
-            if (songInfo.songImage == "") {
+                    TimeUnit.MILLISECONDS.toMinutes((((songHistory.songDuration))).toLong()) % TimeUnit.HOURS.toMinutes(1),
+                    TimeUnit.MILLISECONDS.toSeconds((((songHistory.songDuration))).toLong()) % TimeUnit.MINUTES.toSeconds(1))
+            tvSongPlayCount.text = context.resources.getQuantityString(R.plurals.numberOfTimeSongPlayed, songHistory.playCount, songHistory.playCount)
+            if (songHistory.songImage == "") {
                 Glide.with(context)
                         .load(R.drawable.music_icon)
                         .into(ivSongImage)
             } else {
                 Glide.with(context)
-                        .load(songInfo.songImage)
+                        .load(songHistory.songImage)
                         .into(ivSongImage)
             }
-            tvSongPlayCount.visibility = if (isHistory) View.VISIBLE else View.GONE
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
         }

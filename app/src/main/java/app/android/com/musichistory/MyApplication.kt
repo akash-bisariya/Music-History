@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Environment
 import android.os.FileObserver
 import android.util.Log
+import app.android.com.musichistory.utils.MediaChangeObserver
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
@@ -20,7 +21,7 @@ class MyApplication: Application() {
             return application_context
         }
     }
-    var mediaChangeObserver:MediaChangeObserver? = null
+    var mediaChangeObserver: MediaChangeObserver? = null
     override fun onCreate() {
         super.onCreate()
         Realm.init(this)

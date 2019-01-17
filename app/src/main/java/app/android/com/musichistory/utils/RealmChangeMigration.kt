@@ -1,8 +1,7 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.utils
 
 import io.realm.DynamicRealm
 import io.realm.RealmMigration
-import io.realm.RealmSchema
 
 /**
  * Created by akash

@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.ui
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -29,15 +29,23 @@ import android.support.v7.graphics.Palette
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.ImageView
+import app.android.com.musichistory.IOnRecycleItemClick
+import app.android.com.musichistory.adapters.PagerAdapter
+import app.android.com.musichistory.R
 import app.android.com.musichistory.constants.MUSIC_HISTORY_CHANGE_OBSERVE_IN_AUDIO_FILES
+import app.android.com.musichistory.constants.MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_PATH
 import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.utils.Utils.Companion.getCroppedBitmap
 import io.realm.RealmResults
-import java.lang.Math.random
+import java.io.File
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
 
 class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListener, View.OnTouchListener, NavigationView.OnNavigationItemSelectedListener {
+    override fun onRecycleItemLongClick(view: View?, position: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private var dX: Float = 0.toFloat()
     private var dY: Float = 0.toFloat()
     private var downRawX: Float = 0.toFloat()
@@ -51,7 +59,33 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     {
         override fun onReceive(p0: Context?, intent : Intent?) {
             if (intent != null) {
-                Log.d("MusicHistory",intent.action.toString())
+                val uri: Uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                Log.d("MusicHistory",intent.action.toString()+""+intent.extras["MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_PATH"])
+                var changedUri = Uri.fromFile(File(intent.extras[MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_PATH].toString()))
+//                AND "+MediaStore.Audio.Media.DATA +" = '"+changedUri+"'"
+                var cursor =this@MainActivity.contentResolver.query(  uri, null, MediaStore.Audio.Media.IS_MUSIC + " = 1", null, null)
+//                Realm.getDefaultInstance().beginTransaction()
+                if (cursor.count > 0) {
+                    cursor.moveToFirst()
+                    do {
+                        val albumId = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
+//                        realm.insert(SongHistory(
+//                                cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)),
+//                                cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME))
+//                                        .replace(Regex("^(-+|\\d+)"), "").trim()
+//                                        .replace(Regex("^-+"), "").trim()
+//                                        .replace(Regex("_+"), " "),
+//                                cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
+//                                cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)).replace(Regex("^-+\\d+-+"), "").trim(),
+//                                cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)),
+//                                cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)),
+//                                cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)),
+//                                getSongImageIcon(albumId),
+//                                0, false))
+                    } while (cursor.moveToNext())
+                }
+                cursor.close()
+//                realm.commitTransaction()
             }
         }
 
@@ -126,6 +160,8 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         }
         customView(fab_music_playing, songData[0]!!.songImage)
 
+
+
         fabMusicPlaying.customView(songData[0]!!.songImage)
     }
 
@@ -194,26 +230,6 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         LocalBroadcastManager.getInstance(this).registerReceiver(changeFileBroadcastReceiver,f)
     }
 
-    override fun onRecycleItemLongClick(view: View?, position: Int) {
-////        val queue = ArrayList<MediaSessionCompat.QueueItem>()
-//        val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
-//
-//        Toast.makeText(this,""+(songData[0]!!.songId)+songData[0]!!.songDataPath+""+songData[0]!!.albumName, Toast.LENGTH_SHORT).show()
-//        val track = MediaMetadataCompat.Builder()
-//                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mSongId)
-//                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM,songData[0]!!.albumName)
-//                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,songData[0]!!.songArtist)
-//                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE,songData[0]!!.songName)
-//                .build()
-//
-//
-//
-//        val item = MediaSessionCompat.QueueItem(track.description,0)
-////        queue.add(item)
-////        (mMediaSession as MediaSessionCompat).setQueue(queue)
-//        mMediaControllerCompat.queue.set(0,item)
-    }
-
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         drawer_layout.closeDrawer(GravityCompat.START)
@@ -274,7 +290,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             realm.deleteAll()
             realm.commitTransaction()
             val uri: Uri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-            val cursor: Cursor = context.contentResolver.query(uri, null, MediaStore.Audio.Media.IS_MUSIC + " = 1", null, null)
+            val cursor: Cursor = context.contentResolver.query(uri, null, MediaStore.Audio.Media.IS_MUSIC + " = 1" , null, null)
             realm.beginTransaction()
             if (cursor.count > 0) {
                 cursor.moveToFirst()

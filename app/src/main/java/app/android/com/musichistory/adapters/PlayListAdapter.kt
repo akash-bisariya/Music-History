@@ -1,10 +1,12 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.adapters
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ImageView
+import app.android.com.musichistory.IOnRecycleItemClick
+import app.android.com.musichistory.R
 import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.models.SongQueue
 import com.bumptech.glide.Glide

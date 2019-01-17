@@ -6,7 +6,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
-import app.android.com.musichistory.CurrentQueueRecyclerAdapter
+import app.android.com.musichistory.adapters.CurrentQueueRecyclerAdapter
 import app.android.com.musichistory.IOnRecycleItemClick
 import app.android.com.musichistory.R
 import app.android.com.musichistory.models.SongQueue

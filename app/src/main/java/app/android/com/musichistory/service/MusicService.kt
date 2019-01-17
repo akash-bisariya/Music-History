@@ -1,4 +1,4 @@
-package app.android.com.musichistory
+package app.android.com.musichistory.service
 
 
 import android.app.Service
@@ -203,7 +203,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
         if (mCurrentSongIndex < 0) mCurrentSongIndex = 0 else mCurrentSongIndex %= mSongQueueRealmResult!!.size
         val extras = Bundle()
         extras.putString("currentIndex", mCurrentSongIndex.toString())
-
         if (amount > 0)
             mStateBuilder?.setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, mCurrentSongIndex.toLong(), 1.0f)!!.setExtras(extras)
         else
@@ -240,7 +239,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private fun getAudioFocus(): Boolean = (mAudioManager!!.requestAudioFocus(this@MusicService, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED)
 
     override fun onAudioFocusChange(result: Int) {
-
         when (result) {
             AudioManager.AUDIOFOCUS_GAIN_TRANSIENT -> {
                 if (mMediaPlayerPause) {
@@ -270,10 +268,9 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
                 if (!mAudioFocusCanDuck) {
-                    mMusicPlayer.setDataSource(songData.songDataPath)
+                    playMediaPlayer()
                     mMusicPlayer.setOnPreparedListener(this@MusicService)
                     mMusicPlayer.setOnCompletionListener(this@MusicService)
-                    mMusicPlayer.prepareAsync()
                     mMusicPlayer.setOnErrorListener(this)
                 }
                 mAudioFocusCanDuck = false
@@ -293,10 +290,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             MUSIC_HISTORY_SONG_REPEAT_INFINITE -> {
                 if (getAudioFocus()) {
                     handlePlayRequest(1)
-//                    mediaPlayer!!.start()
-//                    mMediaSession!!.isActive = true
-//                    mStateBuilder?.setState(PlaybackStateCompat.STATE_PLAYING, mMusicPlayer.currentPosition.toLong(), 1.0f)
-//                    mMediaSession?.setPlaybackState(mStateBuilder!!.build())
                 }
             }
             MUSIC_HISTORY_SONG_REPEAT_TWO_TIME,
