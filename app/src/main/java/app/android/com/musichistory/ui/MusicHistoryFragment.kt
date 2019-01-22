@@ -41,9 +41,11 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick, View.OnDragListene
         super.onViewCreated(view, savedInstanceState)
         rv_music_history.layoutManager = LinearLayoutManager(activity)
         rv_play_list.layoutManager = LinearLayoutManager(activity)
-        val realm: Realm = Realm.getDefaultInstance()
-        list = realm.where(SongHistory::class.java).findAll().sort("playCount", Sort.DESCENDING)
-        playList = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
+        Realm.getDefaultInstance().use {
+            list = it.where(SongHistory::class.java).findAll().sort("playCount", Sort.DESCENDING)
+            playList = it.where(SongQueue::class.java).findAll()
+        }
+
         musicHistoryRecyclerAdapter = MusicHistoryRecyclerAdapter(activity!!.applicationContext, list, true, this)
         rv_music_history.adapter = musicHistoryRecyclerAdapter
         playListAdapter = PlayListAdapter(activity!!.applicationContext, playList, this)
@@ -63,9 +65,6 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick, View.OnDragListene
         intent.putExtra(MUSIC_HISTORY_REALM_FIELD_SONG_ID, list[position]!!.songId)
         intent.putExtra("fromFloatingButton", false)
         (activity as MainActivity).onRecycleItemClick(null, list[position]!!.songId.toInt())
-//        Realm.getDefaultInstance().executeTransaction({
-//            list[position]!!.playCount++
-//        })
         startActivityForResult(intent, 1001)
     }
 

@@ -148,20 +148,21 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
     override fun onRecycleItemClick(view: View?, position: Int) {
         mSongId = position.toString()
+        lateinit var songData: RealmResults<SongHistory>
         fab_music_playing.visibility = View.VISIBLE
-        val songData: RealmResults<SongHistory> = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
-        Realm.getDefaultInstance().executeTransaction {
-            val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
-            for (music in result) {
-                music.isCurrentlyPlaying = false
+        Realm.getDefaultInstance().use {
+            songData = it.where(SongHistory::class.java).equalTo("songId", "" + position).findAll()
+            it.executeTransaction { it1 ->
+                val result = it1.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+                for (music in result) {
+                    music.isCurrentlyPlaying = false
+                }
+                songData[0]!!.isCurrentlyPlaying = true
+                it1.copyToRealmOrUpdate(songData[0])
             }
-            songData[0]!!.isCurrentlyPlaying = true
-            it.copyToRealmOrUpdate(songData[0])
         }
-        customView(fab_music_playing, songData[0]!!.songImage)
 
-
-
+//        customView(fab_music_playing, songData[0]!!.songImage)
         fabMusicPlaying.customView(songData[0]!!.songImage)
     }
 
@@ -340,6 +341,12 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         LocalBroadcastManager.getInstance(this).unregisterReceiver(changeFileBroadcastReceiver)
     }
 
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Realm.getDefaultInstance().close()
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode == REQUEST_PERMISSION_STORAGE) {
             grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
@@ -360,6 +367,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     }
 
 }
+
 
 private fun ImageView.customView(imagePath: String) {
     val drawable: Drawable? = if (imagePath != "") {

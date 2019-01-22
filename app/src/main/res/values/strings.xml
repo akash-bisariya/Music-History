@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MusicHistory</string>
+    <string name="app_name">Music History</string>
     <string name="txt_all_music">All Music</string>
     <string name="txt_initial_position_media_player">00.00</string>
 

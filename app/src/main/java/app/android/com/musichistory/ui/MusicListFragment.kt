@@ -45,10 +45,11 @@ class MusicListFragment : Fragment(), IOnRecycleItemClick, View.OnDragListener {
         super.onViewCreated(view, savedInstanceState)
         rv_music_history.layoutManager = LinearLayoutManager(activity)
         rv_play_list.layoutManager = LinearLayoutManager(activity)
-        val realm: Realm = Realm.getDefaultInstance()
-        list = realm.where(SongHistory::class.java).findAll().sort(MUSIC_HISTORY_REALM_FIELD_SONG_NAME, Sort.ASCENDING)
-        rv_music_history.adapter = MusicRecyclerAdapter(activity!!.applicationContext, list, false, this)
-        playList = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
+        Realm.getDefaultInstance().use {
+            list = it.where(SongHistory::class.java).findAll().sort(MUSIC_HISTORY_REALM_FIELD_SONG_NAME, Sort.ASCENDING)
+            rv_music_history.adapter = MusicRecyclerAdapter(activity!!.applicationContext, list, false, this)
+            playList = it.where(SongQueue::class.java).findAll()
+        }
         playListAdapter = PlayListAdapter(activity!!.applicationContext, playList, this)
         rv_play_list.adapter = playListAdapter
         if (playList.size > 0) rl_play_list.visibility = View.VISIBLE

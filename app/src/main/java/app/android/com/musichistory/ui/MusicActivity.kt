@@ -102,15 +102,15 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
     override fun onStart() {
         super.onStart()
-        if(mMediaBrowserCompat!=null)
-        mMediaBrowserCompat!!.connect()
+        if (mMediaBrowserCompat != null)
+            mMediaBrowserCompat!!.connect()
 
     }
 
 
     override fun onStop() {
         super.onStop()
-        if(mMediaBrowserCompat!=null)
+        if (mMediaBrowserCompat != null)
             mMediaBrowserCompat!!.disconnect()
         var controllerCompat = MediaControllerCompat.getMediaController(this@MusicActivity);
         if (controllerCompat != null) {
@@ -120,11 +120,15 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     private fun setData() {
-        if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
-            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
-        else {
-            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
+
+        Realm.getDefaultInstance().use {
+            if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
+                songData = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
+            else {
+                songData = it.where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
+            }
         }
+
         Glide.with(applicationContext)
                 .applyDefaultRequestOptions(RequestOptions()
                         .placeholder(R.drawable.music_icon)
@@ -141,7 +145,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
         var bitmap: Bitmap?
         val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
-        if (!(songData.songImage).equals("")) {
+        if ((songData.songImage) != "") {
             bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
             bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
             Palette.from(bitmap).generate {
@@ -223,7 +227,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 }
 
                 R.id.iv_play_list -> {
-                    startActivity(Intent(this@MusicActivity,CurrentQueueActivity::class.java))
+                    startActivity(Intent(this@MusicActivity, CurrentQueueActivity::class.java))
                 }
             }
         }
@@ -424,21 +428,27 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                 iv_play_pause.setImageResource(R.drawable.ic_play_circle_filled_red_400_48dp)
             }
 
-            STATE_SKIPPING_TO_NEXT, STATE_SKIPPING_TO_PREVIOUS-> {
+            STATE_SKIPPING_TO_NEXT, STATE_SKIPPING_TO_PREVIOUS -> {
                 val index: Int = state.extras?.getString("currentIndex", "0")!!.toInt()
                 seek_bar.progress = 0
                 scheduleSeekbarUpdate()
-                if (Realm.getDefaultInstance().where(SongQueue::class.java).findAll().size > 0)
-                    songData = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
-                Realm.getDefaultInstance().executeTransaction {
-                    val result = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
-                    for (music in result) {
-                        music.isCurrentlyPlaying = false
+
+
+                Realm.getDefaultInstance().use {
+                    if (it.where(SongQueue::class.java).findAll().size > 0)
+                        songData = it.where(SongQueue::class.java).findAll()[index]!!.song as SongHistory
+                    it.executeTransaction { it1 ->
+                        val result = it1.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()
+                        for (music in result) {
+                            music.isCurrentlyPlaying = false
+                        }
+                        songData.isCurrentlyPlaying = true
+                        it1.copyToRealmOrUpdate(songData)
                     }
-                    songData.isCurrentlyPlaying = true
-                    it.copyToRealmOrUpdate(songData)
                 }
             }
+
+
         }
     }
 
