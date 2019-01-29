@@ -97,7 +97,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 }
             }
         }
-        return Service.START_STICKY
+        return Service.START_REDELIVER_INTENT
     }
 
     inner class MediaCallbacks : MediaSessionCompat.Callback() {

@@ -78,6 +78,7 @@ class MediaChangeObserver(val mPath: String?, event: Int) : FileObserver(mPath, 
     inner class SingleFileObserver(path: String?) : FileObserver(path) {
         override fun onEvent(event: Int, path: String?) {
             val newPath = "$mPath/$path";
+            if(newPath.contains("mp3"))
             this@MediaChangeObserver.onEvent(event, newPath)
         }
 

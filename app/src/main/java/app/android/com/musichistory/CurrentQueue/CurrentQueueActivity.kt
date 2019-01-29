@@ -40,9 +40,11 @@ class CurrentQueueActivity : AppCompatActivity(), IOnRecycleItemClick {
 
         val swipeHandler = object : SwipeRemoveSong(this) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) {
-                Realm.getDefaultInstance().executeTransaction {
-                    val result = it.where(SongQueue::class.java).findAll()
-                    (result as RealmResults).deleteFromRealm(viewHolder!!.adapterPosition)
+                val result = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
+                if(result.size!=1) {
+                    Realm.getDefaultInstance().executeTransaction {
+                        (result as RealmResults).deleteFromRealm(viewHolder!!.adapterPosition)
+                    }
                 }
             }
         }

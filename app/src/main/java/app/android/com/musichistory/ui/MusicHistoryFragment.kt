@@ -41,10 +41,9 @@ class MusicHistoryFragment : Fragment(), IOnRecycleItemClick, View.OnDragListene
         super.onViewCreated(view, savedInstanceState)
         rv_music_history.layoutManager = LinearLayoutManager(activity)
         rv_play_list.layoutManager = LinearLayoutManager(activity)
-        Realm.getDefaultInstance().use {
-            list = it.where(SongHistory::class.java).findAll().sort("playCount", Sort.DESCENDING)
-            playList = it.where(SongQueue::class.java).findAll()
-        }
+
+        list = Realm.getDefaultInstance().where(SongHistory::class.java).findAll().sort("playCount", Sort.DESCENDING)
+        playList = Realm.getDefaultInstance().where(SongQueue::class.java).findAll()
 
         musicHistoryRecyclerAdapter = MusicHistoryRecyclerAdapter(activity!!.applicationContext, list, true, this)
         rv_music_history.adapter = musicHistoryRecyclerAdapter

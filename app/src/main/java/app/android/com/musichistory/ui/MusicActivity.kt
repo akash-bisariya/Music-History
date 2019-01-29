@@ -64,7 +64,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
-        setData()
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
         iv_next.setOnClickListener(this)
@@ -72,6 +71,9 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         iv_repeat.setOnClickListener(this)
         iv_back.setOnClickListener(this)
         iv_play_list.setOnClickListener(this)
+
+        setData()
+
         mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, MusicService::class.java), mMediaBrowserCompatConnectionCallback, null)
         repeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
 
@@ -120,13 +122,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     }
 
     private fun setData() {
-
-        Realm.getDefaultInstance().use {
             if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
-                songData = it.where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
+                songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
             else {
-                songData = it.where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
-            }
+                songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
         }
 
         Glide.with(applicationContext)

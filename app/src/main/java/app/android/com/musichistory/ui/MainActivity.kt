@@ -35,6 +35,7 @@ import app.android.com.musichistory.R
 import app.android.com.musichistory.constants.MUSIC_HISTORY_CHANGE_OBSERVE_IN_AUDIO_FILES
 import app.android.com.musichistory.constants.MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_PATH
 import app.android.com.musichistory.models.SongHistory
+import app.android.com.musichistory.ui.album.AlbumsActivity
 import app.android.com.musichistory.utils.Utils.Companion.getCroppedBitmap
 import io.realm.RealmResults
 import java.io.File
@@ -233,6 +234,15 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when(item.itemId)
+        {
+            R.id.nav_albums ->
+            {
+                val intent = Intent(this, AlbumsActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                startActivity(intent)
+            }
+        }
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
