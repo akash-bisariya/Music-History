@@ -42,6 +42,7 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".ui.album.AlbumsActivity"
+            android:label="Albums"
             android:screenOrientation="portrait"/>
 
     </application>

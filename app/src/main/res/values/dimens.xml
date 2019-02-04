@@ -21,4 +21,5 @@
     <dimen name="txt_size_18sp">18sp</dimen>
     <dimen name="dimen_15dp">15dp</dimen>
     <dimen name="dimen_8dp">8dp</dimen>
+    <dimen name="s_album_image">150dp</dimen>
 </resources>

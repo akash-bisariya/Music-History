@@ -38,6 +38,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private var mAudioManager: AudioManager? = null
     private var mMediaPlayerPause = false
     private var mAudioFocusCanDuck = false
+    private var isPlayingWhenAudioFocusLose = false
     private var mRepeatCount = -1
     private var mSongId: String? = null
     private var mCurrentSongIndex = 0
@@ -261,19 +262,22 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK")
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
+                isPlayingWhenAudioFocusLose = mMusicPlayer.isPlaying
                 pauseMediaPlayer()
                 mMediaPlayerPause = true
+                isPlayingWhenAudioFocusLose
                 mMediaSession!!.isActive = false
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS")
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
-                if (!mAudioFocusCanDuck) {
+                if (!mAudioFocusCanDuck && isPlayingWhenAudioFocusLose) {
                     playMediaPlayer()
                     mMusicPlayer.setOnPreparedListener(this@MusicService)
                     mMusicPlayer.setOnCompletionListener(this@MusicService)
                     mMusicPlayer.setOnErrorListener(this)
                 }
                 mAudioFocusCanDuck = false
+                isPlayingWhenAudioFocusLose = false
                 Log.d("AudioFocus", "AUDIOFOCUS_GAIN")
             }
             else -> {

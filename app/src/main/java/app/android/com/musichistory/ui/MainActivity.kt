@@ -23,8 +23,6 @@ import android.util.Log
 import android.view.View
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
 import android.support.v7.graphics.Palette
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -38,6 +36,9 @@ import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.ui.album.AlbumsActivity
 import app.android.com.musichistory.utils.Utils.Companion.getCroppedBitmap
 import io.realm.RealmResults
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 
 const val REQUEST_PERMISSION_STORAGE: Int = 30000
@@ -194,15 +195,18 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         nav_view_new.setNavigationItemSelectedListener(this)
-
+        var vibrantColor: Int
+        var vibrantDarkColor: Int
         try {
+            GlobalScope.launch(Dispatchers.Default) {
             val bitmap = BitmapFactory.decodeResource(resources, R.drawable.screen_home)
             Palette.from(bitmap).generate { palette ->
-                val vibrantColor = palette.getVibrantColor(resources.getColor(R.color.color_red))
-                val vibrantDarkColor = palette.getDarkVibrantColor(resources.getColor(R.color.color_red))
+                vibrantColor = palette.getVibrantColor(ContextCompat.getColor(this@MainActivity, R.color.color_red))
+                vibrantDarkColor = palette.getDarkVibrantColor(ContextCompat.getColor(this@MainActivity, R.color.color_red))
                 collapsing_toolbar.setContentScrimColor(vibrantColor)
                 collapsing_toolbar.setStatusBarScrimColor(vibrantDarkColor)
-            }
+
+            }}
 
         } catch (e: Exception) {
             collapsing_toolbar.setContentScrimColor(
@@ -216,7 +220,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_PERMISSION_STORAGE)
         } else {
-            launch {
+            GlobalScope.launch(Dispatchers.Default) {
                 getSong(applicationContext)
                 Log.d("MusicHistory", "CoRoutine under launch method " + Thread.currentThread().name)
             }
@@ -325,7 +329,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
             cursor.close()
             realm.commitTransaction()
         }
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             viewPager!!.adapter = PagerAdapter(supportFragmentManager)
             tb_music.setupWithViewPager(vp_pager)
             pb_music.visibility = View.GONE
@@ -360,13 +364,13 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode == REQUEST_PERMISSION_STORAGE) {
             grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
-                launch() {
+                GlobalScope.launch(Dispatchers.Default) {
                     getSong(applicationContext)
                     Log.d("MusicHistory", "Coroutine under launch method " + Thread.currentThread().name)
                 }
             }
             else -> {
-                launch(UI) {
+                GlobalScope.launch(Dispatchers.Main) {
                     viewPager!!.adapter = PagerAdapter(supportFragmentManager)
                     tb_music.setupWithViewPager(vp_pager)
                     pb_music.visibility = View.GONE

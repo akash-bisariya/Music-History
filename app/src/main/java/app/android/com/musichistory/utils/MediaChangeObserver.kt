@@ -6,7 +6,9 @@ import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import app.android.com.musichistory.MyApplication
 import app.android.com.musichistory.constants.*
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -54,7 +56,7 @@ class MediaChangeObserver(val mPath: String?, event: Int) : FileObserver(mPath, 
     override fun startWatching() {
         super.startWatching()
         if (mObservers != null) return
-        launch {
+        GlobalScope.launch(Dispatchers.Default) {
             mObservers = ArrayList()
             val stack = Stack<String>()
             stack.push(mPath)
