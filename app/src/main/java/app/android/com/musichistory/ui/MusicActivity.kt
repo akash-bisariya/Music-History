@@ -36,6 +36,9 @@ import app.android.com.musichistory.constants.*
 import app.android.com.musichistory.customViews.MusicPlayer
 import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.models.SongQueue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -55,7 +58,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
     private var mMediaBrowserCompat: MediaBrowserCompat? = null
     private var playbackStateCompat: PlaybackStateCompat? = null
     private val mHandler = Handler()
-    private lateinit var mNotification: Notification
     var mMediaControllerCompat: MediaControllerCompat? = null
     private var mNotificationManager: NotificationManager? = null
     private val mExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -127,7 +129,23 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
             else {
                 songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
         }
+        val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
+        bmOptions.inSampleSize = 2
+        var bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
 
+        if ((songData.songImage) != "") {
+            GlobalScope.launch(Dispatchers.Default) {
+                bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
+                Palette.from(bitmap).generate {
+                    music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        window.statusBarColor = getTopColor(it)
+                    }
+                }
+            }
+        } else {
+            music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
+        }
         Glide.with(applicationContext)
                 .applyDefaultRequestOptions(RequestOptions()
                         .placeholder(R.drawable.music_icon)
@@ -142,17 +160,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         tv_song_play_count.text = songData.playCount.toString()
         seek_bar.max = songData.songDuration.toInt()
 
-        var bitmap: Bitmap?
-        val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
-        if ((songData.songImage) != "") {
-            bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
-            bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
-            Palette.from(bitmap).generate {
-                music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
-            }
-        } else {
-            music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
-        }
+
 
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {

@@ -9,7 +9,8 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/dimen_10dp"
+        android:paddingLeft="@dimen/dimen_5dp"
+        android:paddingRight="@dimen/dimen_5dp"
         android:id="@+id/rv_albums">
     </android.support.v7.widget.RecyclerView>
 

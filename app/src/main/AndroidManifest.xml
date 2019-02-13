@@ -28,7 +28,8 @@
             android:name=".ui.MusicActivity"
             android:parentActivityName=".ui.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            />
 
         <service
             android:name=".service.MusicService"

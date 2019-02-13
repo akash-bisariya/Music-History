@@ -38,7 +38,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     private var mAudioManager: AudioManager? = null
     private var mMediaPlayerPause = false
     private var mAudioFocusCanDuck = false
-    private var isPlayingWhenAudioFocusLose = false
+    private var isNeededResumeOnFocusGain = false
     private var mRepeatCount = -1
     private var mSongId: String? = null
     private var mCurrentSongIndex = 0
@@ -135,11 +135,6 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             super.onCustomAction(action, extras)
             if (action.equals(MUSIC_HISTORY_MUSIC_REPEAT_COUNT_CUSTOM_ACTION))
                 mRepeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
-        }
-
-
-        override fun onStop() {
-            super.onStop()
         }
 
         override fun onSkipToQueueItem(id: Long) {
@@ -250,6 +245,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 if (mMusicPlayer.isPlaying) {
+                    isNeededResumeOnFocusGain = mMusicPlayer.isPlaying
                     pauseMediaPlayer()
                     mMediaPlayerPause = true
                     mMediaSession!!.isActive = false
@@ -262,22 +258,20 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK")
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
-                isPlayingWhenAudioFocusLose = mMusicPlayer.isPlaying
                 pauseMediaPlayer()
                 mMediaPlayerPause = true
-                isPlayingWhenAudioFocusLose
                 mMediaSession!!.isActive = false
                 Log.d("AudioFocus", "AUDIOFOCUS_LOSS")
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
-                if (!mAudioFocusCanDuck && isPlayingWhenAudioFocusLose) {
+                if (!mAudioFocusCanDuck && isNeededResumeOnFocusGain) {
                     playMediaPlayer()
                     mMusicPlayer.setOnPreparedListener(this@MusicService)
                     mMusicPlayer.setOnCompletionListener(this@MusicService)
                     mMusicPlayer.setOnErrorListener(this)
                 }
                 mAudioFocusCanDuck = false
-                isPlayingWhenAudioFocusLose = false
+                isNeededResumeOnFocusGain = false
                 Log.d("AudioFocus", "AUDIOFOCUS_GAIN")
             }
             else -> {
@@ -320,8 +314,7 @@ class MusicService : MediaBrowserServiceCompat(), MediaPlayer.OnCompletionListen
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
-        if (mMusicPlayer.isPlaying)
-            stopMusicPlayer()
+        if (mMusicPlayer.isPlaying) stopMusicPlayer()
         Log.d("MusicHistoryError", "Error occurred - p1 $p1 p2 $p2")
         return false
     }

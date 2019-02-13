@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="@dimen/dimen_10dp"
-    android:paddingRight="@dimen/dimen_10dp"
-    android:paddingBottom="@dimen/dimen_10dp"
+    android:paddingLeft="2.5dp"
+    android:paddingRight="2.5dp"
+    android:paddingBottom="@dimen/dimen_5dp"
     tools:context="app.android.com.musichistory.ui.MainActivity">
 
 
@@ -22,7 +22,10 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/iv_album_image"
         android:maxLines="1"
+        android:textSize="@dimen/txt_size_15sp"
+        android:textAlignment="center"
         android:ellipsize="end"
+        android:padding="@dimen/dimen_10dp"
         android:id="@+id/tv_album_name"/>
 
 </android.support.constraint.ConstraintLayout>

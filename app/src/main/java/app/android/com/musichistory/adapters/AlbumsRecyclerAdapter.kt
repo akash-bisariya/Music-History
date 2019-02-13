@@ -1,6 +1,11 @@
 package app.android.com.musichistory.adapters
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.support.v4.content.ContextCompat
+import android.support.v7.graphics.Palette
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +17,10 @@ import app.android.com.musichistory.R
 import com.bumptech.glide.Glide
 import io.realm.RealmResults
 import app.android.com.musichistory.models.SongHistory
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.lang.Exception
 
 
@@ -47,22 +56,36 @@ class AlbumsRecyclerAdapter(val context: Context, private val arrayList: RealmRe
         fun viewHolderBind( context: Context, songInfo: SongHistory?, listener: IOnRecycleItemClick) {
             onItemClick = listener
             tvAlbumName.text= songInfo!!.albumName
+            tvAlbumName.setTextColor(Color.WHITE)
             val songHistory = songInfo.songImage
             if (songHistory == "") {
                 Glide.with(context)
                         .load(R.drawable.music_icon)
                         .into(ivAlbumImage)
+                tvAlbumName.setBackgroundColor(Color.WHITE)
+                tvAlbumName.setTextColor(Color.BLACK)
             } else {
                 try {
                     Glide.with(context)
                             .load(songHistory)
                             .into(ivAlbumImage)
+                    val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
+                    bmOptions.inSampleSize = 2
+                    GlobalScope.launch(Dispatchers.Default) {
+                        var bitmap = BitmapFactory.decodeFile(songHistory, bmOptions)
+                        bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
+                        Palette.from(bitmap).generate { palette ->
+                            tvAlbumName.setBackgroundColor(palette.getLightVibrantColor(ContextCompat.getColor(context, R.color.color_red)))
+
+                        }}
                 }
                 catch (exp:Exception)
                 {
                     Glide.with(context)
                             .load(R.drawable.music_icon)
                             .into(ivAlbumImage)
+                    tvAlbumName.setBackgroundColor(Color.WHITE)
+                    tvAlbumName.setTextColor(Color.BLACK)
                 }
             }
             itemView.setOnClickListener(this)
