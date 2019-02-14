@@ -116,11 +116,8 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         super.onStop()
         if (mMediaBrowserCompat != null)
             mMediaBrowserCompat!!.disconnect()
-        var controllerCompat = MediaControllerCompat.getMediaController(this@MusicActivity);
-        if (controllerCompat != null) {
-            controllerCompat.unregisterCallback(mMediaControllerCompatCallback)
-        }
-
+        val controllerCompat = MediaControllerCompat.getMediaController(this@MusicActivity);
+        controllerCompat?.unregisterCallback(mMediaControllerCompatCallback)
     }
 
     private fun setData() {
@@ -131,10 +128,11 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         }
         val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
         bmOptions.inSampleSize = 2
-        var bitmap = BitmapFactory.decodeFile(songData.songImage, bmOptions)
 
-        if ((songData.songImage) != "") {
+        val image = songData.songImage
+        if ((image) != "") {
             GlobalScope.launch(Dispatchers.Default) {
+                var bitmap = BitmapFactory.decodeFile(image, bmOptions)
                 bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
                 Palette.from(bitmap).generate {
                     music_constraint_layout.background = getGradientDrawable(getTopColor(it), getCenterLightColor(it), getBottomDarkColor(it))
