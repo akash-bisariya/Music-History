@@ -156,7 +156,6 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
                 .setSmallIcon(R.drawable.circular_img)
                 .setLargeIcon(bitmap)
                 .setContentIntent(contentIntent)
-//                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setChannelId(MUSIC_HISTORY_NOTIFICATION_CHANNEL_ID)
                 .setColor(mMusicService.resources.getColor(R.color.color_red))
                 .setStyle(android.support.v4.media.app.NotificationCompat.MediaStyle()
@@ -171,11 +170,11 @@ class MediaNotificationManager(private val mMusicService: MusicService) : Broadc
         val intent: PendingIntent?
         if (mPlaybackState.state == PlaybackStateCompat.STATE_PLAYING) {
             label = mMusicService.getString(R.string.label_txt_pause)
-            icon = R.drawable.ic_pause_circle_filled_red_400_48dp
+            icon = R.drawable.ic_pause_white_48dp
             intent = playbackAction(0)
         } else {
             label = mMusicService.getString(R.string.label_txt_play)
-            icon = R.drawable.ic_play_circle_filled_red_400_48dp
+            icon = R.drawable.ic_play_arrow_white_48dp
             intent = playbackAction(3)
         }
 

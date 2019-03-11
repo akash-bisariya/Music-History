@@ -28,8 +28,7 @@
             android:name=".ui.MusicActivity"
             android:parentActivityName=".ui.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            />
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <service
             android:name=".service.MusicService"
@@ -39,13 +38,14 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".CurrentQueue.CurrentQueueActivity"
+        <activity
+            android:name=".CurrentQueue.CurrentQueueActivity"
             android:screenOrientation="portrait" />
-
-        <activity android:name=".ui.album.AlbumsActivity"
+        <activity
+            android:name=".ui.album.AlbumsActivity"
             android:label="Albums"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.AlbumDetailActivity"></activity>
     </application>
 
 </manifest>

@@ -66,6 +66,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music)
         mNotificationManager = (getSystemService(Context.NOTIFICATION_SERVICE)) as NotificationManager
+        setData()
         iv_like.setOnClickListener(this)
         iv_play_pause.setOnClickListener(this)
         iv_next.setOnClickListener(this)
@@ -74,7 +75,6 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         iv_back.setOnClickListener(this)
         iv_play_list.setOnClickListener(this)
 
-        setData()
 
         mMediaBrowserCompat = MediaBrowserCompat(this, ComponentName(this, MusicService::class.java), mMediaBrowserCompatConnectionCallback, null)
         repeatCount = getSharedPreferences(MUSIC_HISTORY_SHARED_PREFERENCE, Context.MODE_PRIVATE).getInt(PREFERENCE_KEY_REPEAT_COUNT, -1)
@@ -106,32 +106,23 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
     override fun onStart() {
         super.onStart()
-        if (mMediaBrowserCompat != null)
+        if (mMediaBrowserCompat!=null && !mMediaBrowserCompat!!.isConnected)
             mMediaBrowserCompat!!.connect()
 
     }
 
-
-    override fun onStop() {
-        super.onStop()
-        if (mMediaBrowserCompat != null)
-            mMediaBrowserCompat!!.disconnect()
-        val controllerCompat = MediaControllerCompat.getMediaController(this@MusicActivity);
-        controllerCompat?.unregisterCallback(mMediaControllerCompatCallback)
-    }
-
     private fun setData() {
-            if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
-                songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
-            else {
-                songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
+        if (intent.getStringExtra("songId") == null || intent.getStringExtra("songId") == "")
+            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("isCurrentlyPlaying", true).findAll()[0] as SongHistory
+        else {
+            songData = Realm.getDefaultInstance().where(SongHistory::class.java).equalTo("songId", intent.getStringExtra("songId")).findAll()[0] as SongHistory
         }
         val bmOptions: BitmapFactory.Options = BitmapFactory.Options()
         bmOptions.inSampleSize = 2
 
         val image = songData.songImage
-        if ((image) != "") {
-            GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.Default) {
+            if ((image) != "") {
                 var bitmap = BitmapFactory.decodeFile(image, bmOptions)
                 bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
                 Palette.from(bitmap).generate {
@@ -140,9 +131,9 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         window.statusBarColor = getTopColor(it)
                     }
                 }
+            } else {
+                music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
             }
-        } else {
-            music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
         }
         Glide.with(applicationContext)
                 .applyDefaultRequestOptions(RequestOptions()
@@ -242,6 +233,10 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         super.onDestroy()
         stopSeekbarUpdate()
         Realm.getDefaultInstance().close()
+        if (mMediaBrowserCompat != null)
+            mMediaBrowserCompat!!.disconnect()
+        val controllerCompat = MediaControllerCompat.getMediaController(this@MusicActivity);
+        controllerCompat?.unregisterCallback(mMediaControllerCompatCallback)
     }
 
     private fun getGradientDrawable(topColor: Int, centerColor: Int, bottomColor: Int): GradientDrawable {
