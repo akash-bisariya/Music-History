@@ -41,7 +41,7 @@ class AlbumsActivity : AppCompatActivity(), IOnRecycleItemClick {
 
     override fun onRecycleItemClick(view: View?, position: Int) {
         var intent = Intent(this,AlbumDetailActivity::class.java)
-        intent.putExtra( "songName",songAlbums[position]!!.songId)
+        intent.putExtra( "songId",songAlbums[position]!!.songId)
         startActivity(intent)
 
     }

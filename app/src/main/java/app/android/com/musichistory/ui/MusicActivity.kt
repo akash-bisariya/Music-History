@@ -29,6 +29,7 @@ import android.support.v4.media.session.PlaybackStateCompat.*
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.SeekBar
+import android.widget.Toast
 import app.android.com.musichistory.CurrentQueue.CurrentQueueActivity
 import app.android.com.musichistory.service.MusicService
 import app.android.com.musichistory.R
@@ -194,6 +195,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                     if (repeatCount == -1) {
                         iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
                         tv_repeat_count.text = ""
+                        Toast.makeText(this@MusicActivity,"Repeat mode on",Toast.LENGTH_SHORT).show()
                         repeatCount++
                     } else {
                         repeatCount++
@@ -201,6 +203,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         if (repeatCount > 3) {
                             repeatCount = -1
                             tv_repeat_count.text = ""
+                            Toast.makeText(this@MusicActivity,"Repeat mode off",Toast.LENGTH_SHORT).show()
                             iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
                         }
                     }
