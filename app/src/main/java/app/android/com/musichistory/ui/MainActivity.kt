@@ -35,6 +35,7 @@ import app.android.com.musichistory.constants.MUSIC_HISTORY_KEY_FOR_CHANGED_AUDI
 import app.android.com.musichistory.models.SongHistory
 import app.android.com.musichistory.ui.album.AlbumsActivity
 import app.android.com.musichistory.utils.Utils.Companion.getCroppedBitmap
+import io.gresse.hugo.vumeterlibrary.VuMeterView
 import io.realm.RealmResults
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
     private val clickDragTolerance = 10f
     private var mSongId: String? = null
     private var viewPager: ViewPager? = null
-    private lateinit var fabMusicPlaying: ImageView
+    private lateinit var fabMusicPlaying: VuMeterView
 
     private var changeFileBroadcastReceiver = object : BroadcastReceiver()
     {
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 Log.d("MusicHistory",intent.action.toString()+""+intent.extras["MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_PATH"])
                 var changedUri = Uri.fromFile(File(intent.extras[MUSIC_HISTORY_KEY_FOR_CHANGED_AUDIO_FILE_PATH].toString()))
 //                AND "+MediaStore.Audio.Media.DATA +" = '"+changedUri+"'"
-                var cursor =this@MainActivity.contentResolver.query(  uri, null, MediaStore.Audio.Media.IS_MUSIC + " = 1", null, null)
+                val cursor =this@MainActivity.contentResolver.query(  uri, null, MediaStore.Audio.Media.IS_MUSIC + " = 1", null, null)
 //                Realm.getDefaultInstance().beginTransaction()
                 if (cursor.count > 0) {
                     cursor.moveToFirst()
@@ -166,6 +167,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 
 //        customView(fab_music_playing, songData[0]!!.songImage)
         fabMusicPlaying.customView(songData[0]!!.songImage)
+
     }
 
     override fun onBackPressed() {
@@ -185,6 +187,10 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         fabMusicPlaying = findViewById(R.id.fab_music_playing)
         fabMusicPlaying.setOnTouchListener(this)
+        fabMusicPlaying.color = R.color.lightest_gray_transparent
+        fabMusicPlaying.blockNumber = 5
+        fabMusicPlaying.blockSpacing = 10F
+        fabMusicPlaying.stop(true)
         viewPager = vp_pager
         tb_music.setupWithViewPager(vp_pager)
         pb_music.visibility = View.VISIBLE
@@ -258,7 +264,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
                 val intent = Intent(this, MusicActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 intent.putExtra("fromFloatingButton", true)
-                startActivity(intent)
+                startActivityForResult(intent,1000)
             }
         }
     }
@@ -361,6 +367,16 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
         Realm.getDefaultInstance().close()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        data?.let {
+            if(it.getBooleanExtra("isMusicPlaying",false))
+                fabMusicPlaying.resume(true)
+            else
+                fabMusicPlaying.stop(true)
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode == REQUEST_PERMISSION_STORAGE) {
             grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED -> {
@@ -383,7 +399,7 @@ class MainActivity : AppCompatActivity(), IOnRecycleItemClick, View.OnClickListe
 }
 
 
-private fun ImageView.customView(imagePath: String) {
+private fun VuMeterView.customView(imagePath: String) {
     val drawable: Drawable? = if (imagePath != "") {
         val option = BitmapFactory.Options()
         option.inSampleSize = 2

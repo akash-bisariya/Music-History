@@ -1,5 +1,6 @@
 package app.android.com.musichistory.ui
 
+import android.app.Activity
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -366,6 +367,17 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         override fun onConnectionFailed() {
             super.onConnectionFailed()
         }
+    }
+
+
+    override fun onBackPressed() {
+        val intent = Intent()
+        if (musicPlayer.isPlaying)
+            intent.putExtra("isMusicPlaying", true)
+        else
+            intent.putExtra("isMusicPlaying", false)
+        setResult(Activity.RESULT_OK, intent)
+        super.onBackPressed()
     }
 
 

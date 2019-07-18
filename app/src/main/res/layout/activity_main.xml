@@ -91,7 +91,7 @@
                 android:visibility="gone" />
         </android.support.design.widget.CoordinatorLayout>
 
-        <ImageView
+        <io.gresse.hugo.vumeterlibrary.VuMeterView
             android:id="@+id/fab_music_playing"
             android:layout_width="@dimen/s_floating_button"
             android:layout_height="@dimen/s_floating_button"
@@ -99,7 +99,6 @@
             android:layout_margin="@dimen/dimen_20dp"
             android:padding="@dimen/dimen_10dp"
             android:scaleType="fitXY"
-            android:src="@drawable/ic_pause_black_18dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
