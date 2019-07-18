@@ -107,7 +107,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
 
     override fun onStart() {
         super.onStart()
-        if (mMediaBrowserCompat!=null && !mMediaBrowserCompat!!.isConnected)
+        if (mMediaBrowserCompat != null && !mMediaBrowserCompat!!.isConnected)
             mMediaBrowserCompat!!.connect()
 
     }
@@ -122,8 +122,8 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
         bmOptions.inSampleSize = 2
 
         val image = songData.songImage
-        GlobalScope.launch(Dispatchers.Default) {
-            if ((image) != "") {
+        if ((image) != "") {
+            GlobalScope.launch(Dispatchers.Default) {
                 var bitmap = BitmapFactory.decodeFile(image, bmOptions)
                 bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, true)
                 Palette.from(bitmap).generate {
@@ -132,9 +132,9 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         window.statusBarColor = getTopColor(it)
                     }
                 }
-            } else {
-                music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
             }
+        } else {
+            music_constraint_layout.background = getGradientDrawable(R.color.color_red, R.color.color_red, android.R.color.white)
         }
         Glide.with(applicationContext)
                 .applyDefaultRequestOptions(RequestOptions()
@@ -195,7 +195,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                     if (repeatCount == -1) {
                         iv_repeat.setImageResource(R.drawable.ic_repeat_red_400_36dp)
                         tv_repeat_count.text = ""
-                        Toast.makeText(this@MusicActivity,"Repeat mode on",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MusicActivity, "Repeat mode on", Toast.LENGTH_SHORT).show()
                         repeatCount++
                     } else {
                         repeatCount++
@@ -203,7 +203,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener, AudioManager.On
                         if (repeatCount > 3) {
                             repeatCount = -1
                             tv_repeat_count.text = ""
-                            Toast.makeText(this@MusicActivity,"Repeat mode off",Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MusicActivity, "Repeat mode off", Toast.LENGTH_SHORT).show()
                             iv_repeat.setImageResource(R.drawable.ic_repeat_grey_400_36dp)
                         }
                     }
