@@ -8,4 +8,4 @@ A Music Player purely written in kotlin
 3. Save your favourites
 
  
- ![alt text](https://i.imgur.com/dpVQiaE.jpg)      ![alt text](https://i.imgur.com/kq9sNFG.jpg)
+ ![alt text](https://i.imgur.com/dpVQiaE.jpg)      ![alt text](https://i.imgur.com/OisEpHS.jpg)
